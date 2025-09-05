@@ -6,29 +6,80 @@ class LoginScreen extends StatelessWidget{
 
   Widget build(BuildContext context){
   return Scaffold(
-        appBar: AppBar(
-        backgroundColor: Colors.transparent, 
-        elevation: 0, 
-        title: const Text('Com Imagem de Fundo'),
-      ),
       body: Stack(
         children: <Widget>[
           Container(
             decoration: const BoxDecoration (
               image: DecorationImage(
-              image: AssetImage('assets/images/fundo_login.png'),
+                image: AssetImage('assets/images/fundo_login.png'),
               fit: BoxFit.cover,
             )
             ),
           ),
-             // A nova imagem que você quer colocar por cima
+
           Center(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 400),
             child: Image.asset(
-              'assets/images/sua_nova_imagem.png',
-              width: 200, // Exemplo: defina o tamanho
+              'assets/images/logo_metro_login.png',
+              width: 200, 
               height: 200,
             ),
+            ),
           ),
+          Center(
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.8,
+            child: TextField(
+            decoration: InputDecoration(
+              labelText: 'Usuário:',
+              labelStyle: TextStyle(color: Colors.black),
+              filled: true,
+              fillColor: const Color.fromARGB(255, 255, 255, 255),
+              border: OutlineInputBorder( 
+              borderRadius: BorderRadius.circular(30)
+              ),
+              enabledBorder: OutlineInputBorder( 
+              borderSide: const BorderSide(color: Colors.blue),
+              borderRadius: BorderRadius.circular(30),
+              ),
+              focusedBorder: OutlineInputBorder( 
+              borderSide: const BorderSide(color: Colors.blue),
+              borderRadius: BorderRadius.circular(30),
+              ),
+              ),
+              
+              
+            ),  
+            ),
+          ),
+
+          Center(
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.8,
+            child: TextField(
+            decoration: InputDecoration(
+              labelText: 'Senha:',
+              labelStyle: TextStyle(color: Colors.black),
+              filled: true,
+              fillColor: const Color.fromARGB(255, 255, 255, 255),
+              border: OutlineInputBorder( 
+              borderRadius: BorderRadius.circular(30)
+              ),
+              enabledBorder: OutlineInputBorder( 
+              borderSide: const BorderSide(color: Colors.blue),
+              borderRadius: BorderRadius.circular(30),
+              ),
+              focusedBorder: OutlineInputBorder( 
+              borderSide: const BorderSide(color: Colors.blue),
+              borderRadius: BorderRadius.circular(30),
+              ),
+              ),
+              
+              
+            ),  
+            ),
+          )
         ],
       ),
   );
