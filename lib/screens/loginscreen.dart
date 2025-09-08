@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:metro_projeto/widgets/custom_button.dart';
 
-
-class LoginScreen extends StatelessWidget{
+class LoginScreen extends StatefulWidget{
+  
   const LoginScreen({super.key});
 
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+  class _LoginScreenState extends State<LoginScreen>{
+
+  @override
   Widget build(BuildContext context){
   return Scaffold(
       body: Stack(
@@ -27,9 +35,10 @@ class LoginScreen extends StatelessWidget{
             ),
             ),
           ),
+
           Center(
             child: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.8,
+              width: MediaQuery.of(context).size.width * 0.4,
             child: TextField(
             decoration: InputDecoration(
               labelText: 'Usuário:',
@@ -48,15 +57,15 @@ class LoginScreen extends StatelessWidget{
               borderRadius: BorderRadius.circular(30),
               ),
               ),
-              
-              
+           
             ),  
             ),
           ),
 
           Center(
+            child: Padding(padding: const EdgeInsets.only(top: 120),
             child: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.8,
+              width: MediaQuery.of(context).size.width * 0.4,
             child: TextField(
             decoration: InputDecoration(
               labelText: 'Senha:',
@@ -75,14 +84,28 @@ class LoginScreen extends StatelessWidget{
               borderRadius: BorderRadius.circular(30),
               ),
               ),
-              
-              
-            ),  
+            ),
+            ),
+            ),
+          ),
+          Center(
+            child: Padding(padding: const EdgeInsets.only(top: 320),
+            child: CustomButton(
+             onPressed: (){},
+             text: const Text('Entrar', 
+             style: TextStyle(
+              fontSize: 20,
+              color: Colors.white
+             )
+             ),
+             color: const Color(0xFF1763A6),
+             size: const Size(150, 50) ,
+            )
+            
             ),
           )
         ],
       ),
   );
-
   }
-}
+  }
