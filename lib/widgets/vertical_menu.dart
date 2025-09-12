@@ -14,8 +14,7 @@ class _VerticalMenuState extends State<VerticalMenu>{
 
     @override
     Widget build(BuildContext context){
-        return  
-Drawer(
+        return Drawer(
          child: ListView(
             padding: EdgeInsets.zero,
             children:  <Widget>[
@@ -30,8 +29,7 @@ Drawer(
                                     width: 50,
                                     height: 50,
                                     child:  Image.asset('assets/images/logo_metro_menu.png')
-                                    ),    
-                                                        
+                                    ),                       
                                 ],
                             )        
                 ),
