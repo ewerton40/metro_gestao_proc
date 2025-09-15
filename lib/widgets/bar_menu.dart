@@ -45,17 +45,15 @@ class _BarMenuState extends State<BarMenu>{
                 foregroundColor: Colors.black
                 )
           ),
-          offset: const Offset(0, 50),
+          offset: const Offset(50, 44),
           itemBuilder:(BuildContext context) => <PopupMenuEntry<String>>[
-           PopupMenuItem(
-            child: TextButton.icon(
-              onPressed: null,
-              icon: Icon(Icons.settings),
-              label: const Text('Configurações', style: TextStyle(color: Colors.black),),
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                foregroundColor: Colors.black
-                )
+           const PopupMenuItem(
+            child: Row(
+              children: [
+              Icon(Icons.settings, size: 15),
+              SizedBox(width: 8),
+              Text('Configurações', style: TextStyle(color: Colors.black),),
+              ]
               ) 
               ),
 
