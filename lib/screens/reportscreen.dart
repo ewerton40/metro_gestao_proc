@@ -16,12 +16,58 @@ class _ReportScreenState extends State<ReportScreen>{
 
   @override
   Widget build(BuildContext context){
-    return Scaffold(
+    return  Scaffold(
       appBar: const BarMenu(),
       drawer: const VerticalMenu(),
-      body: Container(
-        child: Column(
+      backgroundColor: const Color(0xFFF7F8F9),
+      body: Column(
           children: <Widget>[
+            SizedBox(
+            height: 200,
+              child: Row( 
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Container(
+                    width: 250,
+                    height: 140,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: const Color(0xFFF1F4F9)), 
+                      color: Colors.white
+                    ),
+                    child: const Center(
+                      child: Text('Solicitações Pendentes'),
+                    ),
+                  ),
+
+                  Container(
+                    width: 250,
+                    height: 140,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: const Color(0xFFF1F4F9)),
+                      color: Colors.white
+                    ),
+                    child: const  Center(
+                      child: Text('Movimentações hoje:')
+                    ),
+                  ),
+
+                    Container(
+                    width: 250,
+                    height: 140,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: const Color(0xFFF1F4F9)),
+                      color: Colors.white
+                    ),
+                    child: const  Center(
+                      child: Text('Itens críticos'),
+                    ),
+                  ),
+
+                ],
+           
+              ),
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
@@ -64,7 +110,6 @@ class _ReportScreenState extends State<ReportScreen>{
 
           ] 
       ),
-      ),
-    );
+      );
   }
 }

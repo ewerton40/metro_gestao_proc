@@ -42,7 +42,7 @@ class LoginScreen extends StatefulWidget{
             child: TextField(
             decoration: InputDecoration(
               labelText: 'Usuário:',
-              labelStyle: TextStyle(color: Colors.black),
+              labelStyle: const TextStyle(color: Colors.black),
               filled: true,
               fillColor: const Color.fromARGB(255, 255, 255, 255),
               border: OutlineInputBorder( 
@@ -67,9 +67,10 @@ class LoginScreen extends StatefulWidget{
             child: SizedBox(
               width: MediaQuery.of(context).size.width * 0.4,
             child: TextField(
+            obscureText: true,
             decoration: InputDecoration(
               labelText: 'Senha:',
-              labelStyle: TextStyle(color: Colors.black),
+              labelStyle: const TextStyle(color: Colors.black),
               filled: true,
               fillColor: const Color.fromARGB(255, 255, 255, 255),
               border: OutlineInputBorder( 
