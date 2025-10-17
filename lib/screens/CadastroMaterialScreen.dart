@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
 
-class ItemRegistrationScreen extends StatefulWidget {
-  const ItemRegistrationScreen({super.key});
+class CadastroMaterialScreen extends StatefulWidget {
+  const CadastroMaterialScreen({super.key});
 
   @override
-  State<ItemRegistrationScreen> createState() => _ItemRegistrationScreenState();
+  State<CadastroMaterialScreen> createState() => CadastroMaterialScreenState();
 }
 
-class _ItemRegistrationScreenState extends State<ItemRegistrationScreen> {
+class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
   final _formKey = GlobalKey<FormState>();
   String? _selectedCategory = 'Equipamentos';
   String? _selectedValidityType;

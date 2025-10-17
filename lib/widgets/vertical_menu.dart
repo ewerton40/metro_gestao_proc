@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-
-
+import 'package:metro_projeto/screens/ItemRegistrationScreen.dart';
+import 'package:metro_projeto/screens/CadastroMaterialScreen.dart';
 class VerticalMenu extends StatefulWidget{
     const VerticalMenu({super.key});
 
@@ -40,7 +40,17 @@ class _VerticalMenuState extends State<VerticalMenu>{
                     onTap:() {
                       Navigator.pop(context);
                     },
-                )
+                ),
+                ListTile(
+                    leading: const Icon(Icons.add_box_outlined),
+                    title: const Text('cadastrar material'),
+                    onTap:() {
+                      Navigator.pop(context);
+                      Navigator.push(context, 
+                      MaterialPageRoute(builder: (builder) => const ItemRegistrationScreen())
+                      );
+                    },
+                ),
 
             ],
          )
