@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:metro_projeto/screens/ItemRegistrationScreen.dart';
 import 'package:metro_projeto/screens/inventoryscreen.dart';
 import 'package:metro_projeto/screens/loginscreen.dart';
+import 'package:metro_projeto/screens/reportscreen.dart';
 import 'package:metro_projeto/screens/usermanagementscreen.dart';
 
 void main() {
@@ -35,7 +36,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const LoginScreen(),
+      home: const ReportScreen(),
     );
   }
 }
