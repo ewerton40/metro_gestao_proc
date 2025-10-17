@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:metro_projeto/widgets/bar_menu.dart';
+import 'package:metro_projeto/widgets/vertical_menu.dart';
 
 class ItemRegistrationScreen extends StatefulWidget {
   const ItemRegistrationScreen({super.key});
@@ -16,33 +18,8 @@ class _ItemRegistrationScreenState extends State<ItemRegistrationScreen> {
     // A tela principal é envolvida por um Scaffold para a estrutura básica.
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.black87),
-          onPressed: () {
-            // Lógica para abrir o menu lateral (drawer)
-          },
-        ),
-        title: Row(
-          children: [
-            const Icon(Icons.train, color: Color(0xFF00387B)),
-            const SizedBox(width: 8),
-            const Text(
-              'Metrô de São Paulo',
-              style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        actions: [
-          CircleAvatar(
-            backgroundColor: Colors.grey[200],
-            child: const Icon(Icons.person_outline, color: Colors.black54),
-          ),
-          const SizedBox(width: 16),
-        ],
-      ),
+      drawer: VerticalMenu(),
+      appBar: BarMenu(),    
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 48.0, vertical: 32.0),
