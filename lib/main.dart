@@ -14,8 +14,6 @@ import 'package:metro_projeto/screens/detalhe_item_screen.dart';
 
 void main() {
   runApp(const MyApp());
-  final db = Connection();
-  db.connect();
 }
 
 class MyApp extends StatelessWidget {

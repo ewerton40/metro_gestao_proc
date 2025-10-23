@@ -1,37 +1,33 @@
-import "package:mysql1/mysql1.dart";
+import "package:mysql_client/mysql_client.dart";
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+class Connection {
 
-
-
-class Connection{
-  MySqlConnection? conn;
-
-   Future<void> connect() async{
-    try{
+  Future<void> connect() async {
+    
     await dotenv.load(fileName: '.env');
 
-    final config = await ConnectionSettings(
-      host: dotenv.env['HOST']!,
-      port: int.parse(dotenv.env['PORT']!),
-      user: dotenv.env['USER'],
-      password: dotenv.env['PASSWORD']
-    );
+    MySQLConnection? conn;
+    try {
+      
+      conn = await MySQLConnection.createConnection(
+        host: dotenv.env['HOST']!,
+        port: int.parse(dotenv.env['PORT']!),
+        userName: dotenv.env['USER']!, 
+        password: dotenv.env['PASSWORD']!,
+      );
 
-    conn = await MySqlConnection.connect(config);
-    print("conexao bem sucedida");
-  }
-  catch(e){
-    print("erro ao conectar");
-    print(e);
-  }finally{
-    if (conn != null){
-      await conn!.close();
+      await conn.connect();
+      print("conectado");
+
+      } catch (e) {
+      print("erro ao conectar");
+      print(e);
+      rethrow; 
+    } finally {
+      if (conn != null) {
+        await conn.close();
+      }
     }
   }
-  }
 }
-
-
-
-
