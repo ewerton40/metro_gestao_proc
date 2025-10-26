@@ -3,7 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Connection {
 
-  Future<void> connect() async {
+  Future<MySQLConnection> connect() async {
     
     await dotenv.load(fileName: '.env');
 
@@ -29,5 +29,6 @@ class Connection {
         await conn.close();
       }
     }
+    return conn;
   }
 }
