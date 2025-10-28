@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/widgets/custom_button.dart';
+import '../services/auth_services.dart';
 
 class LoginScreen extends StatefulWidget{
   
@@ -10,6 +11,17 @@ class LoginScreen extends StatefulWidget{
 }
 
   class _LoginScreenState extends State<LoginScreen>{
+  
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController senhaController = TextEditingController();
+
+  void fazerLogin(){
+    String email = emailController.text.trim();
+    String senha = senhaController.text.trim();
+
+    AuthServices login = AuthServices();
+    login.loginRequest(email, senha);
+  }
 
   @override
   Widget build(BuildContext context){
@@ -92,7 +104,9 @@ class LoginScreen extends StatefulWidget{
           Center(
             child: Padding(padding: const EdgeInsets.only(top: 320),
             child: CustomButton(
-             onPressed: (){},
+             onPressed: (){
+              fazerLogin();
+             },
              text: const Text('Entrar', 
              style: TextStyle(
               fontSize: 20,

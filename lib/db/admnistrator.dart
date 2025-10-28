@@ -13,7 +13,7 @@ class AdmnistratorDAO {
     final MySQLConnection connection;
     AdmnistratorDAO(this.connection);
 
-    Future<LoginQueryResult?> getAdmLoginCredentials(String email) async {
+    Future<LoginQueryResult?> findUserbyEmail(dynamic email) async {
 
     const String sqlQuery = '''
       SELECT senha, cargo 
