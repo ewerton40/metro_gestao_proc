@@ -15,12 +15,20 @@ class LoginScreen extends StatefulWidget{
   final TextEditingController emailController = TextEditingController();
   final TextEditingController senhaController = TextEditingController();
 
-  void fazerLogin(){
+  void fazerLogin() async {
     String email = emailController.text.trim();
     String senha = senhaController.text.trim();
 
-    AuthServices login = AuthServices();
-    login.loginRequest(email, senha);
+    try {
+      AuthServices login = AuthServices();
+      final response = await login.loginRequest(email, senha);
+      print('Login realizado com sucesso: $response');
+    } catch (e) {
+      print('Erro no login: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro no login: $e')),
+      );
+    }
   }
 
   @override
@@ -52,6 +60,7 @@ class LoginScreen extends StatefulWidget{
             child: SizedBox(
               width: MediaQuery.of(context).size.width * 0.4,
             child: TextField(
+            controller: emailController,
             decoration: InputDecoration(
               labelText: 'Usuário:',
               labelStyle: const TextStyle(color: Colors.black),
@@ -79,6 +88,7 @@ class LoginScreen extends StatefulWidget{
             child: SizedBox(
               width: MediaQuery.of(context).size.width * 0.4,
             child: TextField(
+            controller: senhaController,
             obscureText: true,
             decoration: InputDecoration(
               labelText: 'Senha:',

@@ -81,6 +81,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.4"
+  dart_frog_cors:
+    dependency: "direct main"
+    description:
+      name: dart_frog_cors
+      sha256: f37371cdf60d0416a2f261dfc8eeb383008fdc1acaca5ba71bc7ec895a4a2de2
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   equatable:
     dependency: transitive
     description:
