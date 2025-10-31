@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:dart_frog/dart_frog.dart';
 
 
+import '../routes/inventory/index.dart' as inventory_index;
 
 
 void main() async {
@@ -21,7 +22,15 @@ Future<HttpServer> createServer(InternetAddress address, int port) {
 
 Handler buildRootHandler() {
   final pipeline = const Pipeline();
-  final router = Router();
+  final router = Router()
+    ..mount('/inventory', (context) => buildInventoryHandler()(context));
+  return pipeline.addHandler(router);
+}
+
+Handler buildInventoryHandler() {
+  final pipeline = const Pipeline();
+  final router = Router()
+    ..all('/', (context) => inventory_index.onRequest(context,));
   return pipeline.addHandler(router);
 }
 
