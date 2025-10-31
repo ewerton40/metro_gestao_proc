@@ -16,6 +16,7 @@ class Connection {
         port: int.parse(dotEnv['PORT']!),
         userName: dotEnv['USER']!, 
         password: dotEnv['PASSWORD']!,
+        databaseName: dotEnv['DATABASE']
       );
 
       await conn.connect();

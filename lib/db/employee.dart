@@ -30,11 +30,7 @@ class EmployeeDAO {
         if (result.numOfRows == 0) {
           return null;
         }
-        final rowMap = result.rows.first.assoc();
-        return LoginQueryResult(
-          senhaHash: rowMap['senha'] as String,
-          cargo: rowMap['cargo'] as String,
-        );
+     
       } on Exception catch (e) {
         print('Erro no DAO ao buscar credenciais: $e');
         throw Exception('Falha ao acessar o banco de dados durante o login.');
