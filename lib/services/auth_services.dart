@@ -10,14 +10,16 @@ final _baseUrl = 'http://localhost:8080';
 
     final response = await http.post(
       url,
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: jsonEncode({'email': email, 'senha': senha}),
     );
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Falha no login: ${response.body}');
+      throw Exception('Falha no login: ${response.statusCode} - ${response.body}');
     }
   }
 }
