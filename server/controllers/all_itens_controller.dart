@@ -1,9 +1,8 @@
 import 'package:dart_frog/dart_frog.dart';
 import '../db/connection.dart';
-import '../../lib/db/inventory.dart';
+import '../../lib/db/inventory.dart'; 
 
 Future<Response> inventoryAllHandler(RequestContext context) async {
-
   if (context.request.method == HttpMethod.get) {
     try {
       final conexao = Connection();
@@ -11,13 +10,20 @@ Future<Response> inventoryAllHandler(RequestContext context) async {
       final dao = InventoryDAO(db);
       final items = await dao.getAllItems();
 
+      // Mapeia os dados do DAO para o JSON de resposta
       final data = items.map((item) => {
-            'code': item.code,
-            'name': item.name,
-            'category': item.category,
-            'status': item.status,
-            'base': item.base,
-            'lastMoved': item.lastMoved,
+            'id': item.id,
+            'nome': item.nome,
+            
+            'categoriaId': item.categoriaId,       
+            'categoriaNome': item.categoria,       
+            'medidaId': item.medidaId,             
+            'medidaNome': item.medida,             
+
+            'requerCalibracao': item.requerCalibracao,
+            'qtdAlto': item.qtdAlto,
+            'qtdBaixo': item.qtdBaixo,
+            'descricao': item.descricao,
           }).toList();
 
       return Response.json(body: {
@@ -27,16 +33,16 @@ Future<Response> inventoryAllHandler(RequestContext context) async {
       });
     } catch (e) {
       print('Erro no controller: $e');
-
       return Response.json(
         statusCode: 500,
         body: {
           'success': false,
-          'message': 'Erro interno ao buscar inventário.',
+          'message': 'Erro interno ao buscar materiais.',
         },
       );
     }
   }
+
   return Response.json(
     statusCode: 405,
     body: {'message': 'Método não permitido'},
