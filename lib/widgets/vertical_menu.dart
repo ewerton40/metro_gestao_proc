@@ -47,7 +47,7 @@ class _VerticalMenuState extends State<VerticalMenu>{
                     onTap:() {
                       Navigator.pop(context);
                       Navigator.push(context, 
-                      MaterialPageRoute(builder: (builder) => const ItemRegistrationScreen())
+                      MaterialPageRoute(builder: (builder) => const CadastroMaterialScreen())
                       );
                     },
                 ),
