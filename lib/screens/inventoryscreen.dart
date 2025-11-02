@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:metro_projeto/widgets/bar_menu.dart';
+import 'package:metro_projeto/widgets/vertical_menu.dart';
 
 // Um modelo de dados simples para representar um item do inventário.
 class InventoryItem {
@@ -27,134 +29,87 @@ class InventoryScreen extends StatefulWidget {
 }
 
 class _InventoryScreenState extends State<InventoryScreen> {
-  // Lista de dados fictícios para popular a tabela.
+  // --- Variáveis de Estado para os Filtros ---
+  String? _selectedStatus;
+  String? _selectedCategory;
+  String? _selectedBase;
+  String? _selectedMovement;
+  String _searchText = '';
+  
+  // --- Listas de Opções para os Dropdowns ---
+  final List<String> _statusOptions = ['Todos', 'Em estoque', 'Baixo estoque', 'Esgotado'];
+  final List<String> _categoryOptions = ['Todas', 'Spare Parts', 'Ferramentas', 'Equipamento'];
+  final List<String> _baseOptions = ['Todas', 'Base Central', 'Base Sul', 'Base Leste', 'Base Oeste'];
+  final List<String> _movementOptions = ['Qualquer data', 'Últimos 7 dias', 'Últimos 30 dias'];
+
+
+  // --- Lista de Dados Fictícios ---
   final List<InventoryItem> _items = [
     InventoryItem(code: 'A0123', name: '', category: 'Spare Parts', status: 'Em estoque', base: 'Base Central', lastMoved: '31.12.2023'),
     InventoryItem(code: '', name: 'Antenna X(b)FC', category: 'Ferramentas', status: 'Baixo estoque', base: 'Base Central', lastMoved: '29.12.2023'),
     InventoryItem(code: '', name: 'Lanterna', category: 'Equipamento', status: 'Baixo estoque', base: 'Base Central', lastMoved: '29.12.2023'),
     InventoryItem(code: '', name: 'Ferraplate', category: 'Equipamento', status: 'Esgotado', base: 'Base Central', lastMoved: '26.12.2023'),
     InventoryItem(code: '', name: 'Pilha', category: 'Equipamento', status: 'Em estoque', base: 'Base Sul', lastMoved: '23.12.2023'),
-    InventoryItem(code: '', name: 'Parafusadeira', category: 'Base Central', status: 'Em estoque', base: 'Base Leste', lastMoved: '29.02.2023'),
-    InventoryItem(code: '', name: 'Baixo Lead', category: 'Base Sul', status: 'Esgotado', base: 'Base Oeste', lastMoved: '29.02.2023'),
-    InventoryItem(code: '', name: 'Chave de fenda', category: 'Base Central', status: 'Esgotado', base: 'Base Central', lastMoved: '29.02.2023'),
+    InventoryItem(code: '', name: 'Parafusadeira', category: 'Spare Parts', status: 'Em estoque', base: 'Base Leste', lastMoved: '29.02.2023'),
+    InventoryItem(code: '', name: 'Baixo Lead', category: 'Ferramentas', status: 'Esgotado', base: 'Base Oeste', lastMoved: '29.02.2023'),
+    InventoryItem(code: '', name: 'Chave de fenda', category: 'Ferramentas', status: 'Esgotado', base: 'Base Central', lastMoved: '29.02.2023'),
   ];
 
   @override
   Widget build(BuildContext context) {
+    // Lógica de filtragem encadeada
+    List<InventoryItem> filteredItems = _items;
+
+    // Filtros de Dropdown
+    if (_selectedStatus != null) {
+      filteredItems = filteredItems.where((item) => item.status == _selectedStatus).toList();
+    }
+    if (_selectedCategory != null) {
+      filteredItems = filteredItems.where((item) => item.category == _selectedCategory).toList();
+    }
+    if (_selectedBase != null) {
+      filteredItems = filteredItems.where((item) => item.base == _selectedBase).toList();
+    }
+
+    // Filtro da barra de pesquisa
+    if (_searchText.isNotEmpty) {
+      filteredItems = filteredItems.where((item) {
+        final searchLower = _searchText.toLowerCase();
+        final nameMatches = item.name.toLowerCase().contains(searchLower);
+        final codeMatches = item.code.toLowerCase().contains(searchLower);
+        return nameMatches || codeMatches;
+      }).toList();
+    }
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA), // Cor de fundo geral
-      body: Row(
-        children: [
-          _buildSidebar(),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(32.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeader(),
-                  const SizedBox(height: 24),
-                  _buildSearchAndFilters(),
-                  const SizedBox(height: 24),
-                  Expanded(child: _buildDataTable()),
-                  const SizedBox(height: 24),
-                  _buildFooter(),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Constrói a barra lateral de navegação.
-  Widget _buildSidebar() {
-    return Container(
-      width: 250,
-      color: Colors.white,
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Substitua pelo seu widget de logo
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: Row(
-              children: [
-                const Icon(Icons.train, color: Color(0xFF00387B), size: 40),
-                const SizedBox(width: 8),
-                Text(
-                  'Metrô de\nSão Paulo',
-                  style: TextStyle(
-                    color: Colors.grey[800],
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-          _buildNavItem(Icons.search, 'Inventário', isSelected: true),
-          _buildNavItem(Icons.inventory_2_outlined, 'Entradas'),
-          _buildNavItem(Icons.bar_chart_outlined, 'Relatórios'),
-          _buildNavItem(Icons.help_outline, 'Ajuda'),
-        ],
-      ),
-    );
-  }
-
-  // Widget para um item de navegação na barra lateral.
-  Widget _buildNavItem(IconData icon, String title, {bool isSelected = false}) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFFE9F2FF) : Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: ListTile(
-        leading: Icon(icon, color: isSelected ? const Color(0xFF1763A6) : Colors.grey[600]),
-        title: Text(
-          title,
-          style: TextStyle(
-            color: isSelected ? const Color(0xFF1763A6) : Colors.grey[800],
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          ),
+      backgroundColor: const Color(0xFFF8F9FA), 
+      appBar: const BarMenu(),
+      drawer: const VerticalMenu(),
+      body: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(),
+            const SizedBox(height: 24),
+            _buildSearchAndFilters(),
+            const SizedBox(height: 24),
+            Expanded(child: _buildDataTable(filteredItems)),
+            const SizedBox(height: 24),
+            _buildFooter(),
+          ],
         ),
-        onTap: () {},
       ),
     );
   }
 
   // Constrói o cabeçalho da área de conteúdo.
   Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return const Row(
       children: [
-        const Text(
+        Text(
           'Inventário',
           style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.grey[300]!),
-          ),
-          child: Row(
-            children: [
-              const CircleAvatar(
-                backgroundColor: Color(0xFF1763A6),
-                child: Text('A', style: TextStyle(color: Colors.white)),
-              ),
-              const SizedBox(width: 8),
-              const Text('Ana'),
-              const SizedBox(width: 4),
-              Icon(Icons.keyboard_arrow_down, color: Colors.grey[600]),
-            ],
-          ),
         ),
       ],
     );
@@ -165,6 +120,11 @@ class _InventoryScreenState extends State<InventoryScreen> {
     return Column(
       children: [
         TextField(
+          onChanged: (value) {
+            setState(() {
+              _searchText = value;
+            });
+          },
           decoration: InputDecoration(
             hintText: 'Pesquisar item...',
             prefixIcon: const Icon(Icons.search),
@@ -179,66 +139,135 @@ class _InventoryScreenState extends State<InventoryScreen> {
         const SizedBox(height: 16),
         Row(
           children: [
-            _buildFilterChip('Categoria'),
+            // Dropdown Categoria
+            Expanded(
+              child: _buildFilterDropdown(
+                value: _selectedCategory,
+                hint: 'Todas',
+                items: _categoryOptions,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedCategory = (newValue == 'Todas') ? null : newValue;
+                  });
+                },
+              ),
+            ),
             const SizedBox(width: 16),
-            _buildFilterChip('Status'),
+            
+            // Dropdown Status
+            Expanded(
+              child: _buildFilterDropdown(
+                value: _selectedStatus,
+                hint: 'Todos',
+                items: _statusOptions,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedStatus = (newValue == 'Todos') ? null : newValue;
+                  });
+                },
+              ),
+            ),
             const SizedBox(width: 16),
-            _buildFilterChip('Base Operacional'),
+
+            // Dropdown Base Operacional
+            Expanded(
+              child: _buildFilterDropdown(
+                value: _selectedBase,
+                hint: 'Todas',
+                items: _baseOptions,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedBase = (newValue == 'Todas') ? null : newValue;
+                  });
+                },
+              ),
+            ),
             const SizedBox(width: 16),
-            _buildFilterChip('Última Movimentação'),
+
+            // Dropdown Última Movimentação
+            Expanded(
+              child: _buildFilterDropdown(
+                value: _selectedMovement,
+                hint: 'Qualquer data',
+                items: _movementOptions,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedMovement = (newValue == 'Qualquer data') ? null : newValue;
+                  });
+                },
+              ),
+            ),
           ],
         ),
       ],
     );
   }
 
-  // Widget para um chip de filtro.
-  Widget _buildFilterChip(String label) {
-    return OutlinedButton.icon(
-      icon: Text(label),
-      label: const Icon(Icons.keyboard_arrow_down, size: 16),
-      onPressed: () {},
-      style: OutlinedButton.styleFrom(
-        foregroundColor: Colors.grey[700],
-        side: BorderSide(color: Colors.grey[300]!),
-        shape: RoundedRectangleBorder(
+  // Widget auxiliar para criar os dropdowns de filtro
+  Widget _buildFilterDropdown({
+    required String? value,
+    required String hint,
+    required List<String> items,
+    required void Function(String?) onChanged,
+  }) {
+    return DropdownButtonFormField<String>(
+      initialValue: value ?? hint, // Mostra o hint (ex: 'Todos') se o valor for nulo
+      items: items.map((String item) {
+        return DropdownMenuItem<String>(
+          value: item,
+          child: Text(item, overflow: TextOverflow.ellipsis), // Evita quebra de linha
+        );
+      }).toList(),
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+        border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: BorderSide(color: Colors.grey[300]!),
         ),
       ),
     );
   }
-
+  
   // Constrói a tabela de dados.
-  Widget _buildDataTable() {
+  Widget _buildDataTable(List<InventoryItem> items) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
       ),
-      child: DataTable(
-        headingRowColor: WidgetStateProperty.all(Colors.grey[50]),
-        columns: const [
-          DataColumn(label: Text('Código / Nome do Item')),
-          DataColumn(label: Text('Categoria')),
-          DataColumn(label: Text('Status')),
-          DataColumn(label: Text('Base Operacional')),
-          DataColumn(label: Text('Última Movimentação')),
-        ],
-        rows: _items.map((item) {
-          return DataRow(cells: [
-            DataCell(Text(item.code.isNotEmpty ? item.code : item.name)),
-            DataCell(Text(item.category)),
-            DataCell(_getStatusWidget(item.status)),
-            DataCell(Text(item.base)),
-            DataCell(Text(item.lastMoved)),
-          ]);
-        }).toList(),
+      child: SizedBox(
+        width: double.infinity,
+        child: DataTable(
+          headingRowColor: WidgetStateProperty.all(Colors.grey[50]),
+          columns: const [
+            DataColumn(label: Text('Código / Nome do Item')),
+            DataColumn(label: Text('Categoria')),
+            DataColumn(label: Text('Status')),
+            DataColumn(label: Text('Base Operacional')),
+            DataColumn(label: Text('Última Movimentação')),
+          ],
+          rows: items.map((item) {
+            return DataRow(cells: [
+              DataCell(Text(item.code.isNotEmpty ? item.code : item.name)),
+              DataCell(Text(item.category)),
+              DataCell(_getStatusWidget(item.status)),
+              DataCell(Text(item.base)),
+              DataCell(Text(item.lastMoved)),
+            ]);
+          }).toList(),
+        ),
       ),
     );
   }
 
   // Retorna um widget estilizado para o status do item.
   Widget _getStatusWidget(String status) {
+    // ... (Sem alterações neste método)
     Color color;
     switch (status) {
       case 'Em estoque':
@@ -258,6 +287,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
   // Constrói o rodapé com os botões e informações.
   Widget _buildFooter() {
+    // ... (Sem alterações neste método)
     return Column(
       children: [
         Row(
