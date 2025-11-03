@@ -38,7 +38,7 @@ child: ListView(
                                                 style: TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 20,
-                                                    color: Color(0xFF0D47A1),
+                                                    color: Color(0xFF001789),
                                                 ),
                                             ),
                                         ],
@@ -48,18 +48,24 @@ child: ListView(
  ),
  ),
 
-                // Itens do menu
-                
-                // Item: Painel
+             
  ListTile(
- leading: const Icon(Icons.grid_view), // Icone de Painel
+ leading: const Icon(Icons.home),
+ title: const Text('Início'),
+ onTap:() {
+ Navigator.pop(context);
+ },
+ ),    
+               
+ ListTile(
+ leading: const Icon(Icons.grid_view),
  title: const Text('Painel'),
  onTap:() {
  Navigator.pop(context); 
  },
  ),
 
-                // Item: Inventário
+               
  ListTile(
  leading: const Icon(Icons.inventory_2_outlined), 
  title: const Text('Inventário'),
@@ -68,7 +74,7 @@ child: ListView(
  },
  ),
 
-                // Item: Entradas
+             
  ListTile(
  leading: const Icon(Icons.input), 
  title: const Text('Entradas'),
@@ -77,7 +83,7 @@ child: ListView(
  },
  ),
 
-                // Item: Relatórios
+               
  ListTile(
  leading: const Icon(Icons.bar_chart), 
  title: const Text('Relatórios'),
@@ -86,7 +92,7 @@ child: ListView(
  },
  ),
 
-                // Item: Configurações
+              
  ListTile(
  leading: const Icon(Icons.settings), 
  title: const Text('Configurações'),
@@ -95,7 +101,7 @@ child: ListView(
  },
  ),
 
-                // Item: Ajuda
+               
  ListTile(
  leading: const Icon(Icons.help_outline), 
  title: const Text('Ajuda'),
@@ -104,14 +110,8 @@ child: ListView(
  },
  ),
 
-                // Item: Início
- ListTile(
- leading: const Icon(Icons.home),
- title: const Text('Início'),
- onTap:() {
- Navigator.pop(context);
- },
- )
+               
+
  ],
 )
  );

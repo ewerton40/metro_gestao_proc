@@ -1,7 +1,7 @@
 import 'package:dart_frog/dart_frog.dart';
 import 'dart:convert';
 import '../db/connection.dart';
-import '../../lib/db/admnistrator.dart';
+import '../db/admnistrator.dart';
 
 Future<Response> loginHandler(RequestContext context) async {
   final body = await context.request.body();
@@ -12,12 +12,12 @@ Future<Response> loginHandler(RequestContext context) async {
   final conexao = Connection();
   final query = AdmnistratorDAO(await conexao.connect());
   final user = await query.findUserbyEmail(email); 
-  if (user != null && senha == senha) {
+  if (user != null && user.senhaHash == senha) {
     return Response.json(body: {'success': true, 'message': 'Login OK!'});
   } else {
     return Response.json(
       statusCode: 401,
-      body: {'success': false, 'message': 'Credenciais inválidas'},
+      body: {'success': false, 'message': 'Credenciais inválidas', 'nome': user?.nome},
     );
   }
 }

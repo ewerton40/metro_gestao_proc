@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:metro_projeto/providers/user_provider.dart';
 import 'package:metro_projeto/screens/ItemRegistrationScreen.dart';
 import 'package:metro_projeto/screens/inventoryscreen.dart';
 import 'package:metro_projeto/screens/CadastroMaterialScreen.dart';
@@ -11,9 +12,16 @@ import 'package:metro_projeto/screens/loginscreen.dart';
 import 'package:metro_projeto/screens/reportscreen.dart';
 import 'package:metro_projeto/screens/usermanagementscreen.dart';
 import 'package:metro_projeto/screens/detalhe_item_screen.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (_) => UserProvider())],
+      child: const MyApp()
+  ),
+  );
 }
 
 class MyApp extends StatelessWidget {

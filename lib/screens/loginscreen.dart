@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:metro_projeto/providers/user_provider.dart';
+import 'package:metro_projeto/screens/dashBoardScreen.dart';
 import 'package:metro_projeto/widgets/custom_button.dart';
 import '../services/auth_services.dart';
+import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget{
   
@@ -15,14 +18,19 @@ class LoginScreen extends StatefulWidget{
   final TextEditingController emailController = TextEditingController();
   final TextEditingController senhaController = TextEditingController();
 
-  void fazerLogin() async {
+  Future<void> fazerLogin() async {
     String email = emailController.text.trim();
     String senha = senhaController.text.trim();
 
     try {
       AuthServices login = AuthServices();
       final response = await login.loginRequest(email, senha);
+      if(response['success']){
+        final nome = response['nome'];
+        Provider.of<UserProvider>(context, listen: false).setFullName(nome);
+        Navigator.push(context, MaterialPageRoute(builder: (context) => const DashboardScreen()));
       print('Login realizado com sucesso: $response');
+      }
     } catch (e) {
       print('Erro no login: $e');
       ScaffoldMessenger.of(context).showSnackBar(

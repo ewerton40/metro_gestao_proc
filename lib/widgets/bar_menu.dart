@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:metro_projeto/providers/user_provider.dart';
+import 'package:provider/provider.dart';
 
 class BarMenu extends StatefulWidget implements PreferredSizeWidget{
   const BarMenu({super.key});
@@ -12,10 +14,12 @@ class BarMenu extends StatefulWidget implements PreferredSizeWidget{
 
 
 class _BarMenuState extends State<BarMenu>{
-
-
   @override
   Widget build(BuildContext context){
+
+  final userProvider = Provider.of<UserProvider>(context);
+  final firstName = userProvider.firstName;
+
     return AppBar(
         title: InkWell(
         onTap: () {},
@@ -39,7 +43,9 @@ class _BarMenuState extends State<BarMenu>{
               child: TextButton.icon(
               onPressed: null,
               icon: const Icon(Icons.person, color: Colors.black,),
-              label: Text('User', style: TextStyle(color: Colors.black)),
+              label: Text(
+                firstName.isNotEmpty ? firstName : 'User', 
+              style: TextStyle(color: Colors.black)),
               style: TextButton.styleFrom(
                 backgroundColor: Colors.transparent,
                 foregroundColor: Colors.black
@@ -50,9 +56,9 @@ class _BarMenuState extends State<BarMenu>{
            const PopupMenuItem(
             child: Row(
               children: [
-              Icon(Icons.settings, size: 15),
+              Icon(Icons.logout, size: 15),
               SizedBox(width: 8),
-              Text('Configurações', style: TextStyle(color: Colors.black),),
+              Text('Sair', style: TextStyle(color: Colors.black),),
               ]
               ) 
               ),

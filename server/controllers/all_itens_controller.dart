@@ -1,6 +1,6 @@
 import 'package:dart_frog/dart_frog.dart';
 import '../db/connection.dart';
-import '../../lib/db/inventory.dart'; 
+import '../db/inventory.dart'; 
 
 Future<Response> inventoryAllHandler(RequestContext context) async {
   if (context.request.method == HttpMethod.get) {
@@ -10,16 +10,13 @@ Future<Response> inventoryAllHandler(RequestContext context) async {
       final dao = InventoryDAO(db);
       final items = await dao.getAllItems();
 
-      // Mapeia os dados do DAO para o JSON de resposta
       final data = items.map((item) => {
             'id': item.id,
             'nome': item.nome,
-            
             'categoriaId': item.categoriaId,       
             'categoriaNome': item.categoria,       
             'medidaId': item.medidaId,             
             'medidaNome': item.medida,             
-
             'requerCalibracao': item.requerCalibracao,
             'qtdAlto': item.qtdAlto,
             'qtdBaixo': item.qtdBaixo,
