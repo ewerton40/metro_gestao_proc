@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:metro_projeto/screens/CadastroMaterialScreen.dart';
 import '../services/inventory_service.dart';
 import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
@@ -349,6 +350,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
           const SizedBox(width: 16),
           ElevatedButton(
             onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (builder) => const CadastroMaterialScreen()));
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF1763A6),
