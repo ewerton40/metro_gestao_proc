@@ -291,7 +291,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
           DataColumn(label: Text('Medida')), 
           DataColumn(label: Text('Qtd. Alta')),
           DataColumn(label: Text('Qtd. Baixa')),
-          DataColumn(label: Text('Calibração')),
+          DataColumn(label: Text('Requer calibração')),
         ],
         rows: items.map((item) {
           return DataRow(cells: [

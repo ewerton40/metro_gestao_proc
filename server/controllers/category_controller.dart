@@ -12,13 +12,13 @@ Future<Response> categoryHandler(RequestContext context) async{
       final categorias = await InventoryDAO(await conexao.connect()).getAllCategories();
       final data = categorias.map((categoria) => {
         'id': categoria.id_categoria,
-        'nome_cat': categoria.nome_categoria
+        'nome': categoria.nome_categoria
       }).toList();
 
 
       return Response.json(body: {
         'success': true,
-        'result': data
+        'data': data
       });
       
     }catch(e){
