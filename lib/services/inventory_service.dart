@@ -23,16 +23,19 @@ class InventoryServices {
 
 
   Future<List<Category>> getAllCategories() async {
-    final url = Uri.parse('$_baseUrl/categories');
-    final response = await http.get(url);
+  final url = Uri.parse('$_baseUrl/categories');
+  final response = await http.get(url);
 
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
-      return data.map((item) => Category.fromJson(item)).toList();
-    } else {
-      throw Exception('Falha ao buscar categorias: ${response.statusCode} - ${response.body}');
-    }
+  if (response.statusCode == 200) {
+    final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+  
+    final List<dynamic> data = jsonResponse['data']; 
+    
+    return data.map((item) => Category.fromJson(item)).toList();
+  } else {
+    throw Exception('Falha ao buscar categorias: ${response.statusCode} - ${response.body}');
   }
+}
 
 
  Future<Map<String, dynamic>> addItem(InventoryItem item) async {

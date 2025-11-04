@@ -9,7 +9,6 @@
   }
 
 
-
   class AdmnistratorDAO {
 
       final MySQLConnection connection;

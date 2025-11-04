@@ -3,22 +3,23 @@ import 'dart:convert';
 import '../db/connection.dart';
 import '../db/admnistrator.dart';
 import '../db/inventory.dart';
+import '../db/category.dart';
 
 
 Future<Response> categoryHandler(RequestContext context) async{
     if(context.request.method == HttpMethod.get){
     try{
       final conexao = Connection();
-      final categorias = await InventoryDAO(await conexao.connect()).getAllCategories();
+      final categorias = await CategoryDAO(await conexao.connect()).getAllCategories();
       final data = categorias.map((categoria) => {
         'id': categoria.id_categoria,
-        'nome_cat': categoria.nome_categoria
+        'nome': categoria.nome_categoria
       }).toList();
 
 
       return Response.json(body: {
         'success': true,
-        'result': data
+        'data': data
       });
       
     }catch(e){
