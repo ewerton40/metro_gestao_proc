@@ -6,8 +6,7 @@ Future<Response> inventoryAllHandler(RequestContext context) async {
   if (context.request.method == HttpMethod.get) {
     try {
       final conexao = Connection();
-      final db = await conexao.connect();
-      final dao = InventoryDAO(db);
+      final dao = InventoryDAO(await conexao.connect());
       final items = await dao.getAllItems();
 
       final data = items.map((item) => {
@@ -18,7 +17,7 @@ Future<Response> inventoryAllHandler(RequestContext context) async {
             'medidaId': item.medidaId,             
             'medidaNome': item.medida,             
             'requerCalibracao': item.requerCalibracao,
-            'qtdAlto': item.qtdAlto,
+            'qtdAtual': item.qtdAtual,
             'qtdBaixo': item.qtdBaixo,
             'descricao': item.descricao,
           }).toList();
@@ -29,7 +28,7 @@ Future<Response> inventoryAllHandler(RequestContext context) async {
         'data': data,
       });
     } catch (e) {
-      print('Erro no controller: $e');
+      print('Erro no controller inventoryAllHandler: $e');
       return Response.json(
         statusCode: 500,
         body: {

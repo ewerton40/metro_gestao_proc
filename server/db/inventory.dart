@@ -11,7 +11,7 @@ class InventoryItemQueryResult {
   final String medida;     
 
   final bool requerCalibracao;
-  final int qtdAlto;
+  final int qtdAtual;
   final int qtdBaixo;
   final String descricao;
 
@@ -23,10 +23,17 @@ class InventoryItemQueryResult {
     required this.medidaId,   
     required this.medida,
     required this.requerCalibracao,
-    required this.qtdAlto,
+    required this.qtdAtual,
     required this.qtdBaixo,
     required this.descricao,
   });
+}
+
+class CategoryQueryResult{
+  final int id_categoria;
+  final String nome_categoria;
+
+  CategoryQueryResult(this.id_categoria, this.nome_categoria);
 }
 
 class InventoryDAO {
@@ -71,16 +78,142 @@ class InventoryDAO {
           medida: data['medida'] ?? '',
           
           requerCalibracao: data['requerCalibracao'] == '1',
-          qtdAlto: int.tryParse(data['qtdAlto'] ?? '0') ?? 0,
+          qtdAtual: int.tryParse(data['qtdAlto'] ?? '0') ?? 0,
           qtdBaixo: int.tryParse(data['qtdBaixo'] ?? '0') ?? 0,
           descricao: data['descricao'] ?? '',
         ));
-      }
-
+    }
       return items;
     } catch (e) {
       print('Erro no DAO ao buscar materiais: $e');
       throw Exception('Falha ao acessar o banco de dados.');
+  }
+  }
+
+
+  Future<List<CategoryQueryResult>> getAllCategories() async {
+    const String sqlQuery = '''
+      SELECT id_categoria, nome_categoria 
+      FROM categoria 
+      ORDER BY nome_categoria;
+    ''';
+
+    try {
+      final result = await connection.execute(sqlQuery);
+      if (result.numOfRows == 0) return [];
+
+      final categories = <CategoryQueryResult>[];
+      for (final row in result.rows) {
+        final data = row.assoc();
+        categories.add(CategoryQueryResult(
+          int.tryParse(data['id_categoria'] ?? '0') ?? 0,
+          data['nome_categoria'] ?? '',
+        ));
+      }
+      return categories;
+
+    } catch (e) {
+      print('Erro no DAO ao buscar categorias: $e');
+      throw Exception('Falha ao buscar categorias.');
     }
   }
+
+
+
+  // Esta é a nova função dinâmica
+  Future<List<InventoryItemQueryResult>> getFilteredItems({
+    int? categoriaId,
+    String? statusEstoque, // Ex: "Em estoque", "Baixo estoque", "Esgotado"
+    String? termoPesquisa,
+  }) async {
+    
+    // Query base
+    String sqlQuery = '''
+      SELECT 
+        m.id_material AS id,
+        m.nome AS nome,
+        m.id_categoria AS categoriaId,       
+        c.nome_categoria AS categoria,
+        m.id_medida AS medidaId,       
+        u.nome_medida AS medida,
+        m.requer_calibracao AS requerCalibracao,
+        m.qtd_atual AS qtdAtual,         -- Corrigido
+        m.qtd_alerta_baixo AS qtdBaixo,
+        m.descricao AS descricao
+      FROM materiais m
+      LEFT JOIN categoria c ON m.id_categoria = c.id_categoria
+      LEFT JOIN unidade_medida u ON m.id_medida = u.id_medida
+    ''';
+
+    List<String> whereClauses = [];
+    List<dynamic> parameters = [];
+
+   
+    if (categoriaId != null) {
+      whereClauses.add('m.id_categoria = ?');
+      parameters.add(categoriaId);
+    }
+
+    if (termoPesquisa != null && termoPesquisa.isNotEmpty) {
+      whereClauses.add('m.nome LIKE ?');
+      parameters.add('%$termoPesquisa%'); 
+    }
+
+    if (statusEstoque != null) {
+      switch (statusEstoque) {
+        case 'Em estoque':
+          // Atual > Baixo
+          whereClauses.add('m.qtd_atual > m.qtd_alerta_baixo');
+          break;
+        case 'Baixo estoque':
+          // Atual > 0 E Atual <= Baixo
+          whereClauses.add('m.qtd_atual > 0 AND m.qtd_atual <= m.qtd_alerta_baixo');
+          break;
+        case 'Esgotado':
+          // Atual <= 0
+          whereClauses.add('m.qtd_atual <= 0');
+          break;
+      }
+    }
+
+    if (whereClauses.isNotEmpty) {
+      sqlQuery += ' WHERE ${whereClauses.join(' AND ')}';
+    }
+
+    // Adiciona ordenação
+    sqlQuery += ' ORDER BY m.nome;';
+
+    try {
+      // Executa a query com os parâmetros
+      final result = await connection.execute(sqlQuery);
+
+      if (result.numOfRows == 0) return [];
+
+      final items = <InventoryItemQueryResult>[];
+      for (final row in result.rows) {
+        final data = row.assoc();
+        items.add(InventoryItemQueryResult(
+          id: int.tryParse(data['id'] ?? '0') ?? 0,
+          nome: data['nome'] ?? '',
+          categoriaId: int.tryParse(data['categoriaId'] ?? '0') ?? 0, 
+          categoria: data['categoria'] ?? '',
+          medidaId: int.tryParse(data['medidaId'] ?? '0') ?? 0,     
+          medida: data['medida'] ?? '',
+          requerCalibracao: data['requerCalibracao'] == '1',
+          // Corrigido:
+          qtdAtual: int.tryParse(data['qtdAtual'] ?? '0') ?? 0, 
+          qtdBaixo: int.tryParse(data['qtdBaixo'] ?? '0') ?? 0,
+          descricao: data['descricao'] ?? '',
+        ));
+      }
+      return items;
+    } catch (e) {
+      print('Erro no DAO ao buscar materiais filtrados: $e');
+      throw Exception('Falha ao acessar o banco de dados.');
+    }
+  }
+  
+
+
 }
+

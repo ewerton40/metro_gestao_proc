@@ -1,10 +1,13 @@
 import 'dart:io';
 import 'package:dart_frog/dart_frog.dart';
 
+import '../controllers/category_controller.dart';
+
 
 Future<Response> onRequest(RequestContext context) async {
-  return Response.json(
-    statusCode: HttpStatus.ok,
-    body: [], 
-  );
+  if (context.request.method == HttpMethod.get) {
+    return categoryHandler(context);
+  }
+  return Response(statusCode: 405, body: 'Método não permitido');
+
 }

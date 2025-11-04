@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import '../services/inventory_service.dart';
 import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
 
@@ -78,6 +79,7 @@ class InventoryScreen extends StatefulWidget {
 class _InventoryScreenState extends State<InventoryScreen> {
   List<InventoryItem> _items = [];
   List<Category> _categories = [];
+  InventoryServices inventario = InventoryServices();
 
   // Filtros selecionados
   String? _selectedStatus;
@@ -100,8 +102,8 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
     try {
       final results = await Future.wait([
-        _fetchInventoryItems(),
-        _fetchCategories(),
+        inventario.getAllItems(),
+        inventario.getAllCategories(),
       ]);
 
       setState(() {
@@ -118,33 +120,6 @@ class _InventoryScreenState extends State<InventoryScreen> {
     }
   }
 
-
-Future<List<InventoryItem>> _fetchInventoryItems() async {
-  final url = Uri.parse('http://localhost:8080/inventory/all');
-  final response = await http.get(url);
-
-  if (response.statusCode == 200) {
-    final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-
-    final List<dynamic> data = jsonResponse['data']; 
-    
-    return data.map((json) => InventoryItem.fromJson(json)).toList();
-  } else {
-    throw Exception('Falha ao carregar itens');
-  }
-}
-
-  Future<List<Category>> _fetchCategories() async {
-    final url = Uri.parse('http://localhost:8080/categories');
-    final response = await http.get(url);
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
-      return data.map((json) => Category.fromJson(json)).toList();
-    } else {
-      throw Exception('Falha ao carregar categorias');
-    }
-  }
 
   // --- FILTROS 
   List<InventoryItem> _applyFilters(List<InventoryItem> items) {
@@ -185,7 +160,7 @@ Future<List<InventoryItem>> _fetchInventoryItems() async {
     List<InventoryItem> filteredItems = _applyFilters(_items);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: const Color(0xFFF8F9FA), 
       appBar: const BarMenu(),
       drawer: const VerticalMenu(),
       body: Padding(
