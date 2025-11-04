@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
 import 'package:intl/intl.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 class CadastroMaterialScreen extends StatefulWidget {
   const CadastroMaterialScreen({super.key});
@@ -21,6 +22,11 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
   final _minStockController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _maxStockController = TextEditingController();
+
+  var dateMaskFormatter = MaskTextInputFormatter(
+    mask: "##/##/####", // Define o formato DD/MM/AAAA
+    filter: { "#": RegExp(r'[0-9]') } // Permite apenas dígitos (números)
+  );
 
   final _dateController = TextEditingController();
   bool _isDateRequired = false;
@@ -54,6 +60,8 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
           'validityDate' :_isDateRequired ? _dateController.text : null,
         };
         print(itemData);////////////////////////////////////RESOLVER PROBLEA QUE QUANDO CLICA NO BOTAO SALVAR APARECE COISAS DIFERENTES NO TERMINAL///////////////////////
+
+        _restartScreen();
       }
   }
 
@@ -72,6 +80,15 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
       _dateController.text = formatter.format(picked);
     }
   }
+
+void _restartScreen() {
+
+  Navigator.of(context).pushReplacement(
+    MaterialPageRoute(
+      builder: (context) => const CadastroMaterialScreen(),
+    ),
+  );
+}
     @override
     Widget build(BuildContext context) {
       // A tela principal é envolvida por um Scaffold para a estrutura básica.
@@ -151,7 +168,7 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
                 Expanded(child: _buildDropdownField(
                   label: 'Categoria',
                   value: _selectedCategory,
-                  items: ['Material consumo', 'Material de Giro', 'Material Patrimoniado', 'Ferramentas Manuais','Debito Direto'],
+                  items: ['Material de consumo', 'Material de Giro', 'Material Patrimoniado', 'Ferramentas Manuais','Debito Direto', 'material sobressalente'],
                   onChanged: (value) => setState(() => _selectedCategory = value),
                   hint: 'Materiais',
                 )),
@@ -224,17 +241,6 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
                   ),
                   child: const Text('Salvar'),
                 ),
-                const SizedBox(width: 16),
-                OutlinedButton(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.grey[700],
-                    side: BorderSide(color: Colors.grey[400]!),
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                  child: const Text('Voltar'),
-                ),
               ],
             )
           ],
@@ -242,8 +248,9 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
       ),
     );////////// ) do form
   }
-  
-  
+
+
+
 
 
 
@@ -290,11 +297,17 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
           const SizedBox(height: 8),
           TextFormField(
             controller: _dateController,
-            readOnly: true, // Impedir edição manual e forçar o DatePicker
-            onTap: () => _selectDate(context), // Chama o DatePicker
+            
+            keyboardType: TextInputType.number,
+            maxLength: 10,
+            inputFormatters: [
+              dateMaskFormatter,
+            ],
+
               decoration: InputDecoration(
-              hintText: 'Selecione a data',
+              hintText: 'DD/MM/AAAA',
               suffixIcon: const Icon(Icons.calendar_today_outlined, color: Colors.black54),
+              counterText: '',
               filled: true,
               fillColor: Colors.white,
               border: OutlineInputBorder(
@@ -311,6 +324,9 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
             // O campo é obrigatório APENAS se _isDateRequired for true
               if (_isDateRequired && (value == null || value.isEmpty)) {
                 return 'Obrigatório selecionar a data.';
+              }
+              if (_isDateRequired && value != null && value.length < 10 ){
+                return "A data deve estar completa (DD/MM/AAAA)";
               }
               return null;
             },
