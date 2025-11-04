@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/providers/user_provider.dart';
 import 'package:metro_projeto/screens/ItemRegistrationScreen.dart';
+import 'package:metro_projeto/screens/dashBoardScreen.dart';
 import 'package:metro_projeto/screens/inventoryscreen.dart';
 import 'package:metro_projeto/screens/CadastroMaterialScreen.dart';
 import 'package:metro_projeto/screens/loginscreen.dart';

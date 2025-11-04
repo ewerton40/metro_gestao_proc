@@ -29,12 +29,11 @@ class InventoryItemQueryResult {
   });
 }
 
-class CategoryQueryResult{
-  final int id_categoria;
-  final String nome_categoria;
+class MovementsQuant{
+  final String mov_totais;
 
-  CategoryQueryResult(this.id_categoria, this.nome_categoria);
-}
+  MovementsQuant({required this.mov_totais});
+  }
 
 class InventoryDAO {
   final MySQLConnection connection;
@@ -90,37 +89,6 @@ class InventoryDAO {
   }
   }
 
-
-  Future<List<CategoryQueryResult>> getAllCategories() async {
-    const String sqlQuery = '''
-      SELECT id_categoria, nome_categoria 
-      FROM categoria 
-      ORDER BY nome_categoria;
-    ''';
-
-    try {
-      final result = await connection.execute(sqlQuery);
-      if (result.numOfRows == 0) return [];
-
-      final categories = <CategoryQueryResult>[];
-      for (final row in result.rows) {
-        final data = row.assoc();
-        categories.add(CategoryQueryResult(
-          int.tryParse(data['id_categoria'] ?? '0') ?? 0,
-          data['nome_categoria'] ?? '',
-        ));
-      }
-      return categories;
-
-    } catch (e) {
-      print('Erro no DAO ao buscar categorias: $e');
-      throw Exception('Falha ao buscar categorias.');
-    }
-  }
-
-
-
-  // Esta é a nova função dinâmica
   Future<List<InventoryItemQueryResult>> getFilteredItems({
     int? categoriaId,
     String? statusEstoque, // Ex: "Em estoque", "Baixo estoque", "Esgotado"
@@ -213,7 +181,25 @@ class InventoryDAO {
     }
   }
   
-
-
+  Future<MovementsQuant?> MovementsToday() async{
+    String sqlQuery = '''
+      SELECT
+      SUM(CASE WHEN tipo_movimentacao = 'entrada' THEN 1 ELSE 0 END) AS entradas,
+      SUM(CASE WHEN tipo_movimentacao = 'saida' THEN 1 ELSE 0 END) AS saidas
+      FROM movimentacoes
+      WHERE DATE(data_movimentacao) = CURDATE()
+''';
+    try{
+      final result =  await connection.execute(sqlQuery);
+      if(result.numOfRows == 0){
+      return null;
+      }
+      final data = result.rows.first.assoc();
+      final entradas = int.tryParse(data['entradas'] ?? '0') ?? 0;
+      final saidas = int.tryParse(data['saidas'] ?? '0') ?? 0;
+    }catch(e){
+      print("Erro ao buscar Movimentacoes de hoje :$e");
+    }
+  }
 }
 
