@@ -194,8 +194,13 @@ void _restartScreen() {
                   },
                 )),
 
-                const SizedBox(width: 16),
-                Expanded(child: _buildTextField(label: 'Localização Física', controller: _locationController)),
+            const SizedBox(width: 16),
+            Expanded(child: _buildDropdownField(
+                  label: 'base', 
+                  value: _selectedCategory,
+                  items: ['WJA (Jabaquara)', 'PSO (Paraiso)', 'TRD (Tiradentes)', 'TUC (Yucuruvi)', 'LUN (Luminarias)', 'IMG (Imigantes)', 'BFU (Barra Funda)', 'BAS (Brás)', 'CEC (Cecília)', 'MAT (Matheus)', 'VTD (Vila Matilde)', 'VPT (Vila Prudente)', 'PIT (Pátio Itaquera)', 'POT (Pátio Oratório)', 'PAT (Pátio Jabaquara)'],
+                  onChanged: (value) => setState(() => _selectedCategory = value),
+                )),
               ],
             ),
             const SizedBox(height: 16),
@@ -366,7 +371,7 @@ void _restartScreen() {
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
-            validator: (value) { // <<< ALTERADA: Adicionada validação básica
+            validator: (value) { 
               if (value == null || value.isEmpty) {
                 return 'Este campo é obrigatório.';
               }
