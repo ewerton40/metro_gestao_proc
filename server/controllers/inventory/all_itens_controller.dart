@@ -1,12 +1,12 @@
 import 'package:dart_frog/dart_frog.dart';
-import '../db/connection.dart';
-import '../db/inventory.dart'; 
+import '../../db/connection.dart';
+import '../../db/inventory.dart'; 
 
 Future<Response> inventoryAllHandler(RequestContext context) async {
   if (context.request.method == HttpMethod.get) {
     try {
-      final conexao = Connection();
-      final dao = InventoryDAO(await conexao.connect());
+      final conexao = Connection.getConnection();
+      final dao = InventoryDAO(await conexao);
       final items = await dao.getAllItems();
 
       final data = items.map((item) => {

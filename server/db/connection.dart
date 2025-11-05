@@ -3,14 +3,18 @@ import 'package:mysql_client/mysql_client.dart';
 
 class Connection {
 
-  Future<MySQLConnection> connect() async {
+  static MySQLConnection? conn;  
+
+  static Future<MySQLConnection> getConnection() async {
+
+    if(conn != null && conn!.connected){
+      return conn!;
+    }
     
     final dotEnv = dotenv.DotEnv(includePlatformEnvironment: true)..load(['.env']);
 
 
-    MySQLConnection? conn;  
     try {
-      
       conn = await MySQLConnection.createConnection(
         host: dotEnv['HOST']!,
         port: int.parse(dotEnv['PORT']!),
@@ -19,7 +23,7 @@ class Connection {
         databaseName: dotEnv['DATABASE']!
       );
 
-      await conn.connect();
+      await conn!.connect();
       print("conectado");
 
       } catch (e) {
@@ -27,6 +31,6 @@ class Connection {
       print(e);
       rethrow; 
     } 
-    return conn;
+    return conn!;
   }
 }

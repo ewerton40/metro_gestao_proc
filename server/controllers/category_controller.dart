@@ -9,8 +9,8 @@ import '../db/category.dart';
 Future<Response> categoryHandler(RequestContext context) async{
     if(context.request.method == HttpMethod.get){
     try{
-      final conexao = Connection();
-      final categorias = await CategoryDAO(await conexao.connect()).getAllCategories();
+      final conexao = Connection.getConnection();
+      final categorias = await CategoryDAO(await conexao).getAllCategories();
       final data = categorias.map((categoria) => {
         'id': categoria.id_categoria,
         'nome': categoria.nome_categoria

@@ -29,11 +29,6 @@ class InventoryItemQueryResult {
   });
 }
 
-class MovementsQuant{
-  final String mov_totais;
-
-  MovementsQuant({required this.mov_totais});
-  }
 
 class InventoryDAO {
   final MySQLConnection connection;
@@ -181,25 +176,4 @@ class InventoryDAO {
     }
   }
   
-  Future<MovementsQuant?> MovementsToday() async{
-    String sqlQuery = '''
-      SELECT
-      SUM(CASE WHEN tipo_movimentacao = 'entrada' THEN 1 ELSE 0 END) AS entradas,
-      SUM(CASE WHEN tipo_movimentacao = 'saida' THEN 1 ELSE 0 END) AS saidas
-      FROM movimentacoes
-      WHERE DATE(data_movimentacao) = CURDATE()
-''';
-    try{
-      final result =  await connection.execute(sqlQuery);
-      if(result.numOfRows == 0){
-      return null;
-      }
-      final data = result.rows.first.assoc();
-      final entradas = int.tryParse(data['entradas'] ?? '0') ?? 0;
-      final saidas = int.tryParse(data['saidas'] ?? '0') ?? 0;
-    }catch(e){
-      print("Erro ao buscar Movimentacoes de hoje :$e");
-    }
-  }
 }
-

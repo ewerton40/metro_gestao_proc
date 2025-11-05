@@ -1,11 +1,18 @@
-import 'dart:convert';
 import 'package:mysql_client/mysql_client.dart';
 
 
-class TransactionDAO {
+class MovementsQuant{
+  final String mov_totais;
+
+  MovementsQuant({required this.mov_totais});
+  }
+
+
+
+class MovimentationDAO {
   final MySQLConnection connection;
 
-  TransactionDAO(this.connection);
+  MovimentationDAO(this.connection);
 
   Future<void> registrarEntrada({
     required int idMaterial,
@@ -121,4 +128,30 @@ class TransactionDAO {
       rethrow;
     }
   }
+
+  Future<MovementsQuant?> MovementsToday() async{
+    String sqlQuery = '''
+      SELECT
+      SUM(CASE WHEN tipo_movimentacao = 'entrada' THEN 1 ELSE 0 END) AS entradas,
+      SUM(CASE WHEN tipo_movimentacao = 'saida' THEN 1 ELSE 0 END) AS saidas
+      FROM movimentacoes
+      WHERE DATE(data_movimentacao) = CURDATE()
+''';
+    try{
+      final result =  await connection.execute(sqlQuery);
+      if(result.numOfRows == 0){
+      return null;
+      }
+      final data = result.rows.first.assoc();
+      final entradas = int.tryParse(data['entradas'] ?? '0') ?? 0;
+      final saidas = int.tryParse(data['saidas'] ?? '0') ?? 0;
+    }catch(e){
+      print("Erro ao buscar Movimentacoes de hoje :$e");
+    }
+  }
 }
+
+
+
+
+

@@ -6,11 +6,10 @@ import '../db/admnistrator.dart';
 Future<Response> loginHandler(RequestContext context) async {
   final body = await context.request.body();
   final data = jsonDecode(body);
-
   final email = data['email'];
   final senha = data['senha'];
-  final conexao = Connection();
-  final query = AdmnistratorDAO(await conexao.connect());
+  final conexao = Connection.getConnection();
+  final query = AdmnistratorDAO(await conexao);
   final user = await query.findUserbyEmail(email); 
   if (user != null && user.senhaHash == senha) {
     return Response.json(body: {'success': true, 'message': 'Login OK!'});
