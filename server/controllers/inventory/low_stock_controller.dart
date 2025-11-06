@@ -11,7 +11,7 @@ Future<Response> lowStockHandler(RequestContext context) async{
       final count = await dao.countLowStockItems();
 
       return Response.json(body: {'success': true, 'data': {'lowStockCount': count}});
-    } catch (e) {
+    } catch (e){
       return Response.json(statusCode: 500, body: {'success': false, 'error': e.toString()});
     }
   }

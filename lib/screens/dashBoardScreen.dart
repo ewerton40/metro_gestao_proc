@@ -37,6 +37,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int _lowStockCount = 0;
   int _totalItems = 0;
   List<Map<String, dynamic>> _topfiveMaterials = [];
+  List<Map<String, dynamic>> _criticalItems = [];
 
   @override
   void initState() {
@@ -45,6 +46,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _loadLowStockCount();
     _loadTotalItems();
     _loadTopFiveMaterials();
+    _loadCriticalItems();
   }
 
    Future<void> _loadMovements() async {
@@ -90,6 +92,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
     print('Erro ao carregar top 5 materiais: $e');
   }
 }
+
+Future<void> _loadCriticalItems() async {
+  try {
+    final items = await InventoryServices().getCriticalItems();
+    setState(() {
+      _criticalItems = items;
+    });
+  } catch (e) {
+    print('Erro ao carregar itens críticos: $e');
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -276,12 +290,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
           title: 'Itens Críticos',
           icon: Icons.error_outline,
           iconColor: Colors.red,
-          content: const Column(
+          content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Cabo XYZ (Estoque: 2)', style: TextStyle(fontSize: 14)),
-              Text('Lanterna LED (Estoque: 1)', style: TextStyle(fontSize: 14)),
-            ],
+            children: _criticalItems.isEmpty
+          ? [const Text('Nenhum item crítico no momento.')]
+          : _criticalItems.map((item) {
+              return Text(
+                '${item['nome_material']} (Estoque: ${item['quantidade']})',
+                style: const TextStyle(fontSize: 14),
+              );
+            }).toList(),
           ),
         ),
       ),

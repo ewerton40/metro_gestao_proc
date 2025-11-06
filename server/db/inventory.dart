@@ -199,6 +199,36 @@ class InventoryDAO {
     }
   }
 
+
+Future<List<Map<String, dynamic>>> getCriticalItems() async {
+  const String sqlQuery = '''
+    SELECT 
+        m.nome AS nome_material,
+        e.quantidade
+    FROM materiais m
+    JOIN estoque e ON m.id_material = e.id_material
+    WHERE e.quantidade <= m.qtd_alerta_baixo
+    ORDER BY e.quantidade ASC
+    LIMIT 5;
+  ''';
+
+  try {
+    final result = await connection.execute(sqlQuery);
+
+    if (result.numOfRows == 0) return [];
+
+    return result.rows.map((row) {
+      final data = row.assoc();
+      return {
+        'nome_material': data['nome_material'] ?? '',
+        'quantidade': int.tryParse(data['quantidade'] ?? '0') ?? 0,
+      };
+    }).toList();
+  } catch (e) {
+    print('Erro ao buscar itens críticos: $e');
+    throw Exception('Falha ao acessar o banco de dados.');
+  }
+}
   
 }
 

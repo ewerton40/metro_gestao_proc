@@ -99,8 +99,23 @@ Future<int> getTotalItemsCount() async {
     throw Exception('Falha ao obter total de itens: ${response.statusCode}');
   }
 }
+
+
+Future<List<Map<String, dynamic>>> getCriticalItems() async {
+  final url = Uri.parse('$_baseUrl/inventory/critical');
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    final jsonResponse = jsonDecode(response.body);
+    if (jsonResponse['success'] == true) {
+      return List<Map<String, dynamic>>.from(jsonResponse['data']);
+    } else {
+      throw Exception('Erro: ${jsonResponse['error']}');
+    }
+  } else {
+    throw Exception('Falha ao buscar itens críticos: ${response.statusCode}');
+  }
 }
 
-
-
+}
 
