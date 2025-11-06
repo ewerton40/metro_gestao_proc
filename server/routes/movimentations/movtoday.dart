@@ -1,5 +1,5 @@
 import 'package:dart_frog/dart_frog.dart';
-import '../../controllers/inventory/mov_today_controller.dart';
+import '../../controllers/movimentations/mov_today_controller.dart';
 
 Future<Response> onRequest(RequestContext context) async {
   if(context.request.method == HttpMethod.get){

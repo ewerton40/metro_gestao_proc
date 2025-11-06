@@ -29,5 +29,20 @@ class MovimentationServices {
       rethrow;
     }
 }
+
+
+ Future<List<Map<String, dynamic>>> getTop5Materials() async {
+    final response = await http.get(Uri.parse('$_baseUrl/movimentation/fiveused'));
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body)['data'];
+      return data.map((e) => {
+        'material': e['material'],
+        'total_saidas': e['total_saidas'],
+      }).toList();
+    } else {
+      throw Exception('Erro ao buscar top 5 materiais');
+    }
+  }
 }
+
 

@@ -1,6 +1,10 @@
 import 'package:dart_frog/dart_frog.dart';
+import '../../controllers/movimentations/five_used_controller.dart';
 
-Response onRequest(RequestContext context) {
-  // TODO: implement route handler
-  return Response(body: 'This is a new route!');
+Future<Response> onRequest(RequestContext context) async{
+  if(context.request.method == HttpMethod.get){
+    return fiveUsedHandler(context);
+  }
+  return Response(statusCode: 405, body: 'Método não permitido');
 }
+

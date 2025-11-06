@@ -35,12 +35,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final movimentationServices = MovimentationServices();
   final inventoryServices = InventoryServices();
   int _lowStockCount = 0;
+  int _totalItems = 0;
+  List<Map<String, dynamic>> _topfiveMaterials = [];
 
   @override
   void initState() {
     super.initState();
     _loadMovements();
     _loadLowStockCount();
+    _loadTotalItems();
+    _loadTopFiveMaterials();
   }
 
    Future<void> _loadMovements() async {
@@ -64,6 +68,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
     print('Erro ao carregar itens de baixo estoque: $e');
   }
 }
+
+ Future<void> _loadTotalItems() async {
+    try {
+      final count = await inventoryServices.getTotalItemsCount();
+      setState(() {
+        _totalItems = count;
+      });
+    } catch (e) {
+      print('Erro ao carregar total de itens: $e');
+    }
+  }
+
+  Future<void> _loadTopFiveMaterials() async {
+  try {
+    final data = await movimentationServices.getTop5Materials();
+    setState(() {
+      _topfiveMaterials = data;
+    });
+  } catch (e) {
+    print('Erro ao carregar top 5 materiais: $e');
+  }
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,8 +106,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(context),
-              const SizedBox(height: 24),
               _buildTopStatCards(context),
               const SizedBox(height: 24),
               _buildAlertsAndCharts(context),
@@ -92,20 +117,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  // Constrói o cabeçalho do conteúdo
-  Widget _buildHeader(BuildContext context) {
-    final entradas = _movementsToday?.entradas ?? 0;
-    final saidas = _movementsToday?.saidas ?? 0;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Movimentações Hoje', style: TextStyle(color: Colors.grey[600], fontSize: 14)),
-        Text('Entradas:$entradas', style: TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.w500)),
-        Text('Saídas: $saidas', style: TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.w500)),
-      ],
     );
   }
 
@@ -127,7 +138,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Expanded(
           child: _buildStatCard(
             title: 'Total de itens',
-            value: '1,245',
+            value: '$_totalItems',
             change: '3%',
             changeColor: Colors.blue.shade800,
             chartPlaceholder: _buildTotalItemsChart(),
@@ -183,7 +194,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Top 5 Materiais mais usados', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  const Text('5 Materiais mais usados', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 16),
                   Container(
                     height: 150,
@@ -235,59 +246,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // Constrói os cards de informação de baixo
   Widget _buildBottomInfoCards(BuildContext context) {
-    // ... (Sem alterações neste método)
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: _buildInfoCard(
-            title: 'Movimentações Hoje',
-            icon: Icons.sync_alt,
-            content: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Entradas: 12', style: TextStyle(fontSize: 14)),
-                Text('Saídas: 8', style: TextStyle(fontSize: 14)),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 24),
-        Expanded(
-          child: _buildInfoCard(
-            title: 'Itens Críticos',
-            icon: Icons.error_outline,
-            iconColor: Colors.red,
-            content: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Cabo XYZ (Estoque: 2)', style: TextStyle(fontSize: 14)),
-                Text('Lanterna LED (Estoque: 1)', style: TextStyle(fontSize: 14)),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 24),
-        Expanded(
-          child: _buildInfoCard(
-            title: 'Solicitações Pendentes',
-            icon: Icons.pending_actions,
-            iconColor: Colors.orange,
-            content: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Pedido 4452', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                Text('Aguardando aprovação', style: TextStyle(fontSize: 14)),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+  final entradas = _movementsToday?.entradas ?? 0;
+  final saidas = _movementsToday?.saidas ?? 0;
 
+  return Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      // Primeiro card - Movimentações Hoje
+      Expanded(
+        child: _buildInfoCard(
+          title: 'Movimentações Hoje',
+          icon: Icons.sync_alt,
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Entradas: $entradas', style: const TextStyle(fontSize: 14)),
+              Text('Saídas: $saidas', style: const TextStyle(fontSize: 14)),
+            ],
+          ),
+        ),
+      ),
+
+      const SizedBox(width: 24),
+
+      // Segundo card - Itens Críticos
+      Expanded(
+        child: _buildInfoCard(
+          title: 'Itens Críticos',
+          icon: Icons.error_outline,
+          iconColor: Colors.red,
+          content: const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Cabo XYZ (Estoque: 2)', style: TextStyle(fontSize: 14)),
+              Text('Lanterna LED (Estoque: 1)', style: TextStyle(fontSize: 14)),
+            ],
+          ),
+        ),
+      ),
+    ],
+  );
+}
 
   // --- WIDGETS AUXILIARES REUTILIZÁVEIS ---
 
@@ -434,68 +434,96 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
 
-  // Gráfico de Barras para "Top 5 Materiais"
-  Widget _buildTopMaterialsChart() {
-    // ... (Sem alterações neste método)
-    return SizedBox(
-      height: 150,
-      child: BarChart(
-        BarChartData(
-          gridData: FlGridData(show: false),
-          borderData: FlBorderData(show: false),
-          titlesData: FlTitlesData(
-            leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (double value, TitleMeta meta) {
-                  String text = '';
-                  switch (value.toInt()) {
-                    case 0: text = 'Steel Rails'; break;
-                    case 1: text = 'Copper'; break;
-                    case 2: text = 'Steel'; break;
-                    case 3: text = 'Rubber'; break;
-                    case 4: text = 'Insulation'; break;
-                  }
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 4.0),
-                    child: Text(text, style: TextStyle(color: Colors.grey[700], fontSize: 10)),
-                  );
-                },
-                reservedSize: 20,
-              ),
-            ),
-          ),
-          barGroups: [
-            _buildBarGroup(0, 4),    // Steel Rails
-            _buildBarGroup(1, 2.5),  // Copper
-            _buildBarGroup(2, 3.5),  // Steel
-            _buildBarGroup(3, 5),    // Rubber
-            _buildBarGroup(4, 3.8),  // Insulation
-          ],
+  
+
+
+  BarChartGroupData _buildBarGroup(int x, double y) {
+  return BarChartGroupData(
+    x: x,
+    barRods: [
+      BarChartRodData(
+        toY: y,
+        width: 20,
+        // não defina cortica globalmente se não quiser
+        color: const Color(0xFF1763A6),
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(4),
+          topRight: Radius.circular(4),
         ),
       ),
-    );
+    ],
+  );
+}
+
+
+Widget _buildTopMaterialsChart() {
+
+  if (_topfiveMaterials.isEmpty) {
+    return const Center(child: CircularProgressIndicator()) ;
+    
+  }
+  
+  final List<double> totals = _topfiveMaterials.map<double>((e) {
+    final v = e['total_saidas'];
+    if (v is int) return v.toDouble();
+    if (v is double) return v;
+    if (v is String) return double.tryParse(v) ?? 0.0;
+    return 0.0;
+  }).toList();
+
+  // calcula maxY para ajustar o eixo y
+  final double maxY = (totals.isNotEmpty ? totals.reduce((a, b) => a > b ? a : b) : 1.0) * 1.2;
+
+  // cria os grupos usando o helper
+  final List<BarChartGroupData> barGroups = [];
+  for (int i = 0; i < _topfiveMaterials.length; i++) {
+    final double value = totals[i];
+    barGroups.add(_buildBarGroup(i, value));
   }
 
-  // Método auxiliar para criar um grupo de barras
-  BarChartGroupData _buildBarGroup(int x, double y) {
-    // ... (Sem alterações neste método)
-    return BarChartGroupData(
-      x: x,
-      barRods: [
-        BarChartRodData(
-          toY: y,
-          color: const Color(0xFF1763A6),
-          width: 20,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(4),
-            topRight: Radius.circular(4),
+  return SizedBox(
+    height: 150,
+    child: BarChart(
+      BarChartData(
+        maxY: maxY,
+        barTouchData: BarTouchData(enabled: true),
+        gridData: FlGridData(show: false),
+        borderData: FlBorderData(show: false),
+        titlesData: FlTitlesData(
+          leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 28)),
+          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 42,
+              getTitlesWidget: (double value, TitleMeta meta) {
+                final int idx = value.toInt();
+                if (idx < 0 || idx >= _topfiveMaterials.length) return const SizedBox.shrink();
+
+                final nome = _topfiveMaterials[idx]['material']?.toString() ?? '';
+                return SideTitleWidget(
+                  meta: meta,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 60),
+                    child: Text(
+                      nome,
+                      style: TextStyle(color: Colors.grey[700], fontSize: 10),
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
-        )
-      ],
-    );
-  }
+        ),
+        barGroups: barGroups,
+        alignment: BarChartAlignment.spaceAround,
+        groupsSpace: 12,
+      ),
+    ),
+  );
+}
 }

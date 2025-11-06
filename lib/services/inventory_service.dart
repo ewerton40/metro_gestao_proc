@@ -80,6 +80,25 @@ Future<List<Category>> getAllCategories() async {
     throw Exception('Falha na requisição: ${response.statusCode}');
   }
 }
+
+
+Future<int> getTotalItemsCount() async {
+  final url = Uri.parse('$_baseUrl/inventory/all');
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+
+    if (jsonResponse['success'] == true) {
+      final count = jsonResponse['count'];
+      return count is int ? count : int.tryParse(count.toString()) ?? 0;
+    } else {
+      throw Exception('Erro na resposta: ${jsonResponse['message']}');
+    }
+  } else {
+    throw Exception('Falha ao obter total de itens: ${response.statusCode}');
+  }
+}
 }
 
 
