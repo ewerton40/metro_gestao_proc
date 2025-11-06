@@ -86,11 +86,11 @@ class InventoryDAO {
 
   Future<List<InventoryItemQueryResult>> getFilteredItems({
     int? categoriaId,
-    String? statusEstoque, // Ex: "Em estoque", "Baixo estoque", "Esgotado"
+    String? statusEstoque, 
     String? termoPesquisa,
   }) async {
     
-    // Query base
+
     String sqlQuery = '''
       SELECT 
         m.id_material AS id,
@@ -147,7 +147,7 @@ class InventoryDAO {
     sqlQuery += ' ORDER BY m.nome;';
 
     try {
-      // Executa a query com os parâmetros
+
       final result = await connection.execute(sqlQuery);
 
       if (result.numOfRows == 0) return [];
@@ -163,7 +163,6 @@ class InventoryDAO {
           medidaId: int.tryParse(data['medidaId'] ?? '0') ?? 0,     
           medida: data['medida'] ?? '',
           requerCalibracao: data['requerCalibracao'] == '1',
-          // Corrigido:
           qtdAtual: int.tryParse(data['qtdAtual'] ?? '0') ?? 0, 
           qtdBaixo: int.tryParse(data['qtdBaixo'] ?? '0') ?? 0,
           descricao: data['descricao'] ?? '',
@@ -176,4 +175,29 @@ class InventoryDAO {
     }
   }
   
+   Future<int> countLowStockItems() async {
+    const String sqlQuery = '''
+      SELECT 
+        COUNT(*) AS itens_baixo_estoque
+      FROM materiais m
+      JOIN estoque e ON m.id_material = e.id_material
+      WHERE e.quantidade <= m.qtd_alerta_baixo;
+    ''';
+
+    try {
+      final result = await connection.execute(sqlQuery);
+
+      if (result.numOfRows == 0) return 0;
+
+      final row = result.rows.first.assoc();
+      final count = int.tryParse(row['itens_baixo_estoque'] ?? '0') ?? 0;
+
+      return count;
+    } catch (e) {
+      print('Erro ao contar itens de baixo estoque: $e');
+      throw Exception('Falha ao acessar o banco de dados.');
+    }
+  }
 }
+
+

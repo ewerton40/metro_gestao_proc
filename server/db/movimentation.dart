@@ -2,11 +2,11 @@ import 'package:mysql_client/mysql_client.dart';
 
 
 class MovementsQuant{
-  final String mov_totais;
-
-  MovementsQuant({required this.mov_totais});
+  final int entradas;
+  final int saidas;
+  
+  MovementsQuant({required this.entradas, required this.saidas});
   }
-
 
 
 class MovimentationDAO {
@@ -145,9 +145,13 @@ class MovimentationDAO {
       final data = result.rows.first.assoc();
       final entradas = int.tryParse(data['entradas'] ?? '0') ?? 0;
       final saidas = int.tryParse(data['saidas'] ?? '0') ?? 0;
+
+      return MovementsQuant(entradas: entradas, saidas: saidas);
     }catch(e){
       print("Erro ao buscar Movimentacoes de hoje :$e");
+      return null;
     }
+
   }
 }
 

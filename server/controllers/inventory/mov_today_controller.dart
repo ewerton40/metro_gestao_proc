@@ -8,16 +8,13 @@ Future<Response> movTodayHandler(RequestContext context) async{
     try{
       final conexao = Connection.getConnection();
       final dao = MovimentationDAO(await conexao);
-      final items = dao.MovementsToday();
-
-      final data = {
-        'data': items
-      };
+      final items = await dao.MovementsToday();
 
       return Response.json(body: {
         'success': true,
-        'data': data
+        'data': items
       });
+      
     }catch(e){
       print("Erro em buscar todas as movimentações de hoje: $e");
       throw Exception("Erro em mov_today_controller");

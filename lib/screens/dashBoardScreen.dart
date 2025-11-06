@@ -1,9 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart'; 
-
-// Importações para os widgets reutilizáveis
 import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
+import '../services/movimentation_services.dart';
+import '../services/inventory_service.dart';
+
+
+
+class MovementsToday {
+  final int entradas;
+  final int saidas;
+
+  MovementsToday({required this.entradas, required this.saidas});
+
+  factory MovementsToday.fromJson(Map<String, dynamic> json) {
+    return MovementsToday(
+      entradas: json['entradas'] ?? 0,
+      saidas: json['saidas'] ?? 0,
+    );
+  }
+}
+
+
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -13,10 +31,43 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  MovementsToday? _movementsToday;
+  final movimentationServices = MovimentationServices();
+  final inventoryServices = InventoryServices();
+  int _lowStockCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMovements();
+    _loadLowStockCount();
+  }
+
+   Future<void> _loadMovements() async {
+    try {
+      final data = await movimentationServices.getMovementsToday();
+      setState(() {
+        _movementsToday = data;
+      });
+    } catch (e) {
+      print('Erro ao carregar movimentações: $e');
+    }
+  }
+
+  Future<void> _loadLowStockCount() async {
+  try {
+    final count = await inventoryServices.getLowStockCount();
+    setState(() {
+      _lowStockCount = count;
+    });
+  } catch (e) {
+    print('Erro ao carregar itens de baixo estoque: $e');
+  }
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // MODIFICADO: Trocado de Colors.white para o cinza de fundo
+
       backgroundColor: const Color(0xFFF8F9FA), 
       
       appBar: const BarMenu(),
@@ -46,13 +97,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   // Constrói o cabeçalho do conteúdo
   Widget _buildHeader(BuildContext context) {
-    // ... (Sem alterações neste método)
+    final entradas = _movementsToday?.entradas ?? 0;
+    final saidas = _movementsToday?.saidas ?? 0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Movimentações Hoje', style: TextStyle(color: Colors.grey[600], fontSize: 14)),
-        const Text('Entradas: 12', style: TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.w500)),
-        const Text('Saídas: 8', style: TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.w500)),
+        Text('Entradas:$entradas', style: TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.w500)),
+        Text('Saídas: $saidas', style: TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.w500)),
       ],
     );
   }
@@ -65,7 +117,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Expanded(
           child: _buildStatCard(
             title: 'Itens com baixo estoque',
-            value: '35',
+            value: '$_lowStockCount',
             change: '+2%',
             changeColor: Colors.red,
             chartPlaceholder: _buildLowStockChart(),

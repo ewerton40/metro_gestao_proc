@@ -29,9 +29,14 @@ Future<List<Category>> getAllCategories() async {
   if (response.statusCode == 200) {
     final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
     final List<dynamic> data = jsonResponse['data']; 
-  
-    
+    final List<Category> categories =
+        data.map((item) => Category.fromJson(item)).toList();
+    return categories;
+  } else {
+    throw Exception('Failed to load categories. Status code: ${response.statusCode}');
+  }
 }
+    
 
 
  Future<Map<String, dynamic>> addItem(InventoryItem item) async {
@@ -59,5 +64,24 @@ Future<List<Category>> getAllCategories() async {
       throw Exception('Falha ao cadastrar item: ${response.statusCode} - ${response.body}');
     }
   }
+
+  Future<int> getLowStockCount() async {
+  final url = Uri.parse('$_baseUrl/inventory/low_stock');
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+    if (jsonResponse['success'] == true) {
+      return jsonResponse['data']['lowStockCount'] ?? 0;
+    } else {
+      throw Exception('Erro: ${jsonResponse['error']}');
+    }
+  } else {
+    throw Exception('Falha na requisição: ${response.statusCode}');
+  }
 }
+}
+
+
+
 
