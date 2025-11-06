@@ -25,7 +25,7 @@ Future<Response> inventoryAllHandler(RequestContext context) async {
       return Response.json(body: {
         'success': true,
         'count': data.length,
-        'data': data,
+        'data': data
       });
     } catch (e) {
       print('Erro no controller inventoryAllHandler: $e');

@@ -198,6 +198,9 @@ class InventoryDAO {
       throw Exception('Falha ao acessar o banco de dados.');
     }
   }
+
+  
 }
+
 
 
