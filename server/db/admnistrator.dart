@@ -4,8 +4,9 @@
     final String senhaHash; 
     final String cargo;     
     final String? nome;
+    final int id;
     
-    LoginQueryResult({required this.senhaHash, required this.cargo, this.nome});
+    LoginQueryResult({required this.senhaHash, required this.cargo, this.nome, required this.id});
   }
 
 
@@ -17,7 +18,7 @@
       Future<LoginQueryResult?> findUserbyEmail(dynamic email) async {
 
       const String sqlQuery = '''
-        SELECT senha, cargo, nome 
+        SELECT id_funcionario, senha, cargo, nome 
         FROM funcionario 
         WHERE email = :email
       ''';
@@ -33,6 +34,7 @@
         }
         final rowMap = result.rows.first.assoc();
         return LoginQueryResult(
+          id: int.parse(rowMap['id_funcionario']!),
           senhaHash: rowMap['senha'] as String,
           cargo: rowMap['cargo'] as String,
           nome: rowMap['nome'] as String

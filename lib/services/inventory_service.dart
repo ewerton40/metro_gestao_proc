@@ -165,5 +165,43 @@ Future<List<Map<String, dynamic>>> getCriticalItems() async {
       throw Exception('Falha ao buscar locais');
     }
   }
+
+  Future<Map<String, dynamic>> registerSaida({
+    required int idMaterial,
+    required int quantidade,
+    required int idLocalOrigem,
+    required int idFuncionario,
+    required String observacao,
+  }) async {
+    
+    final url = Uri.parse('$_baseUrl/movimentations/exit'); 
+
+    final body = jsonEncode({
+      'id_material': idMaterial,
+      'quantidade': quantidade,
+      'id_local_origem': idLocalOrigem,
+      'id_funcionario': idFuncionario,
+      'observacao': observacao,
+    });
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
+
+      final responseBody = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return responseBody as Map<String, dynamic>;
+      } else {
+        throw Exception(responseBody['message']);
+      }
+    } catch (e) {
+      throw Exception('Erro de conexão ao registrar saída: $e');
+    }
+
 }
 
+}

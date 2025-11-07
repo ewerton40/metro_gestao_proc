@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:metro_projeto/screens/CadastroMaterialScreen.dart';
 import 'package:metro_projeto/screens/dashBoardScreen.dart';
 import 'package:metro_projeto/screens/inventoryscreen.dart';
+import 'package:metro_projeto/screens/movimentation_screen.dart';
 import 'package:metro_projeto/screens/reportscreen.dart';
 
 class VerticalMenu extends StatefulWidget {
@@ -82,7 +83,7 @@ class _VerticalMenuState extends State<VerticalMenu> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (Builder) => const InventoryScreen()));
+                    builder: (Builder) => const MovimentacaoScreen()));
           },
         ),
         ListTile(

@@ -7,6 +7,8 @@ import '../services/inventory_service.dart';
 import '../screens/inventoryscreen.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_services.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:flutter/services.dart';
 
 class MovimentacaoScreen extends StatefulWidget {
   const MovimentacaoScreen({super.key});
@@ -26,6 +28,10 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
   // Controladores para os campos de texto da Entrada
   final _entradaQtdController = TextEditingController();
   final _entradaObsController = TextEditingController();
+  final _entradaDataController = TextEditingController();
+  var dateMaskFormatter = MaskTextInputFormatter(
+      mask: "##/##/####", //
+      filter: {"#": RegExp(r'[0-9]')});
 
   // Variáveis para o dropdown de Locais (Base de Destino)
   List<SimpleLocation> _locaisList = [];
@@ -38,6 +44,17 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
 
   // Variável de estado de carregamento para o botão Salvar
   bool _isLoadingEntrada = false;
+
+  // Controladores para os campos de texto da Saída
+  final _saidaQtdController = TextEditingController();
+  final _saidaObsController = TextEditingController();
+
+  // Variáveis para os dropdowns da Saída
+  InventoryItem? _selectedSaidaItem;
+  SimpleLocation? _selectedSaidaLocalOrigem;
+
+  // Variável de estado de carregamento para o botão Salvar Saída
+  bool _isLoadingSaida = false;
 
   void _limparFormularioEntrada() {
     _entradaQtdController.clear();
@@ -85,6 +102,68 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
             backgroundColor: Colors.red),
       );
     }
+  }
+
+  Future<void> _salvarSaida() async {
+    // Trava o formulário de Saída
+    setState(() => _isLoadingSaida = true);
+
+    try {
+      final authService = context.read<AuthServices>();
+
+      if (_selectedSaidaItem == null ||
+          _saidaQtdController.text.isEmpty ||
+          _selectedSaidaLocalOrigem == null) {
+        throw Exception(
+            'Preencha todos os campos obrigatórios (Item, Qtd, Origem).');
+      }
+
+      if (!authService.estaLogado || authService.usuario == null) {
+        throw Exception(
+            'Erro: Usuário não está logado. Faça o login novamente.');
+      }
+      final int idMaterial = _selectedSaidaItem!.code;
+      final int quantidade = int.parse(_saidaQtdController.text);
+      final int idLocalOrigem = _selectedSaidaLocalOrigem!.id;
+      final int idFuncionario = authService.usuario!.id;
+      final String observacao = _saidaObsController.text;
+
+      final response = await _inventoryService.registerSaida(
+        idMaterial: idMaterial,
+        quantidade: quantidade,
+        idLocalOrigem: idLocalOrigem,
+        idFuncionario: idFuncionario,
+        observacao: observacao,
+      );
+
+      if (response['success'] == true) {
+        _limparFormularioSaida();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Saída registrada com sucesso!'),
+              backgroundColor: Colors.green),
+        );
+      } else {
+        throw Exception(response['message']);
+      }
+    } catch (e) {
+      // Mostra o erro para o usuário
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Erro ao salvar: $e'), backgroundColor: Colors.red),
+      );
+    }
+    // Libera o formulário
+    setState(() => _isLoadingSaida = false);
+  }
+
+  void _limparFormularioSaida() {
+    _saidaQtdController.clear();
+    _saidaObsController.clear();
+    setState(() {
+      _selectedSaidaItem = null;
+      _selectedSaidaLocalOrigem = null;
+    });
   }
 
   @override
@@ -171,13 +250,12 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
               keyboardType: TextInputType.number),
           const SizedBox(height: 16),
 
-          // Campo de "Base de Destino" substituído pelo Dropdown
           _buildLocalDropdown(),
           const SizedBox(height: 16),
 
-          // TODO: Substituir por um DatePicker
-          //_buildFormTextFieldWithIcon(label: 'Data de entrada', icon: Icons.calendar_today_outlined),
-          //const SizedBox(height: 16),
+          const SizedBox(height: 16),
+          _buildDateField(),
+          const SizedBox(height: 16),
 
           _buildFormTextField(
               label: 'Observações',
@@ -190,8 +268,8 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
               ? const Center(child: CircularProgressIndicator())
               : _buildFormButtons(
                   primaryText: 'Salvar Entrada',
-                  onPrimaryPressed: _salvarEntrada, // <-- CONECTADO
-                ),
+                  onPrimaryPressed: _salvarEntrada,
+                  onCancelPressed: _limparFormularioEntrada),
         ],
       ),
     );
@@ -333,35 +411,34 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
                   .headlineSmall
                   ?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 24),
-          _buildFormTextFieldWithIcon(label: 'Item', icon: Icons.search),
+
+          // Dropdown de Item
+          _buildSaidaItemDropdown(),
           const SizedBox(height: 16),
-          _buildFormTextField(label: 'Quantidade'),
+
+          // Campo de Quantidade
+          _buildFormTextField(
+              label: 'Quantidade',
+              controller: _saidaQtdController,
+              keyboardType: TextInputType.number),
           const SizedBox(height: 16),
-          // Dropdown para Destino
-          _buildFormDropdownField(
-            label: 'Destino',
-            value: _selectedDestino,
-            items: ['Base Jabaquara', 'Base Paraíso', 'Oficina Central'],
-            onChanged: (value) => setState(() => _selectedDestino = value),
-          ),
+
+          // Dropdown de Local de ORIGEM
+          _buildSaidaLocalOrigemDropdown(),
           const SizedBox(height: 16),
-          // Dropdown para Motivo
-          _buildFormDropdownField(
-            label: 'Motivo da saída',
-            value: _selectedMotivo,
-            items: ['Uso regular', 'Manutenção', 'Baixa de item'],
-            onChanged: (value) => setState(() => _selectedMotivo = value),
-          ),
-          const SizedBox(height: 16),
-          _buildFormTextFieldWithIcon(
-              label: 'Data de saída', icon: Icons.calendar_today_outlined),
-          const SizedBox(height: 16),
-          _buildFormTextField(label: 'Responsável'),
-          const SizedBox(height: 16),
-          _buildFormTextField(label: 'Observações', maxLines: 3),
+
+          _buildFormTextField(
+              label: 'Observações (Motivo da saída)',
+              controller: _saidaObsController,
+              maxLines: 3),
           const SizedBox(height: 24),
-          _buildFormButtons(
-              primaryText: 'Salvar Saída', onPrimaryPressed: () {}),
+
+          _isLoadingSaida
+              ? const Center(child: CircularProgressIndicator())
+              : _buildFormButtons(
+                  primaryText: 'Salvar Saída',
+                  onPrimaryPressed: _salvarSaida,
+                  onCancelPressed: _limparFormularioSaida),
         ],
       ),
     );
@@ -383,11 +460,14 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
                 fontWeight: FontWeight.w500, color: Colors.black54)),
         const SizedBox(height: 8),
         TextFormField(
-          controller: controller, // <-- Adicionado
-          keyboardType: keyboardType, // <-- Adicionado
+          controller: controller,
+          keyboardType: keyboardType,
           maxLines: maxLines,
+          inputFormatters: keyboardType == TextInputType.number
+              ? [FilteringTextInputFormatter.digitsOnly]
+              : [],
           decoration: InputDecoration(
-            hintText: hint, // <-- Adicionado
+            hintText: hint,
             filled: true,
             fillColor: const Color(0xFFF8F9FA),
             border: OutlineInputBorder(
@@ -399,6 +479,16 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
               borderSide: BorderSide(color: Colors.grey[400]!),
             ),
           ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Este campo é obrigatório.';
+            }
+            if (keyboardType == TextInputType.number &&
+                int.tryParse(value) == null) {
+              return 'Insira um valor numérico válido.';
+            }
+            return null;
+          },
         ),
       ],
     );
@@ -433,7 +523,6 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
     );
   }
 
-  /// Campo de seleção falso (para "Quantidade" e "Base de destino" em Entrada)
   Widget _buildFormSelectionField({required String label}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -509,15 +598,126 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
     );
   }
 
+  Widget _buildDateField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Data da Entrada',
+            style:
+                TextStyle(fontWeight: FontWeight.w500, color: Colors.black54)),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: _entradaDataController,
+          keyboardType: TextInputType.number,
+          maxLength: 10,
+          inputFormatters: [
+            dateMaskFormatter,
+          ],
+          decoration: InputDecoration(
+            hintText: 'DD/MM/AAAA',
+            suffixIcon: const Icon(Icons.calendar_today_outlined,
+                color: Colors.black54), //
+            counterText: '',
+            filled: true,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey[400]!),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey[400]!),
+            ),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          ),
+          validator: (value) {
+            // Validação de data opcional
+            if (value != null && value.isNotEmpty && value.length < 10) {
+              return "A data deve estar completa (DD/MM/AAAA)";
+            }
+            return null;
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSaidaItemDropdown() {
+    if (_isLoadingItems) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 8.0),
+        child: LinearProgressIndicator(),
+      );
+    }
+
+    return DropdownButtonFormField<InventoryItem>(
+      value: _selectedSaidaItem,
+      hint: const Text('Selecione um item'),
+      items: _itemsList.map((InventoryItem item) {
+        return DropdownMenuItem<InventoryItem>(
+          value: item,
+          child: Text(item.nome),
+        );
+      }).toList(),
+      onChanged: (InventoryItem? newValue) {
+        setState(() {
+          _selectedSaidaItem = newValue;
+        });
+      },
+      decoration: InputDecoration(
+        labelText: 'Item',
+        filled: true,
+        fillColor: const Color(0xFFF8F9FA),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey[400]!),
+        ),
+      ),
+    );
+  }
+
+  /// Constrói o Dropdown de Locais para a Saída
+  Widget _buildSaidaLocalOrigemDropdown() {
+    if (_isLoadingLocais) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return DropdownButtonFormField<SimpleLocation>(
+      value: _selectedSaidaLocalOrigem,
+      hint: const Text('Selecione o local de origem'),
+      items: _locaisList.map((SimpleLocation local) {
+        return DropdownMenuItem<SimpleLocation>(
+          value: local,
+          child: Text(local.nome),
+        );
+      }).toList(),
+      onChanged: (SimpleLocation? newValue) {
+        setState(() {
+          _selectedSaidaLocalOrigem = newValue;
+        });
+      },
+      decoration: InputDecoration(
+        labelText: 'Local de Origem',
+        filled: true,
+        fillColor: const Color(0xFFF8F9FA),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey[400]!),
+        ),
+      ),
+    );
+  }
+
   /// Botões de ação do formulário
   Widget _buildFormButtons(
-      {required String primaryText, required VoidCallback onPrimaryPressed}) {
+      {required String primaryText,
+      required VoidCallback onPrimaryPressed,
+      VoidCallback? onCancelPressed}) {
     return Row(
       children: [
         OutlinedButton(
-          onPressed: () {
-            _limparFormularioEntrada();
-          },
+          onPressed: onCancelPressed,
           style: OutlinedButton.styleFrom(
             foregroundColor: Colors.grey[700],
             side: BorderSide(color: Colors.grey[400]!),

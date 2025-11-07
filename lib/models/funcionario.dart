@@ -13,10 +13,10 @@ class Funcionario {
 
   factory Funcionario.fromJson(Map<String, dynamic> json) {
     return Funcionario(
-      id: json['id'] as int,
-      nome: json['nome'] as String,
-      email: json['email'] as String,
-      cargo: json['cargo'] as String,
+      id: int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      nome: json['nome'] ?? '',
+      email: json['email'] ?? '',
+      cargo: json['cargo'] ?? '',
     );
   }
 }

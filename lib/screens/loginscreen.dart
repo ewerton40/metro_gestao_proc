@@ -16,28 +16,29 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController senhaController = TextEditingController();
 
+  // Em: lib/screens/loginscreen.dart
+
   Future<void> fazerLogin() async {
     String email = emailController.text.trim();
     String senha = senhaController.text.trim();
+
     final authService = Provider.of<AuthServices>(context, listen: false);
 
     try {
-      final response = await authService.loginRequest(email, senha); 
-
-      if (response['success']) {
-        final nome = response['data']['nome'];
-        Provider.of<UserProvider>(context, listen: false).setFullName(nome); 
-
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => const DashboardScreen())); 
-        print('Login realizado com sucesso: $response'); 
+      await authService.loginRequest(email, senha);
+      if (authService.estaLogado) {
+        final nome = authService.usuario?.nome ?? 'Nome não encontrado';
+        Provider.of<UserProvider>(context, listen: false).setFullName(nome);
+        Navigator.push(context, MaterialPageRoute(builder: (context) => const DashboardScreen()));
+        print('Login realizado com sucesso: $nome');
+      
+      } else {
+        throw Exception('Ocorreu um erro desconhecido no login.');
       }
     } catch (e) {
-      print('Erro no login: $e'); //
+      print('Erro no login: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro no login: $e')), 
+        SnackBar(content: Text('Erro no login: $e')),
       );
     }
   }

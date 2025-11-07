@@ -320,8 +320,85 @@ Future<List<Map<String, dynamic>>> getCriticalItems() async {
       rethrow;
     }
   }
-}
 
+  Future<int> registerSaida({
+    required int idMaterial,
+    required int quantidade,
+    required int idLocalOrigem,
+    required int idFuncionario,
+    required String observacao,
+  }) async {
+    
+    await connection.execute('START TRANSACTION');
+
+    try {
+      final resultBase = await connection.execute(
+        'SELECT id_base FROM locais_estoque WHERE id_local = :idLocal',
+        {'idLocal': idLocalOrigem},
+      );
+      
+      if (resultBase.numOfRows == 0) {
+        throw Exception('Local de origem não encontrado ou não associado a uma base.');
+      }
+      final int idBase = int.parse(resultBase.rows.first.assoc()['id_base']!);
+
+      final resultEstoque = await connection.execute(
+        '''
+        SELECT quantidade FROM estoque
+        WHERE id_base = :base AND id_material = :material
+        FOR UPDATE
+        ''',
+        {'base': idBase, 'material': idMaterial},
+      );
+
+      int estoqueAtual = 0;
+      if (resultEstoque.numOfRows > 0) {
+        estoqueAtual = int.parse(resultEstoque.rows.first.assoc()['quantidade']!);
+      }
+
+      if (estoqueAtual < quantidade) {
+        // Se não tiver estoque, desfaz a transação e retorna erro
+        await connection.execute('ROLLBACK');
+        throw Exception('Estoque insuficiente. Disponível: $estoqueAtual, Solicitado: $quantidade');
+      }
+
+      await connection.execute(
+        '''
+        UPDATE estoque 
+        SET quantidade = quantidade - :qtd
+        WHERE id_base = :base AND id_material = :material
+        ''',
+        {'qtd': quantidade, 'base': idBase, 'material': idMaterial},
+      );
+
+      final resultMov = await connection.execute(
+        '''
+        INSERT INTO movimentacoes 
+        (id_material, quantidade, id_local_origem, id_funcionario_responsavel, observacao, tipo_movimentacao, id_local_destino)
+        VALUES (:id, :qtd, :origem, :func, :obs, :tipo, NULL)
+        ''',
+        {
+          'id': idMaterial,
+          'qtd': quantidade,
+          'origem': idLocalOrigem,
+          'func': idFuncionario,
+          'obs': observacao,
+          'tipo': 'saida',
+        },
+      );
+
+      await connection.execute('COMMIT');
+      
+      // Retorna o ID da movimentação que acabou de ser criada
+      return resultMov.lastInsertID.toInt();
+
+    } catch (e) {
+      await connection.execute('ROLLBACK');
+      print('Erro na transação de SAÍDA: $e');
+      rethrow; 
+    }
+  }
+}
 
 
 
