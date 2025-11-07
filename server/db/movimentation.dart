@@ -6,7 +6,24 @@ class MovementsQuant{
   final int saidas;
   
   MovementsQuant({required this.entradas, required this.saidas});
+  
+  Map<String, dynamic> toJson() {
+    return {
+      'entradas': entradas,
+      'saidas': saidas,
+    };
   }
+}
+
+class TopMaterial {
+  final String nome;
+  final int totalSaidas;
+
+  TopMaterial({
+    required this.nome,
+    required this.totalSaidas,
+  });
+}
 
 
 class MovimentationDAO {
@@ -129,7 +146,7 @@ class MovimentationDAO {
     }
   }
 
-  Future<MovementsQuant?> MovementsToday() async{
+  Future<MovementsQuant?> movementsToday() async{
     String sqlQuery = '''
       SELECT
       SUM(CASE WHEN tipo_movimentacao = 'entrada' THEN 1 ELSE 0 END) AS entradas,
@@ -144,7 +161,7 @@ class MovimentationDAO {
       }
       final data = result.rows.first.assoc();
       final entradas = int.tryParse(data['entradas'] ?? '0') ?? 0;
-      final saidas = int.tryParse(data['saidas'] ?? '0') ?? 0;
+      final saidas = int.tryParse(data['saidas'] ?? '0') ?? 1;
 
       return MovementsQuant(entradas: entradas, saidas: saidas);
     }catch(e){
@@ -153,9 +170,37 @@ class MovimentationDAO {
     }
 
   }
+
+  Future<List<TopMaterial>> getTopFiveUsedMaterials() async {
+  const String sqlQuery = '''
+    SELECT 
+        m.nome AS material,
+        COUNT(*) AS total_saidas
+    FROM movimentacoes mov
+    JOIN materiais m ON mov.id_material = m.id_material
+    WHERE mov.tipo_movimentacao = 'saida'
+    GROUP BY m.id_material
+    ORDER BY total_saidas DESC
+    LIMIT 5;
+  ''';
+
+  try {
+    final result = await connection.execute(sqlQuery);
+
+    if (result.numOfRows == 0) {
+      return [];
+    }
+
+    return result.rows.map((row) {
+      final data = row.assoc();
+      return TopMaterial(
+        nome: data['material'] ?? '',
+        totalSaidas: int.tryParse(data['total_saidas'] ?? '0') ?? 0,
+      );
+    }).toList();
+  } catch (e) {
+    print("Erro ao buscar os materiais mais usados: $e");
+    return [];
+  }
 }
-
-
-
-
-
+}

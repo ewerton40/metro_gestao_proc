@@ -102,7 +102,7 @@ Future<List<Category>> getAllCategories() async {
   }
 
   Future<int> getLowStockCount() async {
-  final url = Uri.parse('$_baseUrl/inventory/low_stock');
+  final url = Uri.parse('$_baseUrl/inventory/lowstock');
   final response = await http.get(url);
 
   if (response.statusCode == 200) {

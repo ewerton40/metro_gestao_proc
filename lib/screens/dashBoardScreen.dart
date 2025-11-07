@@ -15,12 +15,11 @@ class MovementsToday {
 
   factory MovementsToday.fromJson(Map<String, dynamic> json) {
     return MovementsToday(
-      entradas: json['entradas'] ?? 0,
-      saidas: json['saidas'] ?? 0,
+      entradas: json['entradas'],
+      saidas: json['saidas'],
     );
   }
 }
-
 
 
 class DashboardScreen extends StatefulWidget {
@@ -261,8 +260,8 @@ Future<void> _loadCriticalItems() async {
   }
 
   Widget _buildBottomInfoCards(BuildContext context) {
-  final entradas = _movementsToday?.entradas ?? 0;
-  final saidas = _movementsToday?.saidas ?? 0;
+  final entradas = _movementsToday?.entradas;
+  final saidas = _movementsToday?.saidas;
 
   return Row(
     crossAxisAlignment: CrossAxisAlignment.start,
