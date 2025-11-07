@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../screens/inventoryscreen.dart';
-
-
+import '../models/location.dart';
 
 class InventoryServices {
   final _baseUrl = 'http://localhost:8080';
@@ -37,6 +36,43 @@ Future<List<Category>> getAllCategories() async {
   }
 }
     
+  Future<Map<String, dynamic>> registerMovement({
+    required int idMaterial,
+    required int quantidade,
+    required int idLocalDestino,
+    required int idFuncionario,
+    required String observacao,
+  }) async {
+    
+    final url = Uri.parse('$_baseUrl/movimentations/add');
+
+    final body = jsonEncode({
+      'id_material': idMaterial,
+      'quantidade': quantidade,
+      'id_local_destino': idLocalDestino,
+      'id_funcionario': idFuncionario, // Você precisa pegar o ID do usuário logado
+      'observacao': observacao,
+    });
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      } else {
+        // Tenta decodificar a mensagem de erro do servidor
+        final errorBody = jsonDecode(response.body);
+        throw Exception('Falha ao registrar: ${errorBody['message']}');
+      }
+    } catch (e) {
+      throw Exception('Erro de conexão: $e');
+    }
+  }
+
 
 
  Future<Map<String, dynamic>> addItem(InventoryItem item) async {
@@ -117,5 +153,17 @@ Future<List<Map<String, dynamic>>> getCriticalItems() async {
   }
 }
 
+  Future<List<SimpleLocation>> getAllLocations() async {
+    final url = Uri.parse('$_baseUrl/locations'); 
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+      final List<dynamic> data = jsonResponse['data'] ?? [];
+      return data.map((item) => SimpleLocation.fromJson(item)).toList();
+    } else {
+      throw Exception('Falha ao buscar locais');
+    }
+  }
 }
 

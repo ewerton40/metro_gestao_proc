@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/screens/CadastroMaterialScreen.dart';
 import '../services/inventory_service.dart';

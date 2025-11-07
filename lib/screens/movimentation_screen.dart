@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
+import '../services/inventory_service.dart'; 
+import '../models/location.dart';
 
 class MovimentacaoScreen extends StatefulWidget {
-  const MovimentacaoScreen({super.key});
+  const MovimentacaoScreen({super.key}); //
 
   @override
   State<MovimentacaoScreen> createState() => _MovimentacaoScreenState();
@@ -12,8 +14,58 @@ class MovimentacaoScreen extends StatefulWidget {
 class _MovimentacaoScreenState extends State<MovimentacaoScreen> with TickerProviderStateMixin {
   
   // Variáveis de estado para os dropdowns do formulário de Saída
-  String? _selectedDestino;
-  String? _selectedMotivo;
+  String? _selectedDestino; //
+  String? _selectedMotivo; //
+
+  // === INÍCIO DAS MUDANÇAS (VARIÁVEIS DE ESTADO) ===
+
+  final _inventoryService = InventoryServices(); // Instancia o serviço
+
+  // Controladores para os campos de texto da Entrada
+  final _entradaItemController = TextEditingController();
+  final _entradaQtdController = TextEditingController();
+  final _entradaResponsavelController = TextEditingController();
+  final _entradaObsController = TextEditingController();
+
+  // Variáveis para o dropdown de Locais (Base de Destino)
+  List<SimpleLocation> _locaisList = [];
+  SimpleLocation? _selectedLocal; // Armazena o objeto Local selecionado
+  bool _isLoadingLocais = true;
+
+  // Variável de estado de carregamento para o botão Salvar
+  bool _isLoadingEntrada = false;
+
+  // === FIM DAS MUDANÇAS ===
+
+  // === INÍCIO DAS MUDANÇAS (CARREGAMENTO DE DADOS) ===
+  @override
+  void initState() {
+    super.initState();
+    _loadDropdownData();
+  }
+
+  /// Carrega os dados necessários para os dropdowns do formulário
+  Future<void> _loadDropdownData() async {
+    try {
+      // Carrega os locais do seu serviço
+      // (Você pode adicionar o carregamento de Itens aqui também)
+      final locations = await _inventoryService.getAllLocations();
+      setState(() {
+        _locaisList = locations;
+        _isLoadingLocais = false;
+      });
+    } catch (e) {
+      print("Erro ao carregar locais: $e");
+      setState(() {
+        _isLoadingLocais = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao carregar locais: $e'), backgroundColor: Colors.red),
+      );
+    }
+  }
+  // === FIM DAS MUDANÇAS ===
+
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +112,7 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen> with TickerProv
                   ),
                   child: TabBarView(
                     children: [
-                      _buildEntradaForm(),
+                      _buildEntradaForm(), // <-- MODIFICADO
                       _buildSaidaForm(),
                     ],
                   ),
@@ -73,6 +125,8 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen> with TickerProv
     );
   }
 
+  // === INÍCIO DAS MUDANÇAS (FORMULÁRIO DE ENTRADA) ===
+
   /// Constrói o formulário de "Registrar Entrada"
   Widget _buildEntradaForm() {
     return SingleChildScrollView(
@@ -81,23 +135,151 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen> with TickerProv
         children: [
           Text('Registrar Entrada', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 24),
-          _buildFormTextFieldWithIcon(label: 'Item', icon: Icons.search),
+
+          // TODO: Substituir por um Dropdown/Busca de Itens
+          _buildFormTextField(
+            label: 'Item (ID)', 
+            controller: _entradaItemController, 
+            keyboardType: TextInputType.number
+          ),
           const SizedBox(height: 16),
-          _buildFormSelectionField(label: 'Quantidade'),
+          
+          _buildFormTextField(
+            label: 'Quantidade', 
+            controller: _entradaQtdController, 
+            keyboardType: TextInputType.number
+          ),
           const SizedBox(height: 16),
-          _buildFormSelectionField(label: 'Base de destino'),
+          
+          // Campo de "Base de Destino" substituído pelo Dropdown
+          _buildLocalDropdown(),
           const SizedBox(height: 16),
-          _buildFormTextFieldWithIcon(label: 'Data de entrada', icon: Icons.calendar_today_outlined),
+          
+          // TODO: Substituir por um DatePicker
+          //_buildFormTextFieldWithIcon(label: 'Data de entrada', icon: Icons.calendar_today_outlined),
+          //const SizedBox(height: 16),
+          
+          // TODO: Pegar o ID do usuário logado automaticamente
+          _buildFormTextField(
+            label: 'Responsável (ID)', 
+            controller: _entradaResponsavelController, 
+            keyboardType: TextInputType.number
+          ),
           const SizedBox(height: 16),
-          _buildFormTextField(label: 'Responsável'),
-          const SizedBox(height: 16),
-          _buildFormTextField(label: 'Observações', maxLines: 3),
+          
+          _buildFormTextField(
+            label: 'Observações', 
+            controller: _entradaObsController, 
+            maxLines: 3
+          ),
           const SizedBox(height: 24),
-          _buildFormButtons(primaryText: 'Salvar Entrada', onPrimaryPressed: () {}),
+          
+          // Botão de salvar agora com lógica de loading
+          _isLoadingEntrada
+            ? const Center(child: CircularProgressIndicator())
+            : _buildFormButtons(
+                primaryText: 'Salvar Entrada', 
+                onPrimaryPressed: _salvarEntrada, // <-- CONECTADO
+              ),
         ],
       ),
     );
   }
+
+  /// Constrói o Dropdown de Locais
+  Widget _buildLocalDropdown() {
+    if (_isLoadingLocais) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return DropdownButtonFormField<SimpleLocation>(
+      value: _selectedLocal,
+      hint: const Text('Selecione uma base de destino'),
+      // Mapeia a lista de objetos SimpleLocation para os Itens do Dropdown
+      items: _locaisList.map((SimpleLocation local) {
+        return DropdownMenuItem<SimpleLocation>(
+          value: local,
+          child: Text(local.nome), // Mostra o nome (ex: "Jabaquara - Prateleira A")
+        );
+      }).toList(),
+      onChanged: (SimpleLocation? newValue) {
+        setState(() {
+          _selectedLocal = newValue; // Armazena o local selecionado
+        });
+      },
+      decoration: InputDecoration(
+        labelText: 'Base de destino',
+        filled: true,
+        fillColor: const Color(0xFFF8F9FA),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey[400]!),
+        ),
+      ),
+      validator: (value) => value == null ? 'Campo obrigatório' : null,
+    );
+  }
+  
+  /// Função chamada pelo botão "Salvar Entrada"
+  Future<void> _salvarEntrada() async {
+    // Trava o formulário
+    setState(() => _isLoadingEntrada = true);
+
+    try {
+      // Validação
+      if (_entradaItemController.text.isEmpty || 
+          _entradaQtdController.text.isEmpty || 
+          _selectedLocal == null || 
+          _entradaResponsavelController.text.isEmpty) {
+        
+        throw Exception('Preencha todos os campos obrigatórios.');
+      }
+
+      // 1. Coletar os dados
+      final int idMaterial = int.parse(_entradaItemController.text);
+      final int quantidade = int.parse(_entradaQtdController.text);
+      final int idLocalDestino = _selectedLocal!.id; // Pega o ID do dropdown
+      final int idFuncionario = int.parse(_entradaResponsavelController.text);
+      final String observacao = _entradaObsController.text;
+
+      // 2. Chamar o serviço
+      final response = await _inventoryService.registerMovement(
+        idMaterial: idMaterial,
+        quantidade: quantidade,
+        idLocalDestino: idLocalDestino,
+        idFuncionario: idFuncionario,
+        observacao: observacao,
+      );
+
+      // 3. Processar a resposta
+      if (response['success'] == true) {
+        // Deu certo! Limpa os campos
+        _entradaItemController.clear();
+        _entradaQtdController.clear();
+        _entradaResponsavelController.clear();
+        _entradaObsController.clear();
+        setState(() {
+          _selectedLocal = null;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Entrada registrada com sucesso!'), backgroundColor: Colors.green),
+        );
+      } else {
+        throw Exception(response['message']);
+      }
+
+    } catch (e) {
+      // Mostra o erro para o usuário
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao salvar: $e'), backgroundColor: Colors.red),
+      );
+    }
+    // Libera o formulário
+    setState(() => _isLoadingEntrada = false);
+  }
+
+  // === FIM DAS MUDANÇAS ===
 
   /// Constrói o formulário de "Registrar Saída"
   Widget _buildSaidaForm() {
@@ -139,17 +321,27 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen> with TickerProv
     );
   }
 
+  // === INÍCIO DAS MUDANÇAS (WIDGET HELPER) ===
 
-  /// Campo de texto simples
-  Widget _buildFormTextField({required String label, int maxLines = 1}) {
+  /// Campo de texto simples (Modificado para aceitar Controller, etc.)
+  Widget _buildFormTextField({
+    required String label, 
+    int maxLines = 1, 
+    TextEditingController? controller,
+    TextInputType? keyboardType,
+    String? hint,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.black54)),
         const SizedBox(height: 8),
         TextFormField(
+          controller: controller, // <-- Adicionado
+          keyboardType: keyboardType, // <-- Adicionado
           maxLines: maxLines,
           decoration: InputDecoration(
+            hintText: hint, // <-- Adicionado
             filled: true,
             fillColor: const Color(0xFFF8F9FA),
             border: OutlineInputBorder(
@@ -165,6 +357,8 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen> with TickerProv
       ],
     );
   }
+  
+  // === FIM DAS MUDANÇAS ===
 
   /// Campo de texto com ícone (para pesquisa ou data)
   Widget _buildFormTextFieldWithIcon({required String label, required IconData icon}) {
