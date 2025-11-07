@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class DetalheItemScreen extends StatelessWidget {
+  const DetalheItemScreen({super.key});
   final bool disponivel = true;
 
   @override

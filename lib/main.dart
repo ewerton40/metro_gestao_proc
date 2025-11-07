@@ -14,12 +14,16 @@ import 'package:metro_projeto/screens/reportscreen.dart';
 import 'package:metro_projeto/screens/usermanagementscreen.dart';
 import 'package:metro_projeto/screens/detalhe_item_screen.dart';
 import 'package:provider/provider.dart';
+import 'services/auth_services.dart';
 
 void main() {
   runApp(
     MultiProvider(
     providers: [
-      ChangeNotifierProvider(create: (_) => UserProvider())],
+      ChangeNotifierProvider(create: (_) => UserProvider()),
+      ChangeNotifierProvider(create: (_) => AuthServices()),
+      ],
+      
       child: const MyApp()
   ),
   );
@@ -36,7 +40,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const DashboardScreen(),
+      home: const MovimentacaoScreen(),
     );
   }
 }
