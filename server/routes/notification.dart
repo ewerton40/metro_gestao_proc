@@ -1,7 +1,7 @@
 import 'package:dart_frog/dart_frog.dart';
 import '../controllers/notification_controller.dart';
 
-Response onRequest(RequestContext context) {
+Future<Response> onRequest(RequestContext context) async{
 if (context.request.method == HttpMethod.get){
   return notificationHandler(context);
 }

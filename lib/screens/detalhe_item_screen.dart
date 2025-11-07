@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class DetalheItemScreen extends StatelessWidget {
-  final bool disponivel = true; // Troque para false para testar o status vermelho
+  final bool disponivel = true;
 
   @override
   Widget build(BuildContext context) {

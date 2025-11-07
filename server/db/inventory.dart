@@ -201,5 +201,97 @@ class InventoryDAO {
       print("Erro ao buscar Movimentacoes de hoje :$e");
     }
   }
+
+  Future<int> registerMovement({
+    required int idMaterial,
+    required int quantidade,
+    required int idLocalDestino,
+    required int idFuncionario,
+    required String observacao,
+  }) async {
+    
+    await connection.execute('START TRANSACTION');
+
+    try {
+      final resultMov = await connection.execute(
+        '''
+        INSERT INTO movimentacoes 
+        (id_material, quantidade, id_local_destino, id_funcionario_responsavel, observacao, tipo_movimentacao, id_local_origem)
+        VALUES (:id, :qtd, :destino, :func, :obs, :tipo, NULL)
+        ''',
+        {
+          'id': idMaterial,
+          'qtd': quantidade,
+          'destino': idLocalDestino,
+          'func': idFuncionario,
+          'obs': observacao,
+          'tipo': 'entrada', 
+        },
+      );
+
+      final resultBase = await connection.execute(
+        'SELECT id_base FROM locais_estoque WHERE id_local = :idLocal',
+        {'idLocal': idLocalDestino},
+      );
+      
+      if (resultBase.numOfRows == 0) {
+        throw Exception('Local de destino não encontrado ou não associado a uma base.');
+      }
+      final int idBase = int.parse(resultBase.rows.first.assoc()['id_base']!);
+
+      await connection.execute(
+        '''
+        INSERT INTO estoque (id_base, id_material, quantidade)
+        VALUES (:base, :material, :qtd)
+        ON DUPLICATE KEY UPDATE quantidade = quantidade + :qtd
+        ''',
+        {
+          'base': idBase,
+          'material': idMaterial,
+          'qtd': quantidade,
+        },
+      );
+
+      await connection.execute('COMMIT');
+      
+      return resultMov.lastInsertID.toInt();
+
+    } catch (e) {
+      await connection.execute('ROLLBACK');
+      print('Erro na transação de movimento: $e');
+      rethrow; 
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getAllLocations() async {
+    try {
+      final result = await connection.execute(
+        '''
+        SELECT 
+          l.id_local, 
+          l.localizacao, 
+          b.nome_base 
+        FROM locais_estoque l
+        JOIN base b ON l.id_base = b.id_base
+        ORDER BY b.nome_base, l.localizacao;
+        '''
+      );
+      
+      if (result.numOfRows == 0) return [];
+
+      return result.rows.map((row) {
+        final data = row.assoc();
+        return {
+          'id': data['id_local'],
+          'nome': '${data['nome_base']} - ${data['localizacao']}',
+        };
+      }).toList();
+
+    } catch (e) {
+      print('Erro no DAO ao buscar locais: $e');
+      rethrow;
+    }
+  }
 }
+
 
