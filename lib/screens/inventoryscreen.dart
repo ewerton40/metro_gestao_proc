@@ -5,7 +5,7 @@ import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
 
 class InventoryItem {
-  final int code;
+  final int id;
   final String nome;
   final int categoriaId;
   
@@ -19,7 +19,7 @@ class InventoryItem {
   final String categoriaNome;
 
   InventoryItem({
-    required this.code,
+    required this.id,
     required this.nome,
     required this.categoriaId,
     
@@ -35,7 +35,7 @@ class InventoryItem {
 
   factory InventoryItem.fromJson(Map<String, dynamic> json) {
     return InventoryItem(
-      code: int.tryParse(json['id'].toString()) ?? 0,
+      id: int.tryParse(json['id'].toString()) ?? 0,
       
       nome: json['nome'] ?? '',
       
@@ -294,7 +294,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
         ],
         rows: items.map((item) {
           return DataRow(cells: [
-            DataCell(Text(item.code.toString())),
+            DataCell(Text(item.id.toString())),
             DataCell(Text(item.nome)),
             DataCell(Text(item.categoriaNome.isNotEmpty
                 ? item.categoriaNome

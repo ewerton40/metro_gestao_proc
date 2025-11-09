@@ -49,6 +49,23 @@ class MovimentationServices {
     rethrow;
   }
  }
+
+  Future<Map<String, dynamic>> getItemHistory(int idMaterial) async {
+  final url = Uri.parse('$_baseUrl/movimentations/itenshistory/$idMaterial');
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+    if (jsonResponse['success'] == true) {
+      return jsonResponse['data'];
+    } else {
+      throw Exception(jsonResponse['message'] ?? 'Erro ao buscar detalhes do item.');
+    }
+  } else {
+    throw Exception('Falha ao buscar detalhes do item: ${response.statusCode}');
+  }
 }
+}
+
 
 

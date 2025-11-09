@@ -165,5 +165,22 @@ Future<List<Map<String, dynamic>>> getCriticalItems() async {
       throw Exception('Falha ao buscar locais');
     }
   }
+
+
+  Future<Map<String, dynamic>> getItemDetail(int idMaterial) async {
+  final url = Uri.parse('$_baseUrl/inventory/itensdetails/$idMaterial');
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+    if (jsonResponse['success'] == true) {
+      return jsonResponse['data'];
+    } else {
+      throw Exception(jsonResponse['message'] ?? 'Erro ao buscar detalhes do item.');
+    }
+  } else {
+    throw Exception('Falha ao buscar detalhes do item: ${response.statusCode}');
+  }
+}
 }
 
