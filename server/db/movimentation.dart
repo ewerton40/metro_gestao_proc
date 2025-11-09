@@ -161,7 +161,7 @@ class MovimentationDAO {
       }
       final data = result.rows.first.assoc();
       final entradas = int.tryParse(data['entradas'] ?? '0') ?? 0;
-      final saidas = int.tryParse(data['saidas'] ?? '0') ?? 1;
+      final saidas = int.tryParse(data['saidas'] ?? '0') ?? 0;
 
       return MovementsQuant(entradas: entradas, saidas: saidas);
     }catch(e){

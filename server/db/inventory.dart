@@ -320,6 +320,44 @@ Future<List<Map<String, dynamic>>> getCriticalItems() async {
       rethrow;
     }
   }
+
+
+  Future<Map<String, dynamic>?> getItemDetail(int idMaterial) async {
+  const String sqlQuery = '''
+    SELECT 
+        m.nome AS nome_material,
+        m.id_material AS codigo,
+        c.nome_categoria AS categoria,
+        m.descricao,
+        m.qtd_alerta_baixo AS estoque_minimo,
+        e.quantidade AS quantidade,
+        CASE 
+            WHEN e.quantidade <= m.qtd_alerta_baixo THEN 'Crítico'
+            ELSE 'Disponível'
+        END AS status,
+        b.nome_base AS localizacao
+    FROM materiais m
+    JOIN categoria c ON m.id_categoria = c.id_categoria
+    LEFT JOIN estoque e ON e.id_material = m.id_material
+    LEFT JOIN base b ON e.id_base = b.id_base
+    WHERE m.id_material = :idMaterial;
+  ''';
+
+  try {
+    final result = await connection.execute(sqlQuery, {'idMaterial': idMaterial});
+
+     if (result.isEmpty || result.rows.isEmpty) {
+      return null;
+    }
+
+     final row = result.rows.firstOrNull?.typedAssoc();
+
+    return row;
+  } catch (e) {
+    print('Erro ao buscar detalhe do item: $e');
+    throw Exception('Falha ao acessar o banco de dados.');
+  }
+}
 }
 
 
