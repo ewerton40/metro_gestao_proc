@@ -28,9 +28,11 @@ Future<List<Category>> getAllCategories() async {
 
   if (response.statusCode == 200) {
     final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-    final List<dynamic> data = jsonResponse['data']; 
-  
-    
+    final List<dynamic> data = jsonResponse['data'];
+    return data.map((item) => Category.fromJson(item)).toList();
+  } else {
+    throw Exception('Falha ao buscar categorias: ${response.statusCode} - ${response.body}');
+  }
 }
 
 
