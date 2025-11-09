@@ -10,4 +10,13 @@ class SimpleLocation {
       nome: json['nome'] as String,
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is SimpleLocation && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
 }

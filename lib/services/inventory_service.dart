@@ -7,8 +7,13 @@ class InventoryServices {
   final _baseUrl = 'http://localhost:8080';
 
 
-  Future<List<InventoryItem>> getAllItems() async {
-    final url = Uri.parse('$_baseUrl/inventory/all');
+  Future<List<InventoryItem>> getAllItems({int? baseId}) async { 
+    
+    var urlString = '$_baseUrl/inventory/all';
+    if (baseId != null) {
+      urlString += '?baseId=$baseId'; 
+    }
+    final url = Uri.parse(urlString);
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
