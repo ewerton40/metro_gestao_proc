@@ -203,4 +203,66 @@ class MovimentationDAO {
     return [];
   }
 }
+
+Future<Map<String, dynamic>> getItemHistory(int idMaterial) async {
+const String sqlItem = '''
+   SELECT 
+      m.id_material AS id,
+      m.nome AS nome_material,
+      m.descricao,
+      c.nome_categoria AS categoria,
+      m.qtd_alerta_baixo AS estoque_minimo,
+      e.quantidade,
+      CASE 
+          WHEN e.quantidade <= m.qtd_alerta_baixo THEN 'Crítico'
+          ELSE 'Normal'
+      END AS status,
+      m.id_medida,
+      m.id_categoria
+    FROM materiais m
+    LEFT JOIN categoria c ON m.id_categoria = c.id_categoria
+    LEFT JOIN (
+        SELECT id_material, SUM(quantidade) AS quantidade
+        FROM estoque
+        GROUP BY id_material
+    ) e ON m.id_material = e.id_material
+    WHERE m.id_material = :idMaterial;
+  ''';
+
+  const String sqlMovimentacoes = '''
+    SELECT 
+        DATE_FORMAT(mv.data_movimentacao, '%d/%m/%Y') AS data,
+        CASE 
+            WHEN mv.tipo_movimentacao = 'entrada' THEN 'Entrada'
+            WHEN mv.tipo_movimentacao = 'saida' THEN 'Saída'
+            ELSE mv.tipo_movimentacao
+        END AS tipo,
+        mv.quantidade,
+        f.nome AS responsavel
+    FROM movimentacoes mv
+    LEFT JOIN funcionario f ON mv.id_funcionario_responsavel = f.id_funcionario
+    WHERE mv.id_material = :idMaterial
+    ORDER BY mv.data_movimentacao DESC;
+  ''';
+
+  try {
+    final resultItem = await connection.execute(sqlItem, {'idMaterial': idMaterial});
+    if (resultItem.numOfRows == 0) {
+      throw Exception('Item não encontrado');
+    }
+
+    final item = Map<String, dynamic>.from(resultItem.rows.first.assoc()) ;
+
+
+    final resultMov = await connection.execute(sqlMovimentacoes, {'idMaterial': idMaterial});
+    final movimentacoes = resultMov.rows.map((row) => row.assoc()).toList();
+
+    item['movimentacoes'] = movimentacoes;
+
+    return item;
+  } catch (e) {
+    print('Erro ao buscar detalhes do item: $e');
+    throw Exception('Falha ao buscar detalhes do item.');
+  }
+}
 }

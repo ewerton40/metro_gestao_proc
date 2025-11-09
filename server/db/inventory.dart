@@ -337,7 +337,7 @@ Future<List<Map<String, dynamic>>> getCriticalItems() async {
         END AS status,
         b.nome_base AS localizacao
     FROM materiais m
-    JOIN categoria c ON m.id_categoria = c.id_categoria
+    LEFT JOIN categoria c ON m.id_categoria = c.id_categoria
     LEFT JOIN estoque e ON e.id_material = m.id_material
     LEFT JOIN base b ON e.id_base = b.id_base
     WHERE m.id_material = :idMaterial;
