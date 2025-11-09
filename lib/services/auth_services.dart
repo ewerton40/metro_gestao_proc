@@ -80,4 +80,67 @@ class AuthServices with ChangeNotifier {
       throw Exception('Erro de conexão ao cadastrar: $e');
     }
   }
+
+  Future<List<Funcionario>> getAllUsers() async {
+    final url = Uri.parse('$_baseUrl/users');
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+
+        if (responseBody['success'] == true) {
+          final List<dynamic> data = responseBody['data'];
+          return data.map((json) => Funcionario.fromJson(json)).toList();
+        } else {
+          throw Exception(responseBody['message']);
+        }
+      } else {
+        throw Exception('Falha ao buscar usuários: ${response.statusCode}');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+Future<Map<String, dynamic>> updateUser({
+    required int id,
+    required String nome,
+    required String email,
+    required String cargo,
+    String? senha, 
+  }) async {
+    
+    final url = Uri.parse('$_baseUrl/users/$id'); 
+
+    Map<String, dynamic> bodyMap = {
+      'nome': nome,
+      'email': email,
+      'cargo': cargo,
+    };
+
+    // Só adiciona a senha ao JSON se ela não for nula ou vazia
+    if (senha != null && senha.isNotEmpty) {
+      bodyMap['senha'] = senha;
+    }
+
+    final body = jsonEncode(bodyMap);
+
+    try {
+      final response = await http.put( 
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
+
+      final responseBody = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return responseBody as Map<String, dynamic>;
+      } else {
+        throw Exception(responseBody['message']);
+      }
+    } catch (e) {
+      throw Exception('Erro de conexão ao atualizar: $e');
+    }
+  }
 }

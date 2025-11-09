@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
 import '../services/auth_services.dart';
+import '../models/funcionario.dart';
 
 class UserRegistrationScreen extends StatefulWidget {
-  const UserRegistrationScreen({super.key});
+  final Funcionario? usuarioParaEditar;
+  const UserRegistrationScreen({super.key, this.usuarioParaEditar});
 
   @override
   State<UserRegistrationScreen> createState() => _UserRegistrationScreenState();
@@ -27,6 +29,20 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
   final _authService = AuthServices();
   bool _isLoading = false;
 
+  bool get _isEditing => widget.usuarioParaEditar != null;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (_isEditing) {
+      final user = widget.usuarioParaEditar!;
+      _nameController.text = user.nome;
+      _emailController.text = user.email;
+      _selectedRole = user.cargo;
+    }
+  }
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -48,8 +64,8 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Cadastro de Usuário',
+               Text(
+                _isEditing ? 'Editar Usuário' : 'Cadastro de Usuário',
                 style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -271,7 +287,8 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8)),
                 ),
-                child: const Text('Salvar Usuário'),
+                child: Text(
+                    _isEditing ? 'Salvar Alterações' : 'Salvar Usuário'),
               ),
         const SizedBox(width: 16),
         OutlinedButton(
@@ -294,41 +311,69 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // Validação
-      if (_nameController.text.isEmpty ||
-          _emailController.text.isEmpty ||
-          _passwordController.text.isEmpty ||
-          _confirmPasswordController.text.isEmpty) {
-        throw Exception('Todos os campos são obrigatórios.');
+      if (_nameController.text.isEmpty || _emailController.text.isEmpty) {
+        throw Exception('Nome e E-mail são obrigatórios.');
       }
       if (_selectedRole == null) {
         throw Exception('Selecione um privilégio.');
       }
-      if (_passwordController.text != _confirmPasswordController.text) {
-        throw Exception('As senhas não conferem.');
+
+      final senha = _passwordController.text;
+      final confirmarSenha = _confirmPasswordController.text;
+
+      if (_isEditing) {
+        if (senha.isNotEmpty && senha != confirmarSenha) {
+          throw Exception('As senhas não conferem.');
+        }
+      } else {
+        if (senha.isEmpty || confirmarSenha.isEmpty) {
+          throw Exception('A senha é obrigatória.');
+        }
+        if (senha != confirmarSenha) {
+          throw Exception('As senhas não conferem.');
+        }
       }
 
-      // Coleta de Dados
-      final response = await _authService.registerUser(
-        nome: _nameController.text,
-        email: _emailController.text,
-        senha: _passwordController.text,
-        confirmarSenha: _confirmPasswordController.text,
-        cargo: _selectedRole!,
-      );
-
-      // Resposta
-      if (response['success'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content:
-                  Text('Usuário cadastrado com sucesso! ID: ${response['id']}'),
-              backgroundColor: Colors.green),
+      if (_isEditing) {
+        final response = await _authService.updateUser(
+          id: widget
+              .usuarioParaEditar!.id, 
+          nome: _nameController.text,
+          email: _emailController.text,
+          cargo: _selectedRole!,
+          senha: senha, 
         );
-        // Limpa o formulário
-        _limparCampos();
+
+        if (response['success'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Usuário atualizado com sucesso!'),
+                backgroundColor: Colors.green),
+          );
+          Navigator.of(context).pop();
+        } else {
+          throw Exception(response['message']);
+        }
       } else {
-        throw Exception(response['message']);
+        final response = await _authService.registerUser(
+          nome: _nameController.text,
+          email: _emailController.text,
+          senha: senha,
+          confirmarSenha: confirmarSenha,
+          cargo: _selectedRole!,
+        );
+
+        if (response['success'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(
+                    'Usuário cadastrado com sucesso! ID: ${response['id']}'),
+                backgroundColor: Colors.green),
+          );
+          _limparCampos(); // Limpa o formulário após cadastrar
+        } else {
+          throw Exception(response['message']);
+        }
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
