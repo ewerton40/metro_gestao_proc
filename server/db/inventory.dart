@@ -358,31 +358,45 @@ Future<List<Map<String, dynamic>>> getCriticalItems() async {
 
       final resultEstoque = await connection.execute(
         '''
-        SELECT quantidade FROM estoque
-        WHERE id_base = :base AND id_material = :material
+        SELECT 
+          e.quantidade, 
+          m.qtd_alerta_baixo,
+          m.nome
+        FROM estoque e
+        JOIN materiais m ON e.id_material = m.id_material
+        WHERE e.id_base = :base AND e.id_material = :material
         FOR UPDATE
         ''',
         {'base': idBase, 'material': idMaterial},
       );
 
       int estoqueAtual = 0;
+      int limiteBaixo = 0;
+      String nomeMaterial = '';
+
       if (resultEstoque.numOfRows > 0) {
-        estoqueAtual = int.parse(resultEstoque.rows.first.assoc()['quantidade']!);
+        final data = resultEstoque.rows.first.assoc();
+        estoqueAtual = int.parse(data['quantidade']!);
+        limiteBaixo = int.parse(data['qtd_alerta_baixo']!);
+        nomeMaterial = data['nome']!;
       }
 
       if (estoqueAtual < quantidade) {
         await connection.execute('ROLLBACK');
         throw Exception('Estoque insuficiente. Disponível: $estoqueAtual, Solicitado: $quantidade');
       }
+      
+      final int novoEstoque = estoqueAtual - quantidade;
 
       await connection.execute(
         '''
         UPDATE estoque 
-        SET quantidade = quantidade - :qtd
+        SET quantidade = :novoEstoque
         WHERE id_base = :base AND id_material = :material
         ''',
-        {'qtd': quantidade, 'base': idBase, 'material': idMaterial},
+        {'novoEstoque': novoEstoque, 'base': idBase, 'material': idMaterial},
       );
+
 
       final resultMov = await connection.execute(
         '''
@@ -400,6 +414,27 @@ Future<List<Map<String, dynamic>>> getCriticalItems() async {
         },
       );
 
+      final newMovementId = resultMov.lastInsertID.toInt();
+
+      if (limiteBaixo > 0 && novoEstoque <= limiteBaixo) {
+        final String mensagem = 
+          'Estoque baixo para o item "$nomeMaterial". '
+          'Quantidade atual: $novoEstoque (Limite: $limiteBaixo).';
+          
+        await connection.execute(
+          '''
+          INSERT INTO notificacoes 
+          (mensagem, id_material_relacionado, id_movimentacao_relacionada)
+          VALUES (:msg, :idMat, :idMov)
+          ''',
+          {
+            'msg': mensagem,
+            'idMat': idMaterial,
+            'idMov': newMovementId,
+          }
+        );
+      }
+
       await connection.execute('COMMIT');
       
       return resultMov.lastInsertID.toInt();
@@ -408,6 +443,82 @@ Future<List<Map<String, dynamic>>> getCriticalItems() async {
       await connection.execute('ROLLBACK');
       print('Erro na transação de SAÍDA: $e');
       rethrow; 
+    }
+  }
+  Future<List<Map<String, dynamic>>> getMovimentacoesReport() async {
+    const String sqlQuery = '''
+      SELECT 
+          mov.id_movimentacao,
+          mov.data_movimentacao,
+          mat.nome AS nome_material,
+          mov.quantidade,
+          mov.tipo_movimentacao,
+          func.nome AS nome_funcionario,
+          COALESCE(orig.localizacao, 'N/A') AS local_origem,
+          COALESCE(dest.localizacao, 'N/A') AS local_destino,
+          mov.observacao
+      FROM movimentacoes AS mov
+      JOIN materiais AS mat ON mov.id_material = mat.id_material
+      JOIN funcionario AS func ON mov.id_funcionario_responsavel = func.id_funcionario
+      LEFT JOIN locais_estoque AS orig ON mov.id_local_origem = orig.id_local
+      LEFT JOIN locais_estoque AS dest ON mov.id_local_destino = dest.id_local
+      ORDER BY mov.data_movimentacao DESC
+      LIMIT 100;
+    '''; 
+
+    try {
+      final result = await connection.execute(sqlQuery);
+      if (result.numOfRows == 0) return [];
+
+      return result.rows.map((row) {
+        final data = row.assoc();
+        return {
+          'id': int.tryParse(data['id_movimentacao'] ?? '0') ?? 0,
+          // Formata a data
+          'data': data['data_movimentacao']?.substring(0, 16) ?? '', 
+          'material': data['nome_material'] ?? '',
+          'quantidade': int.tryParse(data['quantidade'] ?? '0') ?? 0,
+          'tipo': data['tipo_movimentacao'] ?? '',
+          'funcionario': data['nome_funcionario'] ?? '',
+          'origem': data['local_origem'] ?? 'N/A',
+          'destino': data['local_destino'] ?? 'N/A',
+          'observacao': data['observacao'] ?? '',
+        };
+      }).toList();
+    } catch (e) {
+      print('Erro no DAO ao buscar relatório de movimentações: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getConsumoReport() async {
+    const String sqlQuery = '''
+      SELECT 
+          m.nome AS nome_material,
+          SUM(mov.quantidade) AS quantidade_total_saida
+      FROM movimentacoes AS mov
+      JOIN materiais AS m ON mov.id_material = m.id_material
+      WHERE mov.tipo_movimentacao = 'saida'
+      GROUP BY mov.id_material
+      ORDER BY quantidade_total_saida DESC
+      LIMIT 10;
+    '''; // Limita aos 10 itens mais consumidos
+
+    try {
+      final result = await connection.execute(sqlQuery);
+      if (result.numOfRows == 0) return [];
+
+      // O backend já formata o JSON
+      return result.rows.map((row) {
+        final data = row.assoc();
+        return {
+          'nome_material': data['nome_material'] ?? '',
+          'total_consumido': int.tryParse(data['quantidade_total_saida'] ?? '0') ?? 0,
+        };
+      }).toList();
+    } catch (e) {
+      print('Erro no DAO ao buscar relatório de consumo: $e');
+      rethrow;
     }
   }
 }
