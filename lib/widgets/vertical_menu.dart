@@ -3,6 +3,7 @@ import 'package:metro_projeto/screens/CadastroMaterialScreen.dart';
 import 'package:metro_projeto/screens/dashBoardScreen.dart';
 import 'package:metro_projeto/screens/inventoryscreen.dart';
 import 'package:metro_projeto/screens/reportscreen.dart';
+import 'package:metro_projeto/screens/user_management_screen.dart';
 
 class VerticalMenu extends StatefulWidget {
   const VerticalMenu({super.key});
@@ -15,6 +16,7 @@ class _VerticalMenuState extends State<VerticalMenu> {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+        backgroundColor: const Color(0xFFF5F5F5),
         child: ListView(
       padding: EdgeInsets.zero,
       children: <Widget>[
@@ -32,13 +34,28 @@ class _VerticalMenuState extends State<VerticalMenu> {
                       height: 50,
                       child: Image.asset('assets/images/logo_metro_menu.png')),
                   const SizedBox(width: 8),
-                  const Text(
-                    'METRÔ',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                      color: Color(0xFF001789),
-                    ),
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Metrô de',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 16,
+                          color: Colors.black,
+                          height: 1.2,
+                        ),
+                      ),
+                      Text(
+                        'Sao Paulo',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Colors.black,
+                          height: 1.2,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -97,6 +114,17 @@ class _VerticalMenuState extends State<VerticalMenu> {
           },
         ),
         ListTile(
+          leading: const Icon(Icons.people),
+          title: const Text('Gestão de Usuários'),
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (Builder) => const UserManagementScreen()));
+          },
+        ),
+        ListTile(
           leading: const Icon(Icons.add_box_outlined),
           title: const Text('Cadastrar Material'),
           onTap: () {
@@ -105,20 +133,6 @@ class _VerticalMenuState extends State<VerticalMenu> {
                 context,
                 MaterialPageRoute(
                     builder: (Builder) => const CadastroMaterialScreen()));
-          },
-        ),
-        ListTile(
-          leading: const Icon(Icons.settings),
-          title: const Text('Configurações'),
-          onTap: () {
-            Navigator.pop(context);
-          },
-        ),
-        ListTile(
-          leading: const Icon(Icons.help_outline),
-          title: const Text('Ajuda'),
-          onTap: () {
-            Navigator.pop(context);
           },
         ),
       ],

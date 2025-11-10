@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
-import 'package:intl/intl.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:metro_projeto/screens/inventoryscreen.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:intl/intl.dart';
+
 
 class CadastroMaterialScreen extends StatefulWidget {
   const CadastroMaterialScreen({super.key});

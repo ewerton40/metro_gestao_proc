@@ -182,5 +182,22 @@ Future<List<Map<String, dynamic>>> getCriticalItems() async {
     throw Exception('Falha ao buscar detalhes do item: ${response.statusCode}');
   }
 }
+
+Future<List<Map<String, dynamic>>> getMaterialsDistributionByCategory() async {
+  final url = Uri.parse('$_baseUrl/inventory/distribution');
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    final jsonResponse = jsonDecode(response.body);
+    if (jsonResponse['success'] == true) {
+      return List<Map<String, dynamic>>.from(jsonResponse['data']);
+    } else {
+      throw Exception(jsonResponse['message'] ?? 'Erro ao buscar distribuição de materiais.');
+    }
+  } else {
+    throw Exception('Falha ao buscar distribuição: ${response.statusCode}');
+  }
+}
+
 }
 

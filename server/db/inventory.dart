@@ -358,7 +358,31 @@ Future<List<Map<String, dynamic>>> getCriticalItems() async {
     throw Exception('Falha ao acessar o banco de dados.');
   }
 }
-}
+
+  Future<List<Map<String, dynamic>>> getMaterialsDistributionByCategory() async {
+    const String sqlQuery = '''
+      SELECT 
+        c.nome_categoria AS categoria,
+        COUNT(m.id_material) AS total
+        FROM materiais m
+        LEFT JOIN categoria c ON m.id_categoria = c.id_categoria
+        GROUP BY c.nome_categoria
+        ORDER BY COUNT(m.id_material) DESC
+    ''';
+
+    try {
+      final result = await connection.execute(sqlQuery);
+
+      if (result.isEmpty) return [];
+
+      final list = result.rows.map((row) => row.typedAssoc()).toList();
+      return list;
+    } catch (e) {
+      print('Erro ao buscar distribuição de materiais por categoria: $e');
+      throw Exception('Falha ao acessar o banco de dados.');
+    }
+  }
+  }
 
 
 

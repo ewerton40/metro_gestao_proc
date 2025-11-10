@@ -22,17 +22,6 @@ class _DetalheItemScreenState extends State<DetalheItemScreen> {
   bool _isLoading = true;
   String _errorMessage = '';
 
-  final List<Map<String, dynamic>> _movimentacoesTeste = [
-  {'data': '05/11/2025', 'tipo': 'Entrada', 'quantidade': 10, 'responsavel': 'Ana C.'},
-  {'data': '04/11/2025', 'tipo': 'Saída', 'quantidade': 3, 'responsavel': 'Pedro L.'},
-  {'data': '03/11/2025', 'tipo': 'Entrada', 'quantidade': 25, 'responsavel': 'João S.'},
-  {'data': '02/11/2025', 'tipo': 'Saída', 'quantidade': 7, 'responsavel': 'Maria A.'},
-  {'data': '01/11/2025', 'tipo': 'Saída', 'quantidade': 2, 'responsavel': 'Carlos D.'},
-  {'data': '31/10/2025', 'tipo': 'Entrada', 'quantidade': 5, 'responsavel': 'Rita F.'},
-  {'data': '30/10/2025', 'tipo': 'Saída', 'quantidade': 1, 'responsavel': 'Bruno G.'},
-  {'data': '29/10/2025', 'tipo': 'Saída', 'quantidade': 4, 'responsavel': 'Telmo H.'},
-];
-
   @override
   void initState() {
     super.initState();

@@ -3,6 +3,8 @@ import 'package:metro_projeto/screens/CadastroMaterialScreen.dart';
 import '../services/inventory_service.dart';
 import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
+import 'package:metro_projeto/screens/inventoryscreen.dart';
+
 
 class InventoryItem {
   final int id;
