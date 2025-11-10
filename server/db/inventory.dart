@@ -474,8 +474,7 @@ Future<List<Map<String, dynamic>>> getCriticalItems() async {
         final data = row.assoc();
         return {
           'id': int.tryParse(data['id_movimentacao'] ?? '0') ?? 0,
-          // Formata a data
-          'data': data['data_movimentacao']?.substring(0, 16) ?? '', 
+          'data': data['data_movimentacao'] ?? '', 
           'material': data['nome_material'] ?? '',
           'quantidade': int.tryParse(data['quantidade'] ?? '0') ?? 0,
           'tipo': data['tipo_movimentacao'] ?? '',

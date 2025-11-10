@@ -46,7 +46,7 @@ class _ReportScreenState extends State<ReportScreen> {
         final color = item['tipo'] == 'entrada' ? Colors.green : Colors.red;
 
         return DataRow(cells: [
-          DataCell(Text(item['data'])),
+          DataCell(Text(DateTime.parse(item['data'] + 'Z').toLocal().toString().substring(0, 16))),
           DataCell(Text(item['material'])),
           DataCell(Text(item['quantidade'].toString(),
               style: TextStyle(color: color, fontWeight: FontWeight.bold))),
