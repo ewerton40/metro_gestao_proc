@@ -51,7 +51,7 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
       if (_formKey.currentState!.validate()) {
         final itemData = {
           'name': _nameController.text,
-      //  'code': _codeController.text,
+          'code': _codeController.text, ///estava comentado
           'category': _selectedCategory,
           'base': _selectedBase,
           'supplier': _supplierController.text,
@@ -68,11 +68,13 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
           final InventoryService = InventoryServices();
           await InventoryService.addItem(itemData);
 
+          _showSnackBar('material cadastrado com sucesso!', isError: false);
           print('material enviado para o backend co sucesso');
 
           _restartScreen();
         } catch (e){
           print('ERRO NO ENVIO PARA O BACKEND: $e');
+          _showSnackBar('falha ao cadastrar material.', isError: true);
         }
 
         //print(itemData);////////////////////////////////////RESOLVER PROBLEA QUE QUANDO CLICA NO BOTAO SALVAR APARECE COISAS DIFERENTES NO TERMINAL///////////////////////
@@ -105,6 +107,18 @@ void _restartScreen() {
     ),
   );
 }
+/////////////////////////mostra falah ao cadastrar material
+void _showSnackBar(String message, {bool isError = false}) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(message),
+      backgroundColor: isError ? Colors.red.shade700 : Colors.green.shade700,
+      duration: const Duration(seconds: 3),
+      behavior: SnackBarBehavior.floating,
+    ),
+  );
+}
+
     @override
     Widget build(BuildContext context) {
       // A tela principal é envolvida por um Scaffold para a estrutura básica.
@@ -144,16 +158,11 @@ void _restartScreen() {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      flex: 2, // A coluna do formulário ocupa 2/3 do espaço
+                      flex: 1, 
                       child: _buildFormCard(),
                     ),
-                    const SizedBox(width: 32),
-                    Expanded(
-                      flex: 1, // A coluna da imagem ocupa 1/3 do espaço
-                      child: _buildImageUploadCard(),
-                    ),
                   ],
-                ),
+                 ),
               ],
             ),
           ),
@@ -275,40 +284,8 @@ void _restartScreen() {
 
 
 
-    // Constrói o card para upload da imagem e resumo ////TEM QUE TIRAR O CAMPO DE COLOCAR A IMAGEM!!!!!
-    Widget _buildImageUploadCard() {
-      return Container(
-        padding: const EdgeInsets.all(24.0),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF8F9FA),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey[300]!),
-        ),
-        child: Column(
-          children: [
-            Container(
-              width: 150,
-              height: 150,
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.image_outlined, size: 50, color: Colors.grey),
-            ),
-            const SizedBox(height: 24),
-            _buildReadOnlyField(label: 'Categoria', value: 'materiais'),
-            const SizedBox(height: 16),
-            _buildReadOnlyField(label: 'Estoque Mínimo', value: '5'),
-            const SizedBox(height: 24),
-            TextButton.icon(
-              icon: const Icon(Icons.attach_file, color: Color(0xFF1763A6)),
-              label: const Text('Upload de Foto', style: TextStyle(color: Color(0xFF1763A6))),
-              onPressed: () {},
-            ),
-          ],
-        ),
-      );
-    }
+    // Construia(foi apagado) o card para upload da imagem e resumo ////TEM QUE TIRAR O CAMPO DE COLOCAR A IMAGEM!!!!!
+   
 
     Widget _buildDateField(){
       return Column(
