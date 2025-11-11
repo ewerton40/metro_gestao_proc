@@ -7,12 +7,11 @@ import 'package:metro_projeto/screens/CadastroMaterialScreen.dart';
 import 'package:metro_projeto/screens/loginscreen.dart';
 import 'package:metro_projeto/screens/movimentation_screen.dart';
 import 'package:metro_projeto/screens/reportscreen.dart';
+import 'package:metro_projeto/screens/user_management_screen.dart';
 import 'package:metro_projeto/screens/user_registration_screen.dart';
-import 'package:metro_projeto/screens/usermanagementscreen.dart';
 import 'package:metro_projeto/screens/detalhe_item_screen.dart';
 import 'package:metro_projeto/screens/loginscreen.dart';
 import 'package:metro_projeto/screens/reportscreen.dart';
-import 'package:metro_projeto/screens/usermanagementscreen.dart';
 import 'package:metro_projeto/screens/detalhe_item_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -43,7 +42,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const InventoryScreen(),
+      home: const UserManagementsScreen(),
     );
   }
 }

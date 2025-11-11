@@ -1,75 +1,71 @@
+// Em: lib/screens/usermanagementscreen.dart
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
 import 'user_registration_screen.dart';
+import '../models/employee.dart'; // 
+import '../services/auth_services.dart'; // 
 
-class UserManagementScreen extends StatefulWidget {
-  const UserManagementScreen({super.key});
+class UserManagementsScreen extends StatefulWidget {
+  const UserManagementsScreen({super.key});
 
   @override
-  State<UserManagementScreen> createState() => _UserManagementScreenState();
+  State<UserManagementsScreen> createState() => _UserManagementScreenState();
 }
 
-class _UserManagementScreenState extends State<UserManagementScreen> {
+class _UserManagementScreenState extends State<UserManagementsScreen> {
   final TextEditingController _searchController = TextEditingController();
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  
 
-  List<Map<String, String>> _users = [
-    {
-      'name': 'João Pedro',
-      'email': 'joao.silva@metro.sp.gov.br',
-      'role': 'Administrador'
-    },
-    {
-      'name': 'Maria Eduarda',
-      'email': 'maria.oliveira@metro.sp.gov.br',
-      'role': 'Funcionario'
-    },
-    {
-      'name': 'Pedro Santos',
-      'email': 'pedro.santos@metro.sp.gov.br',
-      'role': 'Administrador'
-    },
-    {
-      'name': 'Ana Caralina',
-      'email': 'ana.carolina@metro.sp.gov.br',
-      'role': 'Funcionario'
-    },
-  ];
-
-  List<Map<String, String>> _filteredUsers = [];
+  List<Funcionario> _users = []; 
+  List<Funcionario> _filteredUsers = []; 
+  final AuthServices _authService = AuthServices();
+  bool _isLoading = true;
+  String _errorMessage = '';
 
   @override
   void initState() {
     super.initState();
-    _filteredUsers = _users;
+    _fetchUsers(); // Busca os dados reais
     _searchController.addListener(_filterUsers);
+  }
+
+  Future<void> _fetchUsers() async {
+    try {
+      final usersList = await _authService.getAllUsers();
+      setState(() {
+        _users = usersList;
+        _filteredUsers = usersList; 
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
+    }
   }
 
   void _filterUsers() {
     setState(() {
       _filteredUsers = _users
           .where((user) =>
-              user['name']!
+              user.nome // Usa o modelo Funcionario
                   .toLowerCase()
                   .contains(_searchController.text.toLowerCase()) ||
-              user['email']!
+              user.email // Usa o modelo Funcionario
                   .toLowerCase()
                   .contains(_searchController.text.toLowerCase()))
           .toList();
     });
   }
 
-  void _showDeleteConfirmationDialog(int index) {
+  void _showDeleteConfirmationDialog(Funcionario user) { 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Confirmar desativação'),
-          content: const Text('Tem certeza se quer desativar o usuário?'),
+          content: Text('Tem certeza se quer desativar o usuário ${user.nome}?'),
           actions: [
             TextButton(
               onPressed: () {
@@ -84,11 +80,15 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
             ),
             TextButton(
               onPressed: () {
-                setState(() {
-                  _users.removeAt(index);
-                  _filterUsers();
-                });
+                // TODO: Chamar o backend para deletar (Próximo Passo)
+                // setState(() {
+                //   _users.remove(user);
+                //   _filterUsers();
+                // });
                 Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('TODO: Lógica de deletar ainda não implementada.')),
+                );
               },
               style: TextButton.styleFrom(
                 backgroundColor: Colors.red,
@@ -103,20 +103,23 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     );
   }
 
-  void _showEditDialog(int index) {
-    // TODO: Implement edit user dialog
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Funcionalidade de edição em desenvolvimento')),
-    );
+  void _showEditDialog(Funcionario user) { 
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UserRegistrationScreen(
+          usuarioParaEditar: user, // Passa o usuário para a tela de edição
+        ),
+      ),
+    ).then((_) {
+      // Recarrega a lista quando voltar da edição
+      _fetchUsers();
+    });
   }
-
 
   @override
   void dispose() {
     _searchController.dispose();
-    _nameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
     super.dispose();
   }
 
@@ -146,7 +149,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText: 'Buscar...',
+                      hintText: 'Buscar por nome ou e-mail...', // Hint atualizado
                       prefixIcon: const Icon(Icons.search),
                       filled: true,
                       fillColor: Colors.white,
@@ -169,7 +172,10 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                       MaterialPageRoute(
                         builder: (context) => const UserRegistrationScreen(),
                       ),
-                    );
+                    ).then((_) {
+                      // Recarrega a lista quando voltar do cadastro
+                      _fetchUsers();
+                    });
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4285F4),
@@ -200,69 +206,71 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                     ),
                   ],
                 ),
-                child: Column(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(8),
-                          topRight: Radius.circular(8),
-                        ),
-                      ),
-                      child: Table(
-                        columnWidths: const {
-                          0: FlexColumnWidth(2),
-                          1: FlexColumnWidth(2.5),
-                          2: FlexColumnWidth(1.5),
-                          3: FlexColumnWidth(1.5),
-                        },
-                        children: [
-                          TableRow(
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _errorMessage.isNotEmpty
+                        ? Center(child: Text(_errorMessage, style: const TextStyle(color: Colors.red)))
+                        : Column( // Seu layout de Tabela
                             children: [
-                              _buildHeaderCell('Nome'),
-                              _buildHeaderCell('E-mail'),
-                              _buildHeaderCell('Cargo'),
-                              _buildHeaderCell('Ações'),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Table(
-                          columnWidths: const {
-                            0: FlexColumnWidth(2),
-                            1: FlexColumnWidth(2.5),
-                            2: FlexColumnWidth(1.5),
-                            3: FlexColumnWidth(1.5),
-                          },
-                          children: _filteredUsers.asMap().entries.map((entry) {
-                            int idx = entry.key;
-                            Map<String, String> user = entry.value;
-                            return TableRow(
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  bottom: BorderSide(
-                                    color: Colors.grey[200]!,
-                                    width: 1,
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[100],
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(8),
+                                    topRight: Radius.circular(8),
+                                  ),
+                                ),
+                                child: Table(
+                                  columnWidths: const {
+                                    0: FlexColumnWidth(2),
+                                    1: FlexColumnWidth(2.5),
+                                    2: FlexColumnWidth(1.5),
+                                    3: FlexColumnWidth(1.5),
+                                  },
+                                  children: [
+                                    TableRow(
+                                      children: [
+                                        _buildHeaderCell('Nome'),
+                                        _buildHeaderCell('E-mail'),
+                                        _buildHeaderCell('Cargo'), // Era 'Role'
+                                        _buildHeaderCell('Ações'),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: SingleChildScrollView(
+                                  child: Table(
+                                    columnWidths: const {
+                                      0: FlexColumnWidth(2),
+                                      1: FlexColumnWidth(2.5),
+                                      2: FlexColumnWidth(1.5),
+                                      3: FlexColumnWidth(1.5),
+                                    },
+                                    children: _filteredUsers.map((user) {
+                                      return TableRow(
+                                        decoration: BoxDecoration(
+                                          border: Border(
+                                            bottom: BorderSide(
+                                              color: Colors.grey[200]!,
+                                              width: 1,
+                                            ),
+                                          ),
+                                        ),
+                                        children: [
+                                          _buildDataCell(user.nome),
+                                          _buildDataCell(user.email),
+                                          _buildDataCell(user.cargo),
+                                          _buildActionCell(user), // Passa o objeto
+                                        ],
+                                      );
+                                    }).toList(),
                                   ),
                                 ),
                               ),
-                              children: [
-                                _buildDataCell(user['name']!),
-                                _buildDataCell(user['email']!),
-                                _buildDataCell(user['role']!),
-                                _buildActionCell(idx),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                            ],
+                          ),
               ),
             ),
           ],
@@ -299,14 +307,14 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     );
   }
 
-  Widget _buildActionCell(int index) {
+  Widget _buildActionCell(Funcionario user) { // Aceita Funcionario
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           ElevatedButton(
-            onPressed: () => _showEditDialog(index),
+            onPressed: () => _showEditDialog(user), // Passa o 'user'
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF4285F4),
               foregroundColor: Colors.white,
@@ -323,7 +331,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
           ),
           const SizedBox(width: 8),
           ElevatedButton(
-            onPressed: () => _showDeleteConfirmationDialog(index),
+            onPressed: () => _showDeleteConfirmationDialog(user), // Passa o 'user'
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,

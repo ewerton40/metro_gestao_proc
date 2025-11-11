@@ -193,7 +193,7 @@ class VerticalMenu extends StatelessWidget {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (Builder) => const UserManagementScreen(),
+                        builder: (Builder) => const UserManagementsScreen(),
                       ),
                     );
                   },
