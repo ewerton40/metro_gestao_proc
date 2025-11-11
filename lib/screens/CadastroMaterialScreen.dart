@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -98,23 +99,7 @@ void _restartScreen() {
       // A tela principal é envolvida por um Scaffold para a estrutura básica.
       return Scaffold(
         backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          
-          title: Image.asset( //////////////////////////////////////////////
-            'assets/images/logo_metro_menu.png',
-            width: 40.0,
-            height: 40.0,
-          ),
-          actions: [
-            CircleAvatar(
-              backgroundColor: Colors.grey[200],
-              child: const Icon(Icons.person_outline, color: Colors.black54),
-            ),
-            const SizedBox(width: 16),
-          ],
-        ),
+        appBar: const BarMenu(),
         drawer: const VerticalMenu(selectedIndex: 5), ////////////////////////////////////////////////////
 
         body: SingleChildScrollView(

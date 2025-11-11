@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/screens/CadastroMaterialScreen.dart';
+import 'package:metro_projeto/screens/detalhe_item_screen.dart';
 import '../services/inventory_service.dart';
 import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
@@ -379,7 +380,12 @@ class _InventoryScreenState extends State<InventoryScreen> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(context, 
+                  MaterialPageRoute(
+                builder: (Builder) => const DetalheItemScreen()
+            ));
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1763A6),
                 foregroundColor: Colors.white,

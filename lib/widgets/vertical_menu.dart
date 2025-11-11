@@ -34,56 +34,66 @@ class VerticalMenu extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
-          SizedBox(
-            height: 130,
-            child: DrawerHeader(
-              decoration: const BoxDecoration(
+          Container(
+              height: 130, 
+              decoration: BoxDecoration(
                 color: Colors.white,
                 border: Border(
-                  bottom: BorderSide(color: Color(0xFFE0E0E0), width: 1),
+                  bottom: BorderSide(color: Colors.grey[200]!, width: 1.5),
                 ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: 50,
-                        height: 50,
-                        child: Image.asset('assets/images/logo_metro_menu.png'),
+              
+              child: DrawerHeader(
+                decoration: const BoxDecoration(
+                  color: Colors.transparent, 
+                ),
+                
+                padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,  
+                  children: [
+                    Container(
+                      width: 60, 
+                      height: 60,
+                      padding: const EdgeInsets.all(4), 
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(12), 
                       ),
-                      const SizedBox(width: 8),
-                      const Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Metrô de',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 16,
-                              color: Colors.black,
-                              height: 1.2,
-                            ),
-                          ),
-                          Text(
-                            'Sao Paulo',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: Colors.black,
-                              height: 1.2,
-                            ),
-                          ),
-                        ],
+                      child: Image.asset(
+                        'assets/images/logo_metro_menu.png',
+                        fit: BoxFit.contain,
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    const SizedBox(width: 12), 
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center, 
+                      children: [
+                        Text(
+                          'Metrô de',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500, 
+                            fontSize: 18, 
+                            color: Colors.black54,  
+                            height: 1.1, 
+                          ),
+                        ),
+                        Text(
+                          'São Paulo',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold, 
+                            fontSize: 20, 
+                            color: Colors.black87, 
+                            height: 1.2, 
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
             child: Column(

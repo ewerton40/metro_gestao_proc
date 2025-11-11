@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
-import '../models/funcionario.dart'; 
+import '../models/employee.dart'; 
 import '../services/auth_services.dart'; 
 import 'user_registration_screen.dart'; 
 

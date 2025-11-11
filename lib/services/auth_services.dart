@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import '../models/funcionario.dart';
+import '../models/employee.dart';
 
 // esse file services servira como uma area para arquivos .dart que farão requisicoes do front-end -> back-end
 class AuthServices with ChangeNotifier {
