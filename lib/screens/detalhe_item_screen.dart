@@ -148,7 +148,7 @@ class _DetalheItemScreenState extends State<DetalheItemScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF9F7FB),
       appBar: const BarMenu(),
-      drawer: const VerticalMenu(),
+      drawer: const VerticalMenu(selectedIndex: 10),
       body: Column(
         children: [
           // WIDGET DE PESQUISA

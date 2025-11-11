@@ -115,7 +115,7 @@ void _restartScreen() {
             const SizedBox(width: 16),
           ],
         ),
-        drawer: const VerticalMenu(), ////////////////////////////////////////////////////
+        drawer: const VerticalMenu(selectedIndex: 5), ////////////////////////////////////////////////////
 
         body: SingleChildScrollView(
           child: Padding(

@@ -59,7 +59,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: const BarMenu(),
-      drawer: const VerticalMenu(),
+      drawer: const VerticalMenu(selectedIndex: -1),
       body: Padding(
         padding: const EdgeInsets.all(32.0),
         child: Column(

@@ -125,7 +125,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: const BarMenu(),
-      drawer: const VerticalMenu(),
+      drawer: const VerticalMenu(selectedIndex: 0),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(32.0),

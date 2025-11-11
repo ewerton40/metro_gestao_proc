@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
+import 'user_registration_screen.dart';
 
 class UserManagementScreen extends StatefulWidget {
   const UserManagementScreen({super.key});
@@ -15,9 +16,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   
-  String _selectedRole = 'Técnico';
-  String _selectedWorkplace = 'WJA - Jabaquara';
-  bool _autoGeneratePassword = false;
 
   List<Map<String, String>> _users = [
     {
@@ -112,322 +110,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     );
   }
 
-  void _showAddUserDialog() {
-    _nameController.clear();
-    _emailController.clear();
-    _passwordController.clear();
-    _selectedRole = 'Técnico';
-    _selectedWorkplace = 'WJA - Jabaquara';
-    _autoGeneratePassword = false;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Container(
-                width: 600,
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Adicionar Usuário',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    
-                    const Text(
-                      'Nome',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: _nameController,
-                      decoration: InputDecoration(
-                        hintText: 'João da Silva',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    
-                    const Text(
-                      'E-mail',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: _emailController,
-                      decoration: InputDecoration(
-                        hintText: 'joao.silva@metrosp.gov.br',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    
-                    const Text(
-                      'Cargo',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<String>(
-                      value: _selectedRole,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                      ),
-                      items: const [
-                        DropdownMenuItem(value: 'Técnico', child: Text('Técnico')),
-                        DropdownMenuItem(value: 'Administrador', child: Text('Administrador')),
-                        DropdownMenuItem(value: 'Funcionario', child: Text('Funcionario')),
-                        DropdownMenuItem(value: 'Gerente', child: Text('Gerente')),
-                      ],
-                      onChanged: (value) {
-                        setDialogState(() {
-                          _selectedRole = value!;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    
-                    const Text(
-                      'Local de trabalho',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<String>(
-                      value: _selectedWorkplace,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                      ),
-                      items: const [
-                        DropdownMenuItem(value: 'WJA - Jabaquara', child: Text('WJA - Jabaquara')),
-                        DropdownMenuItem(value: 'WVL - Vila Madalena', child: Text('WVL - Vila Madalena')),
-                        DropdownMenuItem(value: 'WPA - Palmeiras', child: Text('WPA - Palmeiras')),
-                        DropdownMenuItem(value: 'WSE - Sé', child: Text('WSE - Sé')),
-                      ],
-                      onChanged: (value) {
-                        setDialogState(() {
-                          _selectedWorkplace = value!;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    
-                    const Text(
-                      'Senha',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: _passwordController,
-                      obscureText: true,
-                      enabled: !_autoGeneratePassword,
-                      decoration: InputDecoration(
-                        hintText: 'Digite a senha',
-                        filled: true,
-                        fillColor: _autoGeneratePassword ? Colors.grey[100] : Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        disabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: _autoGeneratePassword,
-                          onChanged: (value) {
-                            setDialogState(() {
-                              _autoGeneratePassword = value!;
-                              if (_autoGeneratePassword) {
-                                _passwordController.clear();
-                              }
-                            });
-                          },
-                          activeColor: const Color(0xFF4285F4),
-                        ),
-                        const Text(
-                          'Gerar senha automaticamente',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 32),
-                    
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.black87,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 12,
-                            ),
-                          ),
-                          child: const Text(
-                            'Cancelar',
-                            style: TextStyle(fontSize: 15),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        ElevatedButton(
-                          onPressed: () {
-                            if (_nameController.text.isNotEmpty &&
-                                _emailController.text.isNotEmpty &&
-                                (_autoGeneratePassword || _passwordController.text.isNotEmpty)) {
-                              setState(() {
-                                _users.add({
-                                  'name': _nameController.text,
-                                  'email': _emailController.text,
-                                  'role': _selectedRole,
-                                });
-                                _filterUsers();
-                              });
-                              Navigator.of(context).pop();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Usuário adicionado com sucesso!'),
-                                  backgroundColor: Colors.green,
-                                ),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Preencha todos os campos obrigatórios'),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF4285F4),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 12,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Text(
-                            'Criar Usuário',
-                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
 
   @override
   void dispose() {
@@ -442,7 +124,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const BarMenu(),
-      drawer: const VerticalMenu(),
+      drawer: const VerticalMenu(selectedIndex: 4),
       backgroundColor: const Color(0xFFF5F5F5),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -481,14 +163,18 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 ),
                 const SizedBox(width: 16),
                 ElevatedButton(
-                  onPressed: _showAddUserDialog,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const UserRegistrationScreen(),
+                      ),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4285F4),
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 16,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
