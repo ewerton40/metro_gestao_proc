@@ -107,7 +107,7 @@ Future<List<Category>> getAllCategories() async {
   }
 
   Future<int> getLowStockCount() async {
-  final url = Uri.parse('$_baseUrl/inventory/low_stock');
+  final url = Uri.parse('$_baseUrl/inventory/lowstock');
   final response = await http.get(url);
 
   if (response.statusCode == 200) {
@@ -171,6 +171,38 @@ Future<List<Map<String, dynamic>>> getCriticalItems() async {
     }
   }
 
+
+  Future<Map<String, dynamic>> getItemDetail(int idMaterial) async {
+  final url = Uri.parse('$_baseUrl/inventory/itensdetails/$idMaterial');
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+    if (jsonResponse['success'] == true) {
+      return jsonResponse['data'];
+    } else {
+      throw Exception(jsonResponse['message'] ?? 'Erro ao buscar detalhes do item.');
+    }
+  } else {
+    throw Exception('Falha ao buscar detalhes do item: ${response.statusCode}');
+  }
+}
+
+Future<List<Map<String, dynamic>>> getMaterialsDistributionByCategory() async {
+  final url = Uri.parse('$_baseUrl/inventory/distribution');
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    final jsonResponse = jsonDecode(response.body);
+    if (jsonResponse['success'] == true) {
+      return List<Map<String, dynamic>>.from(jsonResponse['data']);
+    } else {
+      throw Exception(jsonResponse['message'] ?? 'Erro ao buscar distribuição de materiais.');
+    }
+  } else {
+    throw Exception('Falha ao buscar distribuição: ${response.statusCode}');
+  }
+}
   Future<Map<String, dynamic>> registerSaida({
     required int idMaterial,
     required int quantidade,

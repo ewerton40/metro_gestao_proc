@@ -50,7 +50,7 @@ class _BaseScreenState extends State<BaseScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA), // Cor de fundo geral
       appBar: const BarMenu(),
-      drawer: const VerticalMenu(),
+      drawer: const VerticalMenu(selectedIndex: -1),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(32.0),

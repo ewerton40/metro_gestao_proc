@@ -1,6 +1,6 @@
 import 'package:dart_frog/dart_frog.dart';
-import '../db/connection.dart';
-import '../db/category.dart';
+import '../../db/connection.dart';
+import '../../db/category.dart';
 
 
 Future<Response> categoryHandler(RequestContext context) async{

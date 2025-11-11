@@ -3,13 +3,13 @@ import 'dart:io';
 import '../db/connection.dart';
 import '../db/notification.dart';
 
-/// Este handler lida com GET /notifications
+
 Future<Response> notificationHandler(RequestContext context) async {
   try {
     final db = await Connection.getConnection();
     final dao = NotificationDAO(db);
     
-    // Busca as duas informações em paralelo
+
     final results = await Future.wait([
       dao.getNotifications(),
       dao.getUnreadCount(),
@@ -18,7 +18,7 @@ Future<Response> notificationHandler(RequestContext context) async {
     final notifications = results[0] as List<Notificacao>;
     final unreadCount = results[1] as int;
 
-    // Mapeia a lista de Notificacao para um JSON
+  
     final jsonData = notifications.map((n) => {
       'id': n.id,
       'mensagem': n.mensagem,

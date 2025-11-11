@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
-import '../models/funcionario.dart'; 
+import '../models/employee.dart'; 
 import '../services/auth_services.dart'; 
 import 'user_registration_screen.dart'; 
 
@@ -59,7 +59,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: const BarMenu(),
-      drawer: const VerticalMenu(),
+      drawer: const VerticalMenu(selectedIndex: -1),
       body: Padding(
         padding: const EdgeInsets.all(32.0),
         child: Column(

@@ -1,6 +1,6 @@
 import 'package:dart_frog/dart_frog.dart';
-import '../db/connection.dart';
-import '../db/inventory.dart';
+import '../../db/connection.dart';
+import '../../db/inventory.dart';
 
 Future<Response> removeMovementHandler(RequestContext context) async {
   final body = await context.request.json() as Map<String, dynamic>;

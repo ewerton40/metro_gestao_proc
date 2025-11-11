@@ -18,8 +18,8 @@ class _ItemRegistrationScreenState extends State<ItemRegistrationScreen> {
     // A tela principal é envolvida por um Scaffold para a estrutura básica.
     return Scaffold(
       backgroundColor: Colors.white,
-      drawer: VerticalMenu(),
-      appBar: BarMenu(),    
+      drawer: const VerticalMenu(selectedIndex: -1),
+      appBar: const BarMenu(),    
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 48.0, vertical: 32.0),

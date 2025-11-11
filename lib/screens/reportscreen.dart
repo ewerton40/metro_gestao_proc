@@ -117,7 +117,7 @@ class _ReportScreenState extends State<ReportScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const BarMenu(),
-      drawer: const VerticalMenu(),
+      drawer: const VerticalMenu(selectedIndex: 3),
       backgroundColor: const Color(0xFFF7F8F9),
       body: Padding(
         padding: const EdgeInsets.all(24),

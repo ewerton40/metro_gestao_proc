@@ -6,7 +6,24 @@ class MovementsQuant{
   final int saidas;
   
   MovementsQuant({required this.entradas, required this.saidas});
+  
+  Map<String, dynamic> toJson() {
+    return {
+      'entradas': entradas,
+      'saidas': saidas,
+    };
   }
+}
+
+class TopMaterial {
+  final String nome;
+  final int totalSaidas;
+
+  TopMaterial({
+    required this.nome,
+    required this.totalSaidas,
+  });
+}
 
 
 class MovimentationDAO {
@@ -129,7 +146,7 @@ class MovimentationDAO {
     }
   }
 
-  Future<MovementsQuant?> MovementsToday() async{
+  Future<MovementsQuant?> movementsToday() async{
     String sqlQuery = '''
       SELECT
       SUM(CASE WHEN tipo_movimentacao = 'entrada' THEN 1 ELSE 0 END) AS entradas,
@@ -153,9 +170,99 @@ class MovimentationDAO {
     }
 
   }
+
+  Future<List<TopMaterial>> getTopFiveUsedMaterials() async {
+  const String sqlQuery = '''
+    SELECT 
+        m.nome AS material,
+        COUNT(*) AS total_saidas
+    FROM movimentacoes mov
+    JOIN materiais m ON mov.id_material = m.id_material
+    WHERE mov.tipo_movimentacao = 'saida'
+    GROUP BY m.id_material
+    ORDER BY total_saidas DESC
+    LIMIT 5;
+  ''';
+
+  try {
+    final result = await connection.execute(sqlQuery);
+
+    if (result.numOfRows == 0) {
+      return [];
+    }
+
+    return result.rows.map((row) {
+      final data = row.assoc();
+      return TopMaterial(
+        nome: data['material'] ?? '',
+        totalSaidas: int.tryParse(data['total_saidas'] ?? '0') ?? 0,
+      );
+    }).toList();
+  } catch (e) {
+    print("Erro ao buscar os materiais mais usados: $e");
+    return [];
+  }
 }
 
+Future<Map<String, dynamic>> getItemHistory(int idMaterial) async {
+const String sqlItem = '''
+   SELECT 
+      m.id_material AS id,
+      m.nome AS nome_material,
+      m.descricao,
+      c.nome_categoria AS categoria,
+      m.qtd_alerta_baixo AS estoque_minimo,
+      e.quantidade,
+      CASE 
+          WHEN e.quantidade <= m.qtd_alerta_baixo THEN 'Crítico'
+          ELSE 'Normal'
+      END AS status,
+      m.id_medida,
+      m.id_categoria
+    FROM materiais m
+    LEFT JOIN categoria c ON m.id_categoria = c.id_categoria
+    LEFT JOIN (
+        SELECT id_material, SUM(quantidade) AS quantidade
+        FROM estoque
+        GROUP BY id_material
+    ) e ON m.id_material = e.id_material
+    WHERE m.id_material = :idMaterial;
+  ''';
+
+  const String sqlMovimentacoes = '''
+    SELECT 
+        DATE_FORMAT(mv.data_movimentacao, '%d/%m/%Y') AS data,
+        CASE 
+            WHEN mv.tipo_movimentacao = 'entrada' THEN 'Entrada'
+            WHEN mv.tipo_movimentacao = 'saida' THEN 'Saída'
+            ELSE mv.tipo_movimentacao
+        END AS tipo,
+        mv.quantidade,
+        f.nome AS responsavel
+    FROM movimentacoes mv
+    LEFT JOIN funcionario f ON mv.id_funcionario_responsavel = f.id_funcionario
+    WHERE mv.id_material = :idMaterial
+    ORDER BY mv.data_movimentacao DESC;
+  ''';
+
+  try {
+    final resultItem = await connection.execute(sqlItem, {'idMaterial': idMaterial});
+    if (resultItem.numOfRows == 0) {
+      throw Exception('Item não encontrado');
+    }
+
+    final item = Map<String, dynamic>.from(resultItem.rows.first.assoc()) ;
 
 
+    final resultMov = await connection.execute(sqlMovimentacoes, {'idMaterial': idMaterial});
+    final movimentacoes = resultMov.rows.map((row) => row.assoc()).toList();
 
+    item['movimentacoes'] = movimentacoes;
 
+    return item;
+  } catch (e) {
+    print('Erro ao buscar detalhes do item: $e');
+    throw Exception('Falha ao buscar detalhes do item.');
+  }
+}
+}

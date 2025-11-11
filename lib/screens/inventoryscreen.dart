@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/screens/CadastroMaterialScreen.dart';
+import 'package:metro_projeto/screens/detalhe_item_screen.dart';
 import '../services/inventory_service.dart';
 import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
+import 'package:metro_projeto/screens/inventoryscreen.dart';
+
 import '../models/location.dart';
 
 class InventoryItem {
@@ -19,7 +22,7 @@ class InventoryItem {
   final int quantidadeAtual;
 
   InventoryItem({
-    required this.code,
+    required this.code ,
     required this.nome,
     required this.categoriaId,
     required this.medidaId,
@@ -172,7 +175,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: const BarMenu(),
-      drawer: const VerticalMenu(),
+      drawer: const VerticalMenu(selectedIndex: 1),
       body: Padding(
         padding: const EdgeInsets.all(32.0),
         child: Column(
@@ -377,7 +380,12 @@ class _InventoryScreenState extends State<InventoryScreen> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(context, 
+                  MaterialPageRoute(
+                builder: (Builder) => const DetalheItemScreen()
+            ));
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1763A6),
                 foregroundColor: Colors.white,

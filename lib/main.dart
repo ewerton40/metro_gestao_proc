@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/providers/user_provider.dart';
-import 'package:metro_projeto/screens/ItemRegistrationScreen.dart';
 import 'package:metro_projeto/screens/dashBoardScreen.dart';
+import 'package:metro_projeto/screens/ItemRegistrationScreen.dart';
 import 'package:metro_projeto/screens/inventoryscreen.dart';
 import 'package:metro_projeto/screens/CadastroMaterialScreen.dart';
 import 'package:metro_projeto/screens/loginscreen.dart';
@@ -15,6 +15,8 @@ import 'package:metro_projeto/screens/reportscreen.dart';
 import 'package:metro_projeto/screens/usermanagementscreen.dart';
 import 'package:metro_projeto/screens/detalhe_item_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'services/auth_services.dart';
 
 void main() {

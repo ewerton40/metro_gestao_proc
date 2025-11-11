@@ -74,7 +74,7 @@ packages:
     source: hosted
     version: "1.0.8"
   dart_frog:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: dart_frog
       sha256: "4ab2323ad74f935f5f76cb2de7e699d0319245e8029753878b0ddc35984f9cfe"
