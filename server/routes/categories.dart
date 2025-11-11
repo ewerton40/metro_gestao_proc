@@ -1,6 +1,6 @@
 import 'package:dart_frog/dart_frog.dart';
 
-import '../controllers/category_controller.dart';
+import '../controllers/inventory/category_controller.dart';
 
 
 Future<Response> onRequest(RequestContext context) async {

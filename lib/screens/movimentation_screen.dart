@@ -1,78 +1,177 @@
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
-import '../services/inventory_service.dart'; 
+import '../services/inventory_service.dart';
 import '../models/location.dart';
+import '../services/inventory_service.dart';
+import '../screens/inventoryscreen.dart';
+import 'package:provider/provider.dart';
+import '../services/auth_services.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:flutter/services.dart';
 
 class MovimentacaoScreen extends StatefulWidget {
-  const MovimentacaoScreen({super.key}); //
+  const MovimentacaoScreen({super.key});
 
   @override
   State<MovimentacaoScreen> createState() => _MovimentacaoScreenState();
 }
 
-class _MovimentacaoScreenState extends State<MovimentacaoScreen> with TickerProviderStateMixin {
-  
+class _MovimentacaoScreenState extends State<MovimentacaoScreen>
+    with TickerProviderStateMixin {
   // Variáveis de estado para os dropdowns do formulário de Saída
-  String? _selectedDestino; //
-  String? _selectedMotivo; //
+  String? _selectedDestino;
+  String? _selectedMotivo;
 
-  // === INÍCIO DAS MUDANÇAS (VARIÁVEIS DE ESTADO) ===
-
-  final _inventoryService = InventoryServices(); // Instancia o serviço
+  final _inventoryService = InventoryServices();
 
   // Controladores para os campos de texto da Entrada
-  final _entradaItemController = TextEditingController();
   final _entradaQtdController = TextEditingController();
-  final _entradaResponsavelController = TextEditingController();
   final _entradaObsController = TextEditingController();
+  final _entradaDataController = TextEditingController();
+  var dateMaskFormatter = MaskTextInputFormatter(
+      mask: "##/##/####", //
+      filter: {"#": RegExp(r'[0-9]')});
 
   // Variáveis para o dropdown de Locais (Base de Destino)
   List<SimpleLocation> _locaisList = [];
-  SimpleLocation? _selectedLocal; // Armazena o objeto Local selecionado
+  SimpleLocation? _selectedLocal;
   bool _isLoadingLocais = true;
+
+  List<InventoryItem> _itemsList = [];
+  InventoryItem? _selectedItem;
+  bool _isLoadingItems = true;
 
   // Variável de estado de carregamento para o botão Salvar
   bool _isLoadingEntrada = false;
 
-  // === FIM DAS MUDANÇAS ===
+  // Controladores para os campos de texto da Saída
+  final _saidaQtdController = TextEditingController();
+  final _saidaObsController = TextEditingController();
 
-  // === INÍCIO DAS MUDANÇAS (CARREGAMENTO DE DADOS) ===
+  // Variáveis para os dropdowns da Saída
+  InventoryItem? _selectedSaidaItem;
+  SimpleLocation? _selectedSaidaLocalOrigem;
+
+  // Variável de estado de carregamento para o botão Salvar Saída
+  bool _isLoadingSaida = false;
+
+  void _limparFormularioEntrada() {
+    _entradaQtdController.clear();
+    _entradaObsController.clear();
+    setState(() {
+      _selectedLocal = null;
+      _selectedItem = null;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     _loadDropdownData();
   }
 
-  /// Carrega os dados necessários para os dropdowns do formulário
   Future<void> _loadDropdownData() async {
+    setState(() {
+      _isLoadingLocais = true;
+      _isLoadingItems = true;
+    });
+
     try {
-      // Carrega os locais do seu serviço
-      // (Você pode adicionar o carregamento de Itens aqui também)
-      final locations = await _inventoryService.getAllLocations();
+      final results = await Future.wait([
+        _inventoryService.getAllLocations(),
+        _inventoryService.getAllItems(),
+      ]);
+
       setState(() {
-        _locaisList = locations;
+        _locaisList = results[0] as List<SimpleLocation>;
         _isLoadingLocais = false;
+
+        _itemsList = results[1] as List<InventoryItem>;
+        _isLoadingItems = false;
       });
     } catch (e) {
-      print("Erro ao carregar locais: $e");
+      print("Erro ao carregar dados dos dropdowns: $e");
       setState(() {
         _isLoadingLocais = false;
+        _isLoadingItems = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao carregar locais: $e'), backgroundColor: Colors.red),
+        SnackBar(
+            content: Text('Erro ao carregar dados: $e'),
+            backgroundColor: Colors.red),
       );
     }
   }
-  // === FIM DAS MUDANÇAS ===
 
+  Future<void> _salvarSaida() async {
+    // Trava o formulário de Saída
+    setState(() => _isLoadingSaida = true);
+
+    try {
+      final authService = context.read<AuthServices>();
+
+      if (_selectedSaidaItem == null ||
+          _saidaQtdController.text.isEmpty ||
+          _selectedSaidaLocalOrigem == null) {
+        throw Exception(
+            'Preencha todos os campos obrigatórios (Item, Qtd, Origem).');
+      }
+
+      if (!authService.estaLogado || authService.usuario == null) {
+        throw Exception(
+            'Erro: Usuário não está logado. Faça o login novamente.');
+      }
+      final int idMaterial = _selectedSaidaItem!.code;
+      final int quantidade = int.parse(_saidaQtdController.text);
+      final int idLocalOrigem = _selectedSaidaLocalOrigem!.id;
+      final int idFuncionario = authService.usuario!.id;
+      final String observacao = _saidaObsController.text;
+
+      final response = await _inventoryService.registerSaida(
+        idMaterial: idMaterial,
+        quantidade: quantidade,
+        idLocalOrigem: idLocalOrigem,
+        idFuncionario: idFuncionario,
+        observacao: observacao,
+      );
+
+      if (response['success'] == true) {
+        _limparFormularioSaida();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Saída registrada com sucesso!'),
+              backgroundColor: Colors.green),
+        );
+      } else {
+        throw Exception(response['message']);
+      }
+    } catch (e) {
+      // Mostra o erro para o usuário
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Erro ao salvar: $e'), backgroundColor: Colors.red),
+      );
+    }
+    // Libera o formulário
+    setState(() => _isLoadingSaida = false);
+  }
+
+  void _limparFormularioSaida() {
+    _saidaQtdController.clear();
+    _saidaObsController.clear();
+    setState(() {
+      _selectedSaidaItem = null;
+      _selectedSaidaLocalOrigem = null;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F9FA), 
+        backgroundColor: const Color(0xFFF8F9FA),
         appBar: const BarMenu(),
         drawer: const VerticalMenu(),
         body: Padding(
@@ -82,7 +181,10 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen> with TickerProv
             children: [
               const Text(
                 'Movimentações',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black87),
+                style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87),
               ),
               const SizedBox(height: 24),
 
@@ -92,13 +194,14 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen> with TickerProv
                   Tab(text: 'Registrar Entrada'),
                   Tab(text: 'Registrar Saída'),
                 ],
-                labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                labelStyle:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 unselectedLabelColor: Colors.grey[600],
                 labelColor: const Color(0xFF1763A6),
                 indicatorColor: const Color(0xFF1763A6),
                 indicatorWeight: 3,
               ),
-              
+
               const SizedBox(height: 24),
 
               // Conteúdo das Abas
@@ -112,7 +215,7 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen> with TickerProv
                   ),
                   child: TabBarView(
                     children: [
-                      _buildEntradaForm(), // <-- MODIFICADO
+                      _buildEntradaForm(),
                       _buildSaidaForm(),
                     ],
                   ),
@@ -125,62 +228,48 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen> with TickerProv
     );
   }
 
-  // === INÍCIO DAS MUDANÇAS (FORMULÁRIO DE ENTRADA) ===
-
   /// Constrói o formulário de "Registrar Entrada"
   Widget _buildEntradaForm() {
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Registrar Entrada', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+          Text('Registrar Entrada',
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 24),
 
-          // TODO: Substituir por um Dropdown/Busca de Itens
-          _buildFormTextField(
-            label: 'Item (ID)', 
-            controller: _entradaItemController, 
-            keyboardType: TextInputType.number
-          ),
+          _buildItemDropdown(),
           const SizedBox(height: 16),
-          
+
           _buildFormTextField(
-            label: 'Quantidade', 
-            controller: _entradaQtdController, 
-            keyboardType: TextInputType.number
-          ),
+              label: 'Quantidade',
+              controller: _entradaQtdController,
+              keyboardType: TextInputType.number),
           const SizedBox(height: 16),
-          
-          // Campo de "Base de Destino" substituído pelo Dropdown
+
           _buildLocalDropdown(),
           const SizedBox(height: 16),
-          
-          // TODO: Substituir por um DatePicker
-          //_buildFormTextFieldWithIcon(label: 'Data de entrada', icon: Icons.calendar_today_outlined),
-          //const SizedBox(height: 16),
-          
-          // TODO: Pegar o ID do usuário logado automaticamente
-          _buildFormTextField(
-            label: 'Responsável (ID)', 
-            controller: _entradaResponsavelController, 
-            keyboardType: TextInputType.number
-          ),
+
           const SizedBox(height: 16),
-          
+          _buildDateField(),
+          const SizedBox(height: 16),
+
           _buildFormTextField(
-            label: 'Observações', 
-            controller: _entradaObsController, 
-            maxLines: 3
-          ),
+              label: 'Observações',
+              controller: _entradaObsController,
+              maxLines: 3),
           const SizedBox(height: 24),
-          
+
           // Botão de salvar agora com lógica de loading
           _isLoadingEntrada
-            ? const Center(child: CircularProgressIndicator())
-            : _buildFormButtons(
-                primaryText: 'Salvar Entrada', 
-                onPrimaryPressed: _salvarEntrada, // <-- CONECTADO
-              ),
+              ? const Center(child: CircularProgressIndicator())
+              : _buildFormButtons(
+                  primaryText: 'Salvar Entrada',
+                  onPrimaryPressed: _salvarEntrada,
+                  onCancelPressed: _limparFormularioEntrada),
         ],
       ),
     );
@@ -199,12 +288,12 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen> with TickerProv
       items: _locaisList.map((SimpleLocation local) {
         return DropdownMenuItem<SimpleLocation>(
           value: local,
-          child: Text(local.nome), // Mostra o nome (ex: "Jabaquara - Prateleira A")
+          child: Text(local.nome),
         );
       }).toList(),
       onChanged: (SimpleLocation? newValue) {
         setState(() {
-          _selectedLocal = newValue; // Armazena o local selecionado
+          _selectedLocal = newValue;
         });
       },
       decoration: InputDecoration(
@@ -219,30 +308,68 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen> with TickerProv
       validator: (value) => value == null ? 'Campo obrigatório' : null,
     );
   }
-  
-  /// Função chamada pelo botão "Salvar Entrada"
+
+  /// Constrói o Dropdown de Itens
+  Widget _buildItemDropdown() {
+    if (_isLoadingItems) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 8.0),
+        child: LinearProgressIndicator(),
+      );
+    }
+
+    return DropdownButtonFormField<InventoryItem>(
+      value: _selectedItem,
+      hint: const Text('Selecione um item'),
+      // Mapeia a lista de objetos InventoryItem
+      items: _itemsList.map((InventoryItem item) {
+        return DropdownMenuItem<InventoryItem>(
+          value: item,
+          child: Text(item.nome),
+        );
+      }).toList(),
+      onChanged: (InventoryItem? newValue) {
+        setState(() {
+          _selectedItem = newValue;
+        });
+      },
+      decoration: InputDecoration(
+        labelText: 'Item',
+        filled: true,
+        fillColor: const Color(0xFFF8F9FA),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey[400]!),
+        ),
+      ),
+      validator: (value) => value == null ? 'Campo obrigatório' : null,
+    );
+  }
+
   Future<void> _salvarEntrada() async {
-    // Trava o formulário
     setState(() => _isLoadingEntrada = true);
 
     try {
-      // Validação
-      if (_entradaItemController.text.isEmpty || 
-          _entradaQtdController.text.isEmpty || 
-          _selectedLocal == null || 
-          _entradaResponsavelController.text.isEmpty) {
-        
+      final authService = context.read<AuthServices>();
+
+      if (_selectedItem == null ||
+          _entradaQtdController.text.isEmpty ||
+          _selectedLocal == null) {
         throw Exception('Preencha todos os campos obrigatórios.');
       }
 
-      // 1. Coletar os dados
-      final int idMaterial = int.parse(_entradaItemController.text);
+      if (!authService.estaLogado || authService.usuario == null) {
+        throw Exception(
+            'Erro: Usuário não está logado. Faça o login novamente.');
+      }
+
+      final int idMaterial = _selectedItem!.code;
       final int quantidade = int.parse(_entradaQtdController.text);
-      final int idLocalDestino = _selectedLocal!.id; // Pega o ID do dropdown
-      final int idFuncionario = int.parse(_entradaResponsavelController.text);
+      final int idLocalDestino = _selectedLocal!.id;
       final String observacao = _entradaObsController.text;
 
-      // 2. Chamar o serviço
+      final int idFuncionario = authService.usuario!.id;
+
       final response = await _inventoryService.registerMovement(
         idMaterial: idMaterial,
         quantidade: quantidade,
@@ -251,35 +378,26 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen> with TickerProv
         observacao: observacao,
       );
 
-      // 3. Processar a resposta
       if (response['success'] == true) {
-        // Deu certo! Limpa os campos
-        _entradaItemController.clear();
-        _entradaQtdController.clear();
-        _entradaResponsavelController.clear();
-        _entradaObsController.clear();
-        setState(() {
-          _selectedLocal = null;
-        });
-        
+        _limparFormularioEntrada();
+
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Entrada registrada com sucesso!'), backgroundColor: Colors.green),
+          const SnackBar(
+              content: Text('Entrada registrada com sucesso!'),
+              backgroundColor: Colors.green),
         );
       } else {
         throw Exception(response['message']);
       }
-
     } catch (e) {
-      // Mostra o erro para o usuário
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao salvar: $e'), backgroundColor: Colors.red),
+        SnackBar(
+            content: Text('Erro ao salvar: $e'), backgroundColor: Colors.red),
       );
     }
     // Libera o formulário
     setState(() => _isLoadingEntrada = false);
   }
-
-  // === FIM DAS MUDANÇAS ===
 
   /// Constrói o formulário de "Registrar Saída"
   Widget _buildSaidaForm() {
@@ -287,46 +405,49 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen> with TickerProv
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Registrar Saída', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+          Text('Registrar Saída',
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 24),
-          _buildFormTextFieldWithIcon(label: 'Item', icon: Icons.search),
+
+          // Dropdown de Item
+          _buildSaidaItemDropdown(),
           const SizedBox(height: 16),
-          _buildFormTextField(label: 'Quantidade'), 
+
+          // Campo de Quantidade
+          _buildFormTextField(
+              label: 'Quantidade',
+              controller: _saidaQtdController,
+              keyboardType: TextInputType.number),
           const SizedBox(height: 16),
-          // Dropdown para Destino
-          _buildFormDropdownField(
-            label: 'Destino',
-            value: _selectedDestino,
-            items: ['Base Jabaquara', 'Base Paraíso', 'Oficina Central'],
-            onChanged: (value) => setState(() => _selectedDestino = value),
-          ),
+
+          // Dropdown de Local de ORIGEM
+          _buildSaidaLocalOrigemDropdown(),
           const SizedBox(height: 16),
-          // Dropdown para Motivo 
-          _buildFormDropdownField(
-            label: 'Motivo da saída',
-            value: _selectedMotivo,
-            items: ['Uso regular', 'Manutenção', 'Baixa de item'],
-            onChanged: (value) => setState(() => _selectedMotivo = value),
-          ),
-          const SizedBox(height: 16),
-          _buildFormTextFieldWithIcon(label: 'Data de saída', icon: Icons.calendar_today_outlined),
-          const SizedBox(height: 16),
-          _buildFormTextField(label: 'Responsável'),
-          const SizedBox(height: 16),
-          _buildFormTextField(label: 'Observações', maxLines: 3),
+
+          _buildFormTextField(
+              label: 'Observações (Motivo da saída)',
+              controller: _saidaObsController,
+              maxLines: 3),
           const SizedBox(height: 24),
-          _buildFormButtons(primaryText: 'Salvar Saída', onPrimaryPressed: () {}),
+
+          _isLoadingSaida
+              ? const Center(child: CircularProgressIndicator())
+              : _buildFormButtons(
+                  primaryText: 'Salvar Saída',
+                  onPrimaryPressed: _salvarSaida,
+                  onCancelPressed: _limparFormularioSaida),
         ],
       ),
     );
   }
 
-  // === INÍCIO DAS MUDANÇAS (WIDGET HELPER) ===
-
   /// Campo de texto simples (Modificado para aceitar Controller, etc.)
   Widget _buildFormTextField({
-    required String label, 
-    int maxLines = 1, 
+    required String label,
+    int maxLines = 1,
     TextEditingController? controller,
     TextInputType? keyboardType,
     String? hint,
@@ -334,14 +455,19 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen> with TickerProv
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.black54)),
+        Text(label,
+            style: const TextStyle(
+                fontWeight: FontWeight.w500, color: Colors.black54)),
         const SizedBox(height: 8),
         TextFormField(
-          controller: controller, // <-- Adicionado
-          keyboardType: keyboardType, // <-- Adicionado
+          controller: controller,
+          keyboardType: keyboardType,
           maxLines: maxLines,
+          inputFormatters: keyboardType == TextInputType.number
+              ? [FilteringTextInputFormatter.digitsOnly]
+              : [],
           decoration: InputDecoration(
-            hintText: hint, // <-- Adicionado
+            hintText: hint,
             filled: true,
             fillColor: const Color(0xFFF8F9FA),
             border: OutlineInputBorder(
@@ -353,19 +479,30 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen> with TickerProv
               borderSide: BorderSide(color: Colors.grey[400]!),
             ),
           ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Este campo é obrigatório.';
+            }
+            if (keyboardType == TextInputType.number &&
+                int.tryParse(value) == null) {
+              return 'Insira um valor numérico válido.';
+            }
+            return null;
+          },
         ),
       ],
     );
   }
-  
-  // === FIM DAS MUDANÇAS ===
 
   /// Campo de texto com ícone (para pesquisa ou data)
-  Widget _buildFormTextFieldWithIcon({required String label, required IconData icon}) {
+  Widget _buildFormTextFieldWithIcon(
+      {required String label, required IconData icon}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.black54)),
+        Text(label,
+            style: const TextStyle(
+                fontWeight: FontWeight.w500, color: Colors.black54)),
         const SizedBox(height: 8),
         TextFormField(
           decoration: InputDecoration(
@@ -385,13 +522,14 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen> with TickerProv
       ],
     );
   }
-  
-  /// Campo de seleção falso (para "Quantidade" e "Base de destino" em Entrada)
+
   Widget _buildFormSelectionField({required String label}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.black54)),
+        Text(label,
+            style: const TextStyle(
+                fontWeight: FontWeight.w500, color: Colors.black54)),
         const SizedBox(height: 8),
         InkWell(
           onTap: () {
@@ -430,7 +568,9 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen> with TickerProv
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.black54)),
+        Text(label,
+            style: const TextStyle(
+                fontWeight: FontWeight.w500, color: Colors.black54)),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           value: value,
@@ -458,19 +598,132 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen> with TickerProv
     );
   }
 
+  Widget _buildDateField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Data da Entrada',
+            style:
+                TextStyle(fontWeight: FontWeight.w500, color: Colors.black54)),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: _entradaDataController,
+          keyboardType: TextInputType.number,
+          maxLength: 10,
+          inputFormatters: [
+            dateMaskFormatter,
+          ],
+          decoration: InputDecoration(
+            hintText: 'DD/MM/AAAA',
+            suffixIcon: const Icon(Icons.calendar_today_outlined,
+                color: Colors.black54), //
+            counterText: '',
+            filled: true,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey[400]!),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey[400]!),
+            ),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          ),
+          validator: (value) {
+            // Validação de data opcional
+            if (value != null && value.isNotEmpty && value.length < 10) {
+              return "A data deve estar completa (DD/MM/AAAA)";
+            }
+            return null;
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSaidaItemDropdown() {
+    if (_isLoadingItems) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 8.0),
+        child: LinearProgressIndicator(),
+      );
+    }
+
+    return DropdownButtonFormField<InventoryItem>(
+      value: _selectedSaidaItem,
+      hint: const Text('Selecione um item'),
+      items: _itemsList.map((InventoryItem item) {
+        return DropdownMenuItem<InventoryItem>(
+          value: item,
+          child: Text(item.nome),
+        );
+      }).toList(),
+      onChanged: (InventoryItem? newValue) {
+        setState(() {
+          _selectedSaidaItem = newValue;
+        });
+      },
+      decoration: InputDecoration(
+        labelText: 'Item',
+        filled: true,
+        fillColor: const Color(0xFFF8F9FA),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey[400]!),
+        ),
+      ),
+    );
+  }
+
+  /// Constrói o Dropdown de Locais para a Saída
+  Widget _buildSaidaLocalOrigemDropdown() {
+    if (_isLoadingLocais) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return DropdownButtonFormField<SimpleLocation>(
+      value: _selectedSaidaLocalOrigem,
+      hint: const Text('Selecione o local de origem'),
+      items: _locaisList.map((SimpleLocation local) {
+        return DropdownMenuItem<SimpleLocation>(
+          value: local,
+          child: Text(local.nome),
+        );
+      }).toList(),
+      onChanged: (SimpleLocation? newValue) {
+        setState(() {
+          _selectedSaidaLocalOrigem = newValue;
+        });
+      },
+      decoration: InputDecoration(
+        labelText: 'Local de Origem',
+        filled: true,
+        fillColor: const Color(0xFFF8F9FA),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey[400]!),
+        ),
+      ),
+    );
+  }
+
   /// Botões de ação do formulário
-  Widget _buildFormButtons({required String primaryText, required VoidCallback onPrimaryPressed}) {
+  Widget _buildFormButtons(
+      {required String primaryText,
+      required VoidCallback onPrimaryPressed,
+      VoidCallback? onCancelPressed}) {
     return Row(
       children: [
         OutlinedButton(
-          onPressed: () {
-            // TODO: Lógica de cancelar (ex: Navigator.pop(context) ou limpar campos)
-          },
+          onPressed: onCancelPressed,
           style: OutlinedButton.styleFrom(
             foregroundColor: Colors.grey[700],
             side: BorderSide(color: Colors.grey[400]!),
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
           child: const Text('Cancelar'),
         ),
@@ -481,7 +734,8 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen> with TickerProv
             backgroundColor: const Color(0xFF1763A6),
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
           child: Text(primaryText),
         ),

@@ -7,6 +7,7 @@ import 'package:metro_projeto/screens/CadastroMaterialScreen.dart';
 import 'package:metro_projeto/screens/loginscreen.dart';
 import 'package:metro_projeto/screens/movimentation_screen.dart';
 import 'package:metro_projeto/screens/reportscreen.dart';
+import 'package:metro_projeto/screens/user_registration_screen.dart';
 import 'package:metro_projeto/screens/usermanagementscreen.dart';
 import 'package:metro_projeto/screens/detalhe_item_screen.dart';
 import 'package:metro_projeto/screens/loginscreen.dart';
@@ -16,12 +17,16 @@ import 'package:metro_projeto/screens/detalhe_item_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'services/auth_services.dart';
 
 void main() {
   runApp(
     MultiProvider(
     providers: [
-      ChangeNotifierProvider(create: (_) => UserProvider())],
+      ChangeNotifierProvider(create: (_) => UserProvider()),
+      ChangeNotifierProvider(create: (_) => AuthServices()),
+      ],
+      
       child: const MyApp()
   ),
   );

@@ -177,8 +177,8 @@ class _DetalheItemScreenState extends State<DetalheItemScreen> {
                   final item =
                       allItems.firstWhere((e) => e.nome == selection);
 
-                  final detalhe = await _inventario.getItemDetail(item.id);
-                  final historico = await _movimentacao.getItemHistory(item.id);
+                  final detalhe = await _inventario.getItemDetail(item.code);
+                  final historico = await _movimentacao.getItemHistory(item.code);
 
                   detalhe['movimentacoes'] = historico['movimentacoes'] ?? [];
                   setState(() {

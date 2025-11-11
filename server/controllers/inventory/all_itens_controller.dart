@@ -1,13 +1,18 @@
 import 'package:dart_frog/dart_frog.dart';
 import '../../db/connection.dart';
-import '../../db/inventory.dart'; 
+import '../../db/inventory.dart';
 
 Future<Response> inventoryAllHandler(RequestContext context) async {
   if (context.request.method == HttpMethod.get) {
     try {
-      final conexao = Connection.getConnection();
-      final dao = InventoryDAO(await conexao);
-      final items = await dao.getAllItems();
+      final params = context.request.uri.queryParameters;
+      final baseId = params['baseId'];
+      final int? baseIdInt = baseId == null ? null : int.tryParse(baseId);
+
+      final db = await Connection.getConnection();
+      final dao = InventoryDAO(db);
+      
+      final items = await dao.getAllItems(baseId: baseIdInt);
 
       final data = items.map((item) => {
             'id': item.id,
@@ -17,18 +22,20 @@ Future<Response> inventoryAllHandler(RequestContext context) async {
             'medidaId': item.medidaId,             
             'medidaNome': item.medida,             
             'requerCalibracao': item.requerCalibracao,
-            'qtdAtual': item.qtdAtual,
+            'qtdAlto': item.qtdAtual,
             'qtdBaixo': item.qtdBaixo,
             'descricao': item.descricao,
+            'qtdAtual': item.quantidadeAtual, 
           }).toList();
 
       return Response.json(body: {
         'success': true,
         'count': data.length,
-        'data': data
+        'data': data,
       });
     } catch (e) {
       print('Erro no controller inventoryAllHandler: $e');
+      
       return Response.json(
         statusCode: 500,
         body: {

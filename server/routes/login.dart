@@ -1,5 +1,5 @@
 import 'package:dart_frog/dart_frog.dart';
-import '../controllers/login_controller.dart';
+import '../controllers/user/login_controller.dart';
 
 Future<Response> onRequest(RequestContext context) async {
   if (context.request.method == HttpMethod.post) {

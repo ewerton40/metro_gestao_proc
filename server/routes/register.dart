@@ -1,11 +1,10 @@
-import 'package:dart_frog/dart_frog.dart';
 import 'dart:io';
-import '../../controllers/movimentations/movimentation_controller.dart'; 
+import 'package:dart_frog/dart_frog.dart';
+import '../controllers/user/user_registration_controller.dart'; 
 
 Future<Response> onRequest(RequestContext context) async {
-  
-  if (context.request.method == HttpMethod.post) {
-    return addMovementHandler(context);
+    if (context.request.method == HttpMethod.post) {
+    return await registerUserHandler(context);
   }
 
   return Response.json(

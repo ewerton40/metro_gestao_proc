@@ -14,6 +14,7 @@ class InventoryItemQueryResult {
   final int qtdAtual;
   final int qtdBaixo;
   final String descricao;
+    final int quantidadeAtual; 
 
   InventoryItemQueryResult({
     required this.id,
@@ -23,9 +24,10 @@ class InventoryItemQueryResult {
     required this.medidaId,   
     required this.medida,
     required this.requerCalibracao,
-    required this.qtdAtual,
+    required this.qtdAtual, 
     required this.qtdBaixo,
     required this.descricao,
+    required this.quantidadeAtual, 
   });
 }
 
@@ -34,29 +36,42 @@ class InventoryDAO {
   final MySQLConnection connection;
   InventoryDAO(this.connection);
 
-  Future<List<InventoryItemQueryResult>> getAllItems() async {
-    const String sqlQuery = '''
+  Future<List<InventoryItemQueryResult>> getAllItems({int? baseId}) async {
+     String sqlQuery = '''
       SELECT 
         m.id_material AS id,
         m.nome AS nome,
-        
         m.id_categoria AS categoriaId,      
         c.nome_categoria AS categoria,
-        
         m.id_medida AS medidaId,
         u.nome_medida AS medida,
-        
         m.requer_calibracao AS requerCalibracao,
-        m.qtd_alto AS qtdAlto,
+        m.qtd_alto AS qtdAlto,           -- Seleciona o limite alto (vamos mapear para qtdAtual)
         m.qtd_alerta_baixo AS qtdBaixo,
-        m.descricao AS descricao
+        m.descricao AS descricao,
+        COALESCE(e.quantidade, 0) AS quantidadeAtual -- Seleciona o estoque real
       FROM materiais m
       LEFT JOIN categoria c ON m.id_categoria = c.id_categoria
-      LEFT JOIN unidade_medida u ON m.id_medida = u.id_medida;
+      LEFT JOIN unidade_medida u ON m.id_medida = u.id_medida
     ''';
 
+    Map<String, dynamic> params = {};
+
+    if (baseId != null) {
+      sqlQuery += ' LEFT JOIN estoque e ON m.id_material = e.id_material AND e.id_base = :baseId';
+      params['baseId'] = baseId;
+    } else {
+      sqlQuery += '''
+        LEFT JOIN (
+          SELECT id_material, SUM(quantidade) AS quantidade
+          FROM estoque
+          GROUP BY id_material
+        ) e ON m.id_material = e.id_material
+      ''';
+    }
+
     try {
-      final result = await connection.execute(sqlQuery);
+      final result = await connection.execute(sqlQuery, params);
       if (result.numOfRows == 0) return [];
 
       final items = <InventoryItemQueryResult>[];
@@ -72,9 +87,12 @@ class InventoryDAO {
           medida: data['medida'] ?? '',
           
           requerCalibracao: data['requerCalibracao'] == '1',
-          qtdAtual: int.tryParse(data['qtdAlto'] ?? '0') ?? 0,
+          
+          qtdAtual: int.tryParse(data['qtdAlto'] ?? '0') ?? 0, 
           qtdBaixo: int.tryParse(data['qtdBaixo'] ?? '0') ?? 0,
           descricao: data['descricao'] ?? '',
+          
+          quantidadeAtual: int.tryParse(data['quantidadeAtual'] ?? '0') ?? 0, 
         ));
     }
       return items;
@@ -90,7 +108,6 @@ class InventoryDAO {
     String? termoPesquisa,
   }) async {
     
-
     String sqlQuery = '''
       SELECT 
         m.id_material AS id,
@@ -100,41 +117,39 @@ class InventoryDAO {
         m.id_medida AS medidaId,       
         u.nome_medida AS medida,
         m.requer_calibracao AS requerCalibracao,
-        m.qtd_atual AS qtdAtual,         -- Corrigido
+        m.qtd_alto AS qtdAlto,           -- CORRIGIDO (era qtd_atual)
         m.qtd_alerta_baixo AS qtdBaixo,
-        m.descricao AS descricao
+        m.descricao AS descricao,
+        0 AS quantidadeAtual -- Adicionado para o construtor não quebrar
       FROM materiais m
       LEFT JOIN categoria c ON m.id_categoria = c.id_categoria
       LEFT JOIN unidade_medida u ON m.id_medida = u.id_medida
     ''';
 
     List<String> whereClauses = [];
-    List<dynamic> parameters = [];
+    Map<String, dynamic> parameters = {};
 
    
     if (categoriaId != null) {
-      whereClauses.add('m.id_categoria = ?');
-      parameters.add(categoriaId);
+      whereClauses.add('m.id_categoria = :categoriaId');
+      parameters['categoriaId'] = categoriaId;
     }
 
     if (termoPesquisa != null && termoPesquisa.isNotEmpty) {
-      whereClauses.add('m.nome LIKE ?');
-      parameters.add('%$termoPesquisa%'); 
+      whereClauses.add('m.nome LIKE :termoPesquisa');
+      parameters['termoPesquisa'] = '%$termoPesquisa%'; 
     }
 
     if (statusEstoque != null) {
       switch (statusEstoque) {
         case 'Em estoque':
-          // Atual > Baixo
-          whereClauses.add('m.qtd_atual > m.qtd_alerta_baixo');
+          whereClauses.add('m.qtd_alto > m.qtd_alerta_baixo');
           break;
         case 'Baixo estoque':
-          // Atual > 0 E Atual <= Baixo
-          whereClauses.add('m.qtd_atual > 0 AND m.qtd_atual <= m.qtd_alerta_baixo');
+          whereClauses.add('m.qtd_alto > 0 AND m.qtd_alto <= m.qtd_alerta_baixo');
           break;
         case 'Esgotado':
-          // Atual <= 0
-          whereClauses.add('m.qtd_atual <= 0');
+          whereClauses.add('m.qtd_alto <= 0');
           break;
       }
     }
@@ -142,13 +157,10 @@ class InventoryDAO {
     if (whereClauses.isNotEmpty) {
       sqlQuery += ' WHERE ${whereClauses.join(' AND ')}';
     }
-
-    // Adiciona ordenação
     sqlQuery += ' ORDER BY m.nome;';
 
     try {
-
-      final result = await connection.execute(sqlQuery);
+      final result = await connection.execute(sqlQuery, parameters);
 
       if (result.numOfRows == 0) return [];
 
@@ -163,9 +175,10 @@ class InventoryDAO {
           medidaId: int.tryParse(data['medidaId'] ?? '0') ?? 0,     
           medida: data['medida'] ?? '',
           requerCalibracao: data['requerCalibracao'] == '1',
-          qtdAtual: int.tryParse(data['qtdAtual'] ?? '0') ?? 0, 
+          qtdAtual: int.tryParse(data['qtdAlto'] ?? '0') ?? 0, 
           qtdBaixo: int.tryParse(data['qtdBaixo'] ?? '0') ?? 0,
           descricao: data['descricao'] ?? '',
+          quantidadeAtual: int.tryParse(data['quantidadeAtual'] ?? '0') ?? 0, 
         ));
       }
       return items;
@@ -175,6 +188,7 @@ class InventoryDAO {
     }
   }
   
+   
    Future<int> countLowStockItems() async {
     const String sqlQuery = '''
       SELECT 
@@ -382,10 +396,82 @@ Future<List<Map<String, dynamic>>> getCriticalItems() async {
       throw Exception('Falha ao acessar o banco de dados.');
     }
   }
+  
+  Future<int> registerSaida({
+    required int idMaterial,
+    required int quantidade,
+    required int idLocalOrigem,
+    required int idFuncionario,
+    required String observacao,
+  }) async {
+    
+    await connection.execute('START TRANSACTION');
+
+    try {
+      final resultBase = await connection.execute(
+        'SELECT id_base FROM locais_estoque WHERE id_local = :idLocal',
+        {'idLocal': idLocalOrigem},
+      );
+      
+      if (resultBase.numOfRows == 0) {
+        throw Exception('Local de origem não encontrado ou não associado a uma base.');
+      }
+      final int idBase = int.parse(resultBase.rows.first.assoc()['id_base']!);
+
+      final resultEstoque = await connection.execute(
+        '''
+        SELECT quantidade FROM estoque
+        WHERE id_base = :base AND id_material = :material
+        FOR UPDATE
+        ''',
+        {'base': idBase, 'material': idMaterial},
+      );
+
+      int estoqueAtual = 0;
+      if (resultEstoque.numOfRows > 0) {
+        estoqueAtual = int.parse(resultEstoque.rows.first.assoc()['quantidade']!);
+      }
+
+      if (estoqueAtual < quantidade) {
+        await connection.execute('ROLLBACK');
+        throw Exception('Estoque insuficiente. Disponível: $estoqueAtual, Solicitado: $quantidade');
+      }
+
+      await connection.execute(
+        '''
+        UPDATE estoque 
+        SET quantidade = quantidade - :qtd
+        WHERE id_base = :base AND id_material = :material
+        ''',
+        {'qtd': quantidade, 'base': idBase, 'material': idMaterial},
+      );
+
+      final resultMov = await connection.execute(
+        '''
+        INSERT INTO movimentacoes 
+        (id_material, quantidade, id_local_origem, id_funcionario_responsavel, observacao, tipo_movimentacao, id_local_destino)
+        VALUES (:id, :qtd, :origem, :func, :obs, :tipo, NULL)
+        ''',
+        {
+          'id': idMaterial,
+          'qtd': quantidade,
+          'origem': idLocalOrigem,
+          'func': idFuncionario,
+          'obs': observacao,
+          'tipo': 'saida',
+        },
+      );
+
+      await connection.execute('COMMIT');
+      
+      return resultMov.lastInsertID.toInt();
+
+    } catch (e) {
+      await connection.execute('ROLLBACK');
+      print('Erro na transação de SAÍDA: $e');
+      rethrow; 
+    }
   }
-
-
-
-
-
+}
+  
 

@@ -739,7 +739,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             sectionsSpace: 3,
             centerSpaceRadius: 50,
             sections: List.generate(_categoryDistribution.length, (i) {
-              final categoria = _categoryDistribution[i]['categoria']?.toString() ?? 'Sem categoria';
               final total = ((_categoryDistribution[i]['total'] ?? 0) as int);
               final percent = (total / totalGeral) * 100;
               final isTouched = _touchedCategoryIndex == i;
