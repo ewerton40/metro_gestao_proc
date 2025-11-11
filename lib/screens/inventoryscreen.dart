@@ -176,7 +176,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
       body: Padding(
         padding: const EdgeInsets.all(32.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _buildHeader(),
             const SizedBox(height: 24),
