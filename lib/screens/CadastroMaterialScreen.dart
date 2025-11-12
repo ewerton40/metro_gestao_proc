@@ -180,6 +180,9 @@ void _showSnackBar(String message, {bool isError = false}) {
             color: const Color(0xFFF8F9FA),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: Colors.grey[300]!),
+            //////
+
+
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,7 +201,7 @@ void _showSnackBar(String message, {bool isError = false}) {
                   hint: 'Materiais',
                 )),
                 const SizedBox(width: 16),
-                Expanded(child: _buildTextField(label: 'Fornecedor', controller: _supplierController)),
+                Expanded(child: _buildTextField(label: 'Fornecedor / Proprietario', controller: _supplierController)),
               ],
             ),
             const SizedBox(height: 16),
@@ -310,7 +313,7 @@ void _showSnackBar(String message, {bool isError = false}) {
               fillColor: Colors.white,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.grey[400]!),
+                borderSide: BorderSide(color: Colors.grey[400]!),            
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
