@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
 import '../services/auth_services.dart';
-import '../models/employee.dart';
+import '../utils/models/employee.dart';
 
 class UserRegistrationScreen extends StatefulWidget {
   final Funcionario? usuarioParaEditar;

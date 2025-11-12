@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/providers/user_provider.dart';
 import 'package:metro_projeto/screens/dashBoardScreen.dart';
+import 'package:metro_projeto/screens/forgot_password_screen.dart';
 import 'package:metro_projeto/widgets/custom_button.dart';
 import '../services/auth_services.dart';
 import 'package:provider/provider.dart';
@@ -210,12 +211,8 @@ class _LoginScreenState extends State<LoginScreen>
                                       alignment: Alignment.centerLeft,
                                     ),
                                     onPressed: () {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        const SnackBar(
-                                            content: Text(
-                                                'Funcionalidade "Esqueceu a Senha" ainda não implementada.')),
-                                      );
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()));
+                                      
                                     },
                                     child: const Text(
                                       'Esqueceu sua senha?',

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
 import '../services/inventory_service.dart';
-import '../models/location.dart';
+import '../utils/models/location.dart';
 import '../services/inventory_service.dart';
 import '../screens/inventoryscreen.dart';
 import 'package:provider/provider.dart';

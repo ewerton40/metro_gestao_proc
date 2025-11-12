@@ -3,9 +3,9 @@ import 'admnistrator.dart' show LoginQueryResult;
 
 class UserQueryResult {
   final int id;
-  final String nome; // Corrigido (era name)
+  final String nome; 
   final String email;
-  final String cargo; // Corrigido (era role)
+  final String cargo; 
 
   UserQueryResult({
     required this.id,

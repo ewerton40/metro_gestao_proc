@@ -1,5 +1,4 @@
 import 'package:dart_frog/dart_frog.dart';
-import '../../../controllers/inventory/itens_details_controller.dart';
 import '../../../controllers/movimentations/itens_history_controller.dart';
 
 

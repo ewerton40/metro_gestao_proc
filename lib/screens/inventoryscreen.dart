@@ -4,9 +4,8 @@ import 'package:metro_projeto/screens/detalhe_item_screen.dart';
 import '../services/inventory_service.dart';
 import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
-import 'package:metro_projeto/screens/inventoryscreen.dart';
 
-import '../models/location.dart';
+import '../utils/models/location.dart';
 
 class InventoryItem {
   final int code;

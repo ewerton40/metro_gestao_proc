@@ -1,5 +1,4 @@
 import 'package:dart_frog/dart_frog.dart';
-import 'dart:io';
 import '../db/connection.dart';
 import '../db/notification.dart';
 
@@ -41,7 +40,7 @@ Future<Response> notificationHandler(RequestContext context) async {
   }
 }
 
-/// Este handler lida com POST /notifications/read
+
 Future<Response> markNotificationsAsReadHandler(RequestContext context) async {
   try {
     final db = await Connection.getConnection();

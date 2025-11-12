@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../screens/inventoryscreen.dart';
-import '../models/location.dart';
+import '../utils/models/location.dart';
 
 class InventoryServices {
   final _baseUrl = 'http://localhost:8080';
@@ -55,7 +55,7 @@ Future<List<Category>> getAllCategories() async {
       'id_material': idMaterial,
       'quantidade': quantidade,
       'id_local_destino': idLocalDestino,
-      'id_funcionario': idFuncionario, // Você precisa pegar o ID do usuário logado
+      'id_funcionario': idFuncionario, 
       'observacao': observacao,
     });
 
@@ -71,7 +71,7 @@ Future<List<Category>> getAllCategories() async {
       } else {
         // Tenta decodificar a mensagem de erro do servidor
         final errorBody = jsonDecode(response.body);
-        throw Exception('Falha ao registrar: ${errorBody['message']}');
+        throw   ('Falha ao registrar: ${errorBody['message']}');
       }
     } catch (e) {
       throw Exception('Erro de conexão: $e');

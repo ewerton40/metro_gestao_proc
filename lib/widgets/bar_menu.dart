@@ -3,7 +3,7 @@ import 'package:metro_projeto/providers/user_provider.dart';
 import 'package:metro_projeto/screens/dashBoardScreen.dart';
 import 'package:provider/provider.dart';
 import '../services/notification_service.dart';
-import '../models/notification.dart';
+import '../utils/models/notification.dart';
  
 
 class BarMenu extends StatefulWidget implements PreferredSizeWidget {
