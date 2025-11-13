@@ -69,7 +69,7 @@ Future<List<Category>> getAllCategories() async {
       if (response.statusCode == 200 || response.statusCode == 201) {
         return jsonDecode(response.body) as Map<String, dynamic>;
       } else {
-        // Tenta decodificar a mensagem de erro do servidor
+        
         final errorBody = jsonDecode(response.body);
         throw   ('Falha ao registrar: ${errorBody['message']}');
       }
@@ -80,17 +80,20 @@ Future<List<Category>> getAllCategories() async {
 
 
 
- Future<Map<String, dynamic>> addItem(InventoryItem item) async {
-    final url = Uri.parse('$_baseUrl/inventory/add');
+ Future<Map<String, dynamic>> addItem(Map<String, dynamic> itemData) async {
+    final url = Uri.parse('$_baseUrl/materiais');
 
     final body = jsonEncode({
-      'nome': item.nome,
-      'categoriaId': item.categoriaId,
-      'medidaId': item.medidaId,
-      'requerCalibracao': item.calibracao,
-      'qtdAlto': item.qtdAlto,
-      'qtdBaixo': item.qtdBaixo,
-      'descricao': item.descricao,
+      'name': itemData['name'],
+      'category': itemData['category'],
+  //  'medidaId': itemData['medida'],
+      'base': itemData['base'],
+      'supplier': itemData['supplier'],
+      'validityType': itemData['validityType'],
+      'minStock': itemData['minStock'],
+      'maxStock': itemData['maxStock'],
+      'description': itemData['description'],
+      'validityDate': itemData['validityDate'],
     });
 
     final response = await http.post(
@@ -99,9 +102,10 @@ Future<List<Category>> getAllCategories() async {
       body: body,
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 201) {
       return jsonDecode(response.body);
     } else {
+      final errorBody = jsonDecode(response.body);
       throw Exception('Falha ao cadastrar item: ${response.statusCode} - ${response.body}');
     }
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/widgets/bar_menu.dart';
+import 'package:metro_projeto/services/inventory_service.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:intl/intl.dart';
@@ -15,6 +16,7 @@ class CadastroMaterialScreen extends StatefulWidget {
 class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
   final _formKey = GlobalKey<FormState>();
   String? _selectedCategory = 'Equipamentos';
+  String? _selectedBase;
   String? _selectedValidityType;
 
   final _nameController = TextEditingController();
@@ -51,19 +53,35 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
       if (_formKey.currentState!.validate()) {
         final itemData = {
           'name': _nameController.text,
-          'code': _codeController.text,
+          'code': _codeController.text, ///estava comentado
           'category': _selectedCategory,
+          'base': _selectedBase,
           'supplier': _supplierController.text,
           'validityType': _selectedValidityType,
-          'location': _locationController.text,
           'minStock': _minStockController.text,
           'maxStock': _maxStockController.text,
           'description': _descriptionController.text,
           'validityDate' :_isDateRequired ? _dateController.text : null,
-        };
-        print(itemData);////////////////////////////////////RESOLVER PROBLEA QUE QUANDO CLICA NO BOTAO SALVAR APARECE COISAS DIFERENTES NO TERMINAL///////////////////////
 
-        _restartScreen();
+          //'location': _locationController.text,
+        };
+
+        try {
+          final InventoryService = InventoryServices();
+          await InventoryService.addItem(itemData);
+
+          _showSnackBar('material cadastrado com sucesso!', isError: false);
+          print('material enviado para o backend co sucesso');
+
+          _restartScreen();
+        } catch (e){
+          print('ERRO NO ENVIO PARA O BACKEND: $e');
+          _showSnackBar('falha ao cadastrar material.', isError: true);
+        }
+
+        //print(itemData);////////////////////////////////////RESOLVER PROBLEA QUE QUANDO CLICA NO BOTAO SALVAR APARECE COISAS DIFERENTES NO TERMINAL///////////////////////
+
+      
       }
   }
 
@@ -91,6 +109,18 @@ void _restartScreen() {
     ),
   );
 }
+/////////////////////////mostra falah ao cadastrar material
+void _showSnackBar(String message, {bool isError = false}) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(message),
+      backgroundColor: isError ? Colors.red.shade700 : Colors.green.shade700,
+      duration: const Duration(seconds: 3),
+      behavior: SnackBarBehavior.floating,
+    ),
+  );
+}
+
     @override
     Widget build(BuildContext context) {
       // A tela principal é envolvida por um Scaffold para a estrutura básica.
@@ -114,16 +144,11 @@ void _restartScreen() {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      flex: 2, // A coluna do formulário ocupa 2/3 do espaço
+                      flex: 1, 
                       child: _buildFormCard(),
                     ),
-                    const SizedBox(width: 32),
-                    Expanded(
-                      flex: 1, // A coluna da imagem ocupa 1/3 do espaço
-                      child: _buildImageUploadCard(),
-                    ),
                   ],
-                ),
+                 ),
               ],
             ),
           ),
@@ -141,6 +166,9 @@ void _restartScreen() {
             color: const Color(0xFFF8F9FA),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: Colors.grey[300]!),
+            //////
+
+
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,7 +187,7 @@ void _restartScreen() {
                   hint: 'Materiais',
                 )),
                 const SizedBox(width: 16),
-                Expanded(child: _buildTextField(label: 'Fornecedor', controller: _supplierController)),
+                Expanded(child: _buildTextField(label: 'Fornecedor / Proprietario', controller: _supplierController)),
               ],
             ),
             const SizedBox(height: 16),
@@ -183,9 +211,9 @@ void _restartScreen() {
             const SizedBox(width: 16),
             Expanded(child: _buildDropdownField(
                   label: 'base', 
-                  value: _selectedCategory,
+                  value: _selectedBase,
                   items: ['WJA (Jabaquara)', 'PSO (Paraiso)', 'TRD (Tiradentes)', 'TUC (Yucuruvi)', 'LUN (Luminarias)', 'IMG (Imigantes)', 'BFU (Barra Funda)', 'BAS (Brás)', 'CEC (Cecília)', 'MAT (Matheus)', 'VTD (Vila Matilde)', 'VPT (Vila Prudente)', 'PIT (Pátio Itaquera)', 'POT (Pátio Oratório)', 'PAT (Pátio Jabaquara)'],
-                  onChanged: (value) => setState(() => _selectedCategory = value),
+                  onChanged: (value) => setState(() => _selectedBase = value),
                 )),
               ],
             ),
@@ -211,7 +239,7 @@ void _restartScreen() {
                 const SizedBox(width: 16),
 
                 Expanded(flex: 1, child: _buildTextField(
-                  label: 'estoque alto',
+                  label: 'estoque atual',
                   controller: _maxStockController,
                   keyboardType: TextInputType.number,
                 )),
@@ -245,42 +273,10 @@ void _restartScreen() {
 
 
 
-    // Constrói o card para upload da imagem e resumo
-    Widget _buildImageUploadCard() {
-      return Container(
-        padding: const EdgeInsets.all(24.0),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF8F9FA),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey[300]!),
-        ),
-        child: Column(
-          children: [
-            Container(
-              width: 150,
-              height: 150,
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.image_outlined, size: 50, color: Colors.grey),
-            ),
-            const SizedBox(height: 24),
-            _buildReadOnlyField(label: 'Categoria', value: 'materiais'),
-            const SizedBox(height: 16),
-            _buildReadOnlyField(label: 'Estoque Mínimo', value: '5'),
-            const SizedBox(height: 24),
-            TextButton.icon(
-              icon: const Icon(Icons.attach_file, color: Color(0xFF1763A6)),
-              label: const Text('Upload de Foto', style: TextStyle(color: Color(0xFF1763A6))),
-              onPressed: () {},
-            ),
-          ],
-        ),
-      );
-    }
+    // Construia(foi apagado) o card para upload da imagem e resumo ////TEM QUE TIRAR O CAMPO DE COLOCAR A IMAGEM!!!!!
+   
 
-    Widget _buildDateField(){ /////// criado, nao tinha antes
+    Widget _buildDateField(){
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -303,7 +299,7 @@ void _restartScreen() {
               fillColor: Colors.white,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.grey[400]!),
+                borderSide: BorderSide(color: Colors.grey[400]!),            
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -312,7 +308,7 @@ void _restartScreen() {
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
             validator: (value) {
-            // O campo é obrigatório APENAS se _isDateRequired for true
+            
               if (_isDateRequired && (value == null || value.isEmpty)) {
                 return 'Obrigatório selecionar a data.';
               }
@@ -327,14 +323,13 @@ void _restartScreen() {
     }
 
 
-    // Widget auxiliar para criar campos de texto padrão
+    
     Widget _buildTextField({
       required String label, 
       required TextEditingController controller, 
       int maxLines = 1,
       TextInputType keyboardType = TextInputType.text 
-    }) {////////////////////////////////////////
-
+    }) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -361,7 +356,7 @@ void _restartScreen() {
               if (value == null || value.isEmpty) {
                 return 'Este campo é obrigatório.';
               }
-              // Validação simples para campos numéricos
+              
               if (keyboardType == TextInputType.number && double.tryParse(value) == null) {
                 return 'Insira um valor numérico válido.';
               }
@@ -372,7 +367,7 @@ void _restartScreen() {
       );
     }
     
-    // Widget auxiliar para criar campos de dropdown
+    
     Widget _buildDropdownField({
 
       required String label,
@@ -415,7 +410,7 @@ void _restartScreen() {
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
-            validator: (value) { // <<< ADICIONADA: Validação para Dropdown
+            validator: (value) { 
               if (value == null || value.isEmpty) {
                 return 'Selecione uma opção.';
               }
@@ -426,7 +421,7 @@ void _restartScreen() {
       );
     }
     
-    // Widget auxiliar para campos de texto somente leitura
+    
     Widget _buildReadOnlyField({required String label, required String value}) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
