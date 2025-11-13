@@ -12,7 +12,6 @@ import 'package:metro_projeto/screens/reset_password_screen.dart';
 import 'package:metro_projeto/screens/user_management_screen.dart';
 import 'package:metro_projeto/screens/user_registration_screen.dart';
 import 'package:metro_projeto/screens/detalhe_item_screen.dart';
-import 'package:metro_projeto/screens/loginscreen.dart';
 import 'package:metro_projeto/screens/reportscreen.dart';
 import 'package:metro_projeto/screens/detalhe_item_screen.dart';
 import 'package:provider/provider.dart';
