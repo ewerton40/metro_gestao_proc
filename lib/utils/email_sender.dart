@@ -2,10 +2,10 @@ import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 
 Future<void> sendRecoveryEmail(String email, String token) async {
-  final smtpServer = gmail('seuemail@gmail.com', 'senha_app_password');
+  final smtpServer = gmail('testemetroimt@gmail.com', 'ihortbbabhymdldq');
 
   final message = Message()
-    ..from = const Address('seuemail@gmail.com', 'Metro Gestão')
+    ..from = const Address('testemetroimt@gmail.com', 'Metro Gestão')
     ..recipients.add(email)
     ..subject = 'Recuperação de Senha - Metro Gestão'
     ..text = '''

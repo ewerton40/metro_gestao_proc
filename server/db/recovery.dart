@@ -20,9 +20,9 @@ class RecoveryDAO {
 
   Future<void> saveToken(String email, String token) async {
     const query = '''
-      INSERT INTO recovery_tokens (id_funcionario, token, criado_em)
-      VALUES (:id_funcionario, :token, NOW())
-      ON DUPLICATE KEY UPDATE token = :token, criado_em = NOW()
+    INSERT INTO recuperacao_senha (email, token, criado_em)
+    VALUES (:email, :token, NOW())
+    ON DUPLICATE KEY UPDATE token = :token, criado_em = NOW()
     ''';
     try {
       await connection.execute(query, {'email': email, 'token': token});
@@ -34,9 +34,9 @@ class RecoveryDAO {
 
   Future<bool> verifyToken(String email, String token) async {
     const query = '''
-      SELECT token FROM recovery_tokens
-      WHERE email = :email AND token = :token
-        AND criado_em >= NOW() - INTERVAL 15 MINUTE
+    SELECT token FROM recuperacao_senha
+    WHERE email = :email AND token = :token
+    AND criado_em >= NOW() - INTERVAL 15 MINUTE
     ''';
     try {
       final result = await connection.execute(query, {'email': email, 'token': token});
@@ -49,28 +49,29 @@ class RecoveryDAO {
   
 
   
-   Future<bool> updatePasswordByEmail(String email, String novaSenha) async {
-    const sqlQuery = '''
-      UPDATE funcionario
-      SET senha = :novaSenha
-      WHERE email = :email
-    ''';
+  Future<bool> updatePassword(String email, String novaSenha) async {
+ 
+  final bytes = utf8.encode(novaSenha);
+  final digest = sha256.convert(bytes);
+  final senhaHash = digest.toString();
 
-    try {
-      final result = await connection.execute(
-        sqlQuery,
-        {
-          'novaSenha': novaSenha,
-          'email': email,
-        },
-      );
+  const sql = '''
+    UPDATE funcionario
+    SET senha = :senhaHash
+    WHERE email = :email
+  ''';
 
-      return result.affectedRows.toInt() > 0;
-    } catch (e) {
-      print('Erro ao atualizar senha: $e');
-      rethrow;
-    }
+  try {
+    final result = await connection.execute(sql, {
+      'senhaHash': senhaHash,
+      'email': email,
+    });
+    print('Senha atualizada com sucesso para $email');
+    return result.affectedRows.toInt() > 0;
+  } catch (e) {
+    print('Erro ao atualizar senha: $e');
+    rethrow;
   }
 }
-
+}
 

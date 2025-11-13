@@ -24,7 +24,7 @@ Future<Response> resetPasswordHandler(RequestContext context) async {
     final db = await Connection.getConnection();
     final dao = RecoveryDAO(db);
 
-    final atualizado = await dao.updatePasswordByEmail(email, novaSenha);
+    final atualizado = await dao.updatePassword(email, novaSenha);
 
     if (atualizado) {
       return Response.json(

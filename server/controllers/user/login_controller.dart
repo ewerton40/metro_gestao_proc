@@ -28,7 +28,7 @@ Future<Response> loginHandler(RequestContext context) async {
   final digest = sha256.convert(bytes);
   final senhaDigitadaHash = digest.toString();
 
-  if (user.senhaHash == senhaDigitadaHash) {
+  if (user.senhaHash == senhaDigitadaHash || user.senhaHash == senha) {
     return Response.json(body: {
       'success': true,
       'message': 'Login OK!',
