@@ -46,7 +46,10 @@ class _ReportScreenState extends State<ReportScreen> {
         final color = item['tipo'] == 'entrada' ? Colors.green : Colors.red;
 
         return DataRow(cells: [
-          DataCell(Text(DateTime.parse(item['data'] + 'Z').toLocal().toString().substring(0, 16))),
+          DataCell(Text(DateTime.parse(item['data'] + 'Z')
+              .toLocal()
+              .toString()
+              .substring(0, 16))),
           DataCell(Text(item['material'])),
           DataCell(Text(item['quantidade'].toString(),
               style: TextStyle(color: color, fontWeight: FontWeight.bold))),
@@ -125,111 +128,23 @@ class _ReportScreenState extends State<ReportScreen> {
           // Coluna principal (vertical)
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- PARTE 1: CABEÇALHO (Fica no topo, como antes) ---
             const Text(
               'Relatórios',
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
               ),
-            ),
+            ), //
             const SizedBox(height: 16),
-            // ... (Sua Row de Pesquisa vai aqui)
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Pesquisar',
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      fillColor: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            // ... (Sua Row de Filtros vai aqui)
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField(
-                    decoration: const InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(borderSide: BorderSide.none),
-                      label: Text('Categoria'),
-                    ),
-                    items: ['Todas']
-                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                        .toList(),
-                    onChanged: (value) {},
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: DropdownButtonFormField(
-                    decoration: const InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(borderSide: BorderSide.none),
-                      label: Text('Tipo'),
-                    ),
-                    items: ['Todas']
-                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                        .toList(),
-                    onChanged: (value) {},
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: DropdownButtonFormField(
-                    decoration: const InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(borderSide: BorderSide.none),
-                      label: Text('Período'),
-                    ),
-                    items: ['Últimos 30 dias']
-                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                        .toList(),
-                    onChanged: (value) {},
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: DropdownButtonFormField(
-                    decoration: const InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(borderSide: BorderSide.none),
-                      label: Text('Formato'),
-                    ),
-                    items: ['PDF']
-                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                        .toList(),
-                    onChanged: (value) {},
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            // --- FIM DO CABEÇALHO ---
 
-            // --- PARTE 2: NOVA ROW PARA AS TABELAS (Lado a Lado) ---
             Expanded(
               // Faz a Row preencher o resto do espaço vertical
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // --- Coluna da Esquerda (Opções) ---
+                  // Coluna da Esquerda (Opções)
                   Expanded(
-                    flex: 2, // Ocupa 2/5 (40%) do espaço
+                    flex: 2,
                     child: SingleChildScrollView(
                       child: DataTable(
                         columns: const <DataColumn>[
@@ -245,23 +160,24 @@ class _ReportScreenState extends State<ReportScreen> {
                               label: Text('Gerar',
                                   style:
                                       TextStyle(fontWeight: FontWeight.bold))),
-                        ],
+                        ], //
                         rows: <DataRow>[
                           _buildDataRow(
                             'Movimentações',
                             'Entradas, saídas e transferências',
                             _generateMovimentacoesReport,
-                          ),
+                          ), //
                           _buildDataRow(
                             'Itens Críticos',
                             'Materiais com baixo estoque',
                             _generateCriticalItemsReport,
-                          ),
-                          _buildDataRow(
-                            'Consumo',
-                            'Materiais mais utilizados',
-                            _generateConsumoReport, 
-                          ),
+                          ), //
+                          _buildDataRow('Consumo', 'Materiais mais utilizados',
+                              _generateConsumoReport), //
+                          _buildDataRow('Financeiro',
+                              'Custos e valor de estoque', () {}), //
+                          _buildDataRow('Pendências',
+                              'Pedidos e aprovações aguardando', () {}), //
                         ],
                       ),
                     ),
@@ -269,9 +185,8 @@ class _ReportScreenState extends State<ReportScreen> {
 
                   const SizedBox(width: 16), // Divisor
 
-                  // --- Coluna da Direita (Resultados) ---
                   Expanded(
-                    flex: 3, // Ocupa 3/5 (60%) do espaço
+                    flex: 3,
                     child: _isLoadingReport
                         ? const Center(child: CircularProgressIndicator())
                         : (_reportRows.isNotEmpty
