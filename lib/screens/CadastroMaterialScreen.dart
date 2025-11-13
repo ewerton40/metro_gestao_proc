@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
+import 'package:intl/intl.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 class CadastroMaterialScreen extends StatefulWidget {
   const CadastroMaterialScreen({super.key});
@@ -19,7 +21,16 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
   final _locationController = TextEditingController();
   final _minStockController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _maxStockcontroller = TextEditingController();
+  final _maxStockController = TextEditingController();
+
+  var dateMaskFormatter = MaskTextInputFormatter(
+    mask: "##/##/####", // Define o formato DD/MM/AAAA
+    filter: { "#": RegExp(r'[0-9]') } // Permite apenas dígitos (números)
+  );
+
+  final _dateController = TextEditingController();
+  bool _isDateRequired = false;
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -28,7 +39,8 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
     _locationController.dispose();
     _minStockController.dispose();
     _descriptionController.dispose();
-    _maxStockcontroller.dispose();
+    _maxStockController.dispose();
+    _dateController.dispose();
     super.dispose();
   }
 
@@ -43,11 +55,40 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
           'validityType': _selectedValidityType,
           'location': _locationController.text,
           'minStock': _minStockController.text,
-          'maxStock': _maxStockcontroller,
+          'maxStock': _maxStockController.text,
           'description': _descriptionController.text,
+          'validityDate' :_isDateRequired ? _dateController.text : null,
         };
+        print(itemData);////////////////////////////////////RESOLVER PROBLEA QUE QUANDO CLICA NO BOTAO SALVAR APARECE COISAS DIFERENTES NO TERMINAL///////////////////////
+
+        _restartScreen();
       }
   }
+
+  Future<void> _selectDate(BuildContext context) async { //funcao para abrir o datepicker
+    FocusScope.of(context).requestFocus(FocusNode()); //esvita que o teclado abra
+
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2101) //pesquisar o que é esse 2101
+    );
+
+    if (picked != null) {
+      final DateFormat formatter = DateFormat('dd/MM/yyyy');
+      _dateController.text = formatter.format(picked);
+    }
+  }
+
+void _restartScreen() {
+
+  Navigator.of(context).pushReplacement(
+    MaterialPageRoute(
+      builder: (context) => const CadastroMaterialScreen(),
+    ),
+  );
+}
     @override
     Widget build(BuildContext context) {
       // A tela principal é envolvida por um Scaffold para a estrutura básica.
@@ -106,16 +147,18 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
 
     // Constrói o card principal do formulário
     Widget _buildFormCard() {
-      return Container(
-        padding: const EdgeInsets.all(24.0),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF8F9FA),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey[300]!),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      return Form(
+        key: _formKey,
+        child: Container(
+          padding: const EdgeInsets.all(24.0),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8F9FA),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey[300]!),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             _buildTextField(label: 'Nome do Item', controller: _nameController),
             const SizedBox(height: 16),
             _buildTextField(label: 'Código do Item', controller: _codeController),
@@ -125,9 +168,9 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
                 Expanded(child: _buildDropdownField(
                   label: 'Categoria',
                   value: _selectedCategory,
-                  items: ['Equipamentos', 'Ferramentas', 'Peças'],
+                  items: ['Material de consumo', 'Material de Giro', 'Material Patrimoniado', 'Ferramentas Manuais','Debito Direto', 'material sobressalente'],
                   onChanged: (value) => setState(() => _selectedCategory = value),
-                  hint: 'Equipamentos',
+                  hint: 'Materiais',
                 )),
                 const SizedBox(width: 16),
                 Expanded(child: _buildTextField(label: 'Fornecedor', controller: _supplierController)),
@@ -140,33 +183,52 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
                   label: 'tipo de validade',
                   value: _selectedValidityType,
                   items: ['tem validade ou calibração', 'não tem validade nem calibração'],
-                  onChanged: (value) => setState(() => _selectedValidityType = value),
-                  
+                  onChanged: (value) { 
+                    setState(() { 
+                      _selectedValidityType = value;
+                      _isDateRequired = (value == 'tem validade ou calibração');
+                      if (!_isDateRequired) {
+                        _dateController.clear();
+                      }
+                    });
+                  },
                 )),
-                const SizedBox(width: 16),
-                Expanded(child: _buildTextField(label: 'Localização Física', controller: _locationController)),
+
+            const SizedBox(width: 16),
+            Expanded(child: _buildDropdownField(
+                  label: 'base', 
+                  value: _selectedCategory,
+                  items: ['WJA (Jabaquara)', 'PSO (Paraiso)', 'TRD (Tiradentes)', 'TUC (Yucuruvi)', 'LUN (Luminarias)', 'IMG (Imigantes)', 'BFU (Barra Funda)', 'BAS (Brás)', 'CEC (Cecília)', 'MAT (Matheus)', 'VTD (Vila Matilde)', 'VPT (Vila Prudente)', 'PIT (Pátio Itaquera)', 'POT (Pátio Oratório)', 'PAT (Pátio Jabaquara)'],
+                  onChanged: (value) => setState(() => _selectedCategory = value),
+                )),
               ],
             ),
             const SizedBox(height: 16),
             Row(
               children: [
-                const SizedBox(width: 16),
-                Expanded(flex: 1, child: Container(),),
-                const SizedBox(width: 16),
-                Expanded(flex: 1, child: Container(),),
+                if (_isDateRequired)
+                  Expanded(
+                    flex: 2,
+                    child: _buildDateField(),
+                  ),
                 
-                const SizedBox(width: 16,),
+                if (_isDateRequired) const SizedBox(width: 16),
+
+                if (!_isDateRequired)
+                  const Expanded(flex: 2, child: SizedBox.shrink()),
+
                 Expanded(flex: 1, child:_buildTextField(
                   label: 'Estoque baixo',
-                  controller: _minStockController
-                )
-              ),
+                  controller: _minStockController,
+                  keyboardType: TextInputType.number,
+                )),
                 const SizedBox(width: 16),
+
                 Expanded(flex: 1, child: _buildTextField(
                   label: 'estoque alto',
-                  controller: _maxStockcontroller
-                )
-              ),
+                  controller: _maxStockController,
+                  keyboardType: TextInputType.number,
+                )),
               ]
             ),
             const SizedBox(height: 16),
@@ -184,24 +246,19 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
                   ),
                   child: const Text('Salvar'),
                 ),
-                const SizedBox(width: 16),
-                OutlinedButton(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.grey[700],
-                    side: BorderSide(color: Colors.grey[400]!),
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                  child: const Text('Voltar'),
-                ),
               ],
             )
           ],
         ),
-      );
-    }
-  
+      ),
+    );////////// ) do form
+  }
+
+
+
+
+
+
     // Constrói o card para upload da imagem e resumo
     Widget _buildImageUploadCard() {
       return Container(
@@ -223,7 +280,7 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
               child: const Icon(Icons.image_outlined, size: 50, color: Colors.grey),
             ),
             const SizedBox(height: 24),
-            _buildReadOnlyField(label: 'Categoria', value: 'Equipamentos'),
+            _buildReadOnlyField(label: 'Categoria', value: 'materiais'),
             const SizedBox(height: 16),
             _buildReadOnlyField(label: 'Estoque Mínimo', value: '5'),
             const SizedBox(height: 24),
@@ -237,8 +294,61 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
       );
     }
 
+    Widget _buildDateField(){ /////// criado, nao tinha antes
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(' vencimento/calibração', style: TextStyle(fontWeight: FontWeight.w500, color: Colors.black54)),
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: _dateController,
+            
+            keyboardType: TextInputType.number,
+            maxLength: 10,
+            inputFormatters: [
+              dateMaskFormatter,
+            ],
+
+              decoration: InputDecoration(
+              hintText: 'DD/MM/AAAA',
+              suffixIcon: const Icon(Icons.calendar_today_outlined, color: Colors.black54),
+              counterText: '',
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey[400]!),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey[400]!),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+            validator: (value) {
+            // O campo é obrigatório APENAS se _isDateRequired for true
+              if (_isDateRequired && (value == null || value.isEmpty)) {
+                return 'Obrigatório selecionar a data.';
+              }
+              if (_isDateRequired && value != null && value.length < 10 ){
+                return "A data deve estar completa (DD/MM/AAAA)";
+              }
+              return null;
+            },
+          ),
+        ],
+      );
+    }
+
+
     // Widget auxiliar para criar campos de texto padrão
-    Widget _buildTextField({required String label, required TextEditingController controller, int maxLines = 1}) {////////////////////////////////////////
+    Widget _buildTextField({
+      required String label, 
+      required TextEditingController controller, 
+      int maxLines = 1,
+      TextInputType keyboardType = TextInputType.text 
+    }) {////////////////////////////////////////
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -247,6 +357,7 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
           TextFormField(
             controller: controller,
             maxLines: maxLines,
+            keyboardType: keyboardType,
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.white,
@@ -260,6 +371,16 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
+            validator: (value) { 
+              if (value == null || value.isEmpty) {
+                return 'Este campo é obrigatório.';
+              }
+              // Validação simples para campos numéricos
+              if (keyboardType == TextInputType.number && double.tryParse(value) == null) {
+                return 'Insira um valor numérico válido.';
+              }
+              return null;
+            },
           ),
         ],
       );
@@ -267,18 +388,25 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
     
     // Widget auxiliar para criar campos de dropdown
     Widget _buildDropdownField({
+
       required String label,
       required String? value,
       required List<String> items,
       required ValueChanged<String?> onChanged,
       String hint = '',
-    }) {
+    }) 
+      {
+      if(value != null && !items.contains(value)){
+        value = null;
+      }
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.black54)),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
+            isExpanded: true,
             value: value,
             items: items.map((String item) {
               return DropdownMenuItem<String>(
@@ -301,6 +429,12 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
+            validator: (value) { // <<< ADICIONADA: Validação para Dropdown
+              if (value == null || value.isEmpty) {
+                return 'Selecione uma opção.';
+              }
+              return null;
+            },
           ),
         ],
       );
