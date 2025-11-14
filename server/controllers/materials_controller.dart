@@ -13,6 +13,24 @@ String _safeToString(dynamic rawValue) {
       return rawValue?.toString() ?? '0';
     }
 
+const Map<String, ({int min, int max})> _codeRanges = {
+  'Material de consumo': (min: 10000000, max: 10999999),
+  'Material de Giro': (min: 15000000, max: 15999999),
+  'Material Patrimoniado': (min: 16000000, max: 16999999),
+  'Ferramentas Manuais': (min: 17000000, max: 17999999),
+  'Debito Direto': (min: 20000000, max: 20999999),
+  'material sobressalente': (min: 21000000, max: 21999999),
+};
+
+bool _checkCodeRange(int codeNumber, String category) {
+  if (_codeRanges.containsKey(category)) {
+    final range = _codeRanges[category]!;
+ 
+    return codeNumber >= range.min && codeNumber <= range.max;
+  }
+  return false; 
+}
+
 Future<Response> materialHandler(RequestContext context) async {
   if (context.request.method != HttpMethod.post) {
     return Response(statusCode: 405); 
@@ -25,19 +43,46 @@ Future<Response> materialHandler(RequestContext context) async {
     final body = await context.request.body();
     final data = jsonDecode(body) as Map<String, dynamic>;
 
-  
-    
     final name = data['name'] as String;
-    final code = data['code'] as String;
-    if (code == null) {
-  
-      throw Exception('O campo "code" (codigo_material) é obrigatório e veio nulo ou faltando na requisição.');
-    }
-
-
-    final codeString = code as String;
-
+    final rawCode = data['code'];
     final category = data['category'] as String;
+
+    final code = int.tryParse(rawCode.toString()); 
+    
+    if (code == null) {
+       
+        return Response.json(
+            statusCode: 400,
+            body: {'success': false, 'message': 'O campo "code" (codigo_material) é obrigatório e deve ser um número inteiro válido.'},
+        );
+    }
+     if (!_checkCodeRange(code, category)) { 
+        final minRange = _codeRanges[category]?.min.toString() ?? 'N/A';
+        final maxRange = _codeRanges[category]?.max.toString() ?? 'N/A';
+
+        
+        
+        return Response.json(
+            statusCode: 400,
+            body: {
+                'success': false,
+                'message': 'O código do item (${code}) está fora da faixa permitida para a categoria "${category}".'
+                ' Faixa esperada: ${minRange} a ${maxRange}.'
+            },
+        );
+    }
+    conexao = await Connection.getConnection(); 
+    final materialDAO = MaterialDAO(conexao);
+
+    final isDuplicated = await materialDAO.checkIfCodeExists(code);
+ 
+    if (isDuplicated) {
+      return Response.json(
+        statusCode: 409,
+        body: {'success': false, 'message': 'O código (${code}) já foi cadastrado no sistema, insira outro codigo.'},
+      );
+    }
+      
     final base = data['base'] as String;
     final supplier = data['supplier'] as String;
     final validityType = data['validityType'] as String;
@@ -57,11 +102,7 @@ Future<Response> materialHandler(RequestContext context) async {
     final description = data['description'] as String;
     final validityDate = data['validityDate'] as String?;
 
-    
-    conexao = await Connection.getConnection();
-    
-    
-    final materialDAO = MaterialDAO(conexao);
+  
     await materialDAO.saveNewMaterial(
       name: name,
       code: code,

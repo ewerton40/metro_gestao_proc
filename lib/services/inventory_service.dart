@@ -92,19 +92,24 @@ Future<List<Category>> getAllCategories() async {
       'validityDate': itemData['validityDate'],
     });
 
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: body,
-    );
-
-    if (response.statusCode == 201) {
-      return jsonDecode(response.body);
-    } else {
-      final errorBody = jsonDecode(response.body);
-      throw Exception('Falha ao cadastrar item: ${response.statusCode} - ${response.body}');
+    try { 
+        final response = await http.post(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: body,
+        );
+        if (response.statusCode == 201) {
+          return jsonDecode(response.body);
+        } else {  
+          final Map<String, dynamic> errorBody = jsonDecode(response.body);
+          final errorMessage = errorBody['message'] ?? 'Falha desconhecida (Status: ${response.statusCode}).';
+          throw Exception(errorMessage);
+        }
+    } catch (e) {
+      throw Exception('Erro ao conectar ou processar dados: $e');
     }
   }
+  
 
   Future<int> getLowStockCount() async {
   final url = Uri.parse('$_baseUrl/inventory/low_stock');
