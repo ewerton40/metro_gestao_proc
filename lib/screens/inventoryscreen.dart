@@ -21,7 +21,7 @@ class InventoryItem {
   final int quantidadeAtual;
 
   InventoryItem({
-    required this.code ,
+    required this.code,
     required this.nome,
     required this.categoriaId,
     required this.medidaId,
@@ -131,7 +131,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
     }
   }
 
-  // --- FILTROS
+  // Filtros
   List<InventoryItem> _applyFilters(List<InventoryItem> items) {
     List<InventoryItem> filtered = items;
 
@@ -146,11 +146,15 @@ class _InventoryScreenState extends State<InventoryScreen> {
     if (_selectedStatus != null && _selectedStatus != 'Todos') {
       filtered = filtered.where((item) {
         if (_selectedStatus == 'Em estoque') {
-          return item.qtdAlto > item.qtdBaixo;
+          // Em estoque = A quantidade real é maior que o limite baixo
+          return item.quantidadeAtual > item.qtdBaixo;
         } else if (_selectedStatus == 'Baixo estoque') {
-          return item.qtdAlto <= item.qtdBaixo && item.qtdAlto > 0;
+          // Baixo estoque = A qtd real está entre 0 e o limite baixo
+          return item.quantidadeAtual <= item.qtdBaixo &&
+              item.quantidadeAtual > 0;
         } else if (_selectedStatus == 'Esgotado') {
-          return item.qtdAlto == 0;
+          // Esgotado = A qtd real é 0
+          return item.quantidadeAtual == 0;
         }
         return true;
       }).toList();
@@ -212,7 +216,8 @@ class _InventoryScreenState extends State<InventoryScreen> {
   Widget _buildSearchAndFilters() {
     return Column(
       children: [
-        TextField(onChanged: (value) => setState(() => _searchText = value),
+        TextField(
+          onChanged: (value) => setState(() => _searchText = value),
           decoration: InputDecoration(
             hintText: 'Pesquisar item...', //
             prefixIcon: const Icon(Icons.search), //
@@ -222,8 +227,8 @@ class _InventoryScreenState extends State<InventoryScreen> {
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide.none,
             ),
-          ),),
-          
+          ),
+        ),
         const SizedBox(height: 16),
         Row(
           children: [
@@ -362,10 +367,10 @@ class _InventoryScreenState extends State<InventoryScreen> {
     // Cálculos dinâmicos
     int totalItens = _items.length;
 
-    // Usa a mesma lógica do filtro de "Baixo Estoque" e "Esgotado"
     int itensCriticos = _items.where((item) {
-      bool baixoEstoque = item.qtdAlto <= item.qtdBaixo && item.qtdAlto > 0;
-      bool esgotado = item.qtdAlto == 0;
+      bool baixoEstoque =
+          item.quantidadeAtual <= item.qtdBaixo && item.quantidadeAtual > 0;
+      bool esgotado = item.quantidadeAtual == 0;
       return baixoEstoque || esgotado;
     }).length;
 
@@ -379,12 +384,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             ElevatedButton(
-              onPressed: () {
-                Navigator.push(context, 
-                  MaterialPageRoute(
-                builder: (Builder) => const DetalheItemScreen()
-            ));
-              },
+              onPressed: () {},
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1763A6),
                 foregroundColor: Colors.white,

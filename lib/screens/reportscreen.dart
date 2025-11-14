@@ -174,10 +174,6 @@ class _ReportScreenState extends State<ReportScreen> {
                           ), //
                           _buildDataRow('Consumo', 'Materiais mais utilizados',
                               _generateConsumoReport), //
-                          _buildDataRow('Financeiro',
-                              'Custos e valor de estoque', () {}), //
-                          _buildDataRow('Pendências',
-                              'Pedidos e aprovações aguardando', () {}), //
                         ],
                       ),
                     ),
@@ -296,7 +292,7 @@ class _ReportScreenState extends State<ReportScreen> {
   Widget _buildResultsTable() {
     return Container(
       width: double
-          .infinity, // Garante que o container preencha o espaço horizontal
+          .infinity, 
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
@@ -314,11 +310,14 @@ class _ReportScreenState extends State<ReportScreen> {
           ),
           Flexible(
             child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: DataTable(
-                headingRowColor: MaterialStateProperty.all(Colors.grey[50]),
-                columns: _reportColumns,
-                rows: _reportRows,
+              scrollDirection: Axis.vertical,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: DataTable(
+                  headingRowColor: MaterialStateProperty.all(Colors.grey[50]),
+                  columns: _reportColumns,
+                  rows: _reportRows,
+                ),
               ),
             ),
           ),
