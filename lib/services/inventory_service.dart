@@ -81,6 +81,7 @@ Future<List<Category>> getAllCategories() async {
     final body = jsonEncode({
       'name': itemData['name'],
       'category': itemData['category'],
+      'code': itemData['code'],
   //  'medidaId': itemData['medida'],
       'base': itemData['base'],
       'supplier': itemData['supplier'],

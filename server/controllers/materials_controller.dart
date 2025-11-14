@@ -28,7 +28,15 @@ Future<Response> materialHandler(RequestContext context) async {
   
     
     final name = data['name'] as String;
-    final code = _safeToString(data['code']);
+    final code = data['code'] as String;
+    if (code == null) {
+  
+      throw Exception('O campo "code" (codigo_material) é obrigatório e veio nulo ou faltando na requisição.');
+    }
+
+
+    final codeString = code as String;
+
     final category = data['category'] as String;
     final base = data['base'] as String;
     final supplier = data['supplier'] as String;
