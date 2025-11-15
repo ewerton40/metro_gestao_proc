@@ -120,12 +120,11 @@ class _ReportScreenState extends State<ReportScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const BarMenu(),
-      drawer: const VerticalMenu(selectedIndex: 3),
+      drawer: VerticalMenu(selectedIndex: 3),
       backgroundColor: const Color(0xFFF7F8F9),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
-          // Coluna principal (vertical)
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
@@ -137,60 +136,20 @@ class _ReportScreenState extends State<ReportScreen> {
             ), //
             const SizedBox(height: 16),
 
+            // Layout Responsivo
             Expanded(
-              // Faz a Row preencher o resto do espaço vertical
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Coluna da Esquerda (Opções)
-                  Expanded(
-                    flex: 2,
-                    child: SingleChildScrollView(
-                      child: DataTable(
-                        columns: const <DataColumn>[
-                          DataColumn(
-                              label: Text('Relatório',
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold))),
-                          DataColumn(
-                              label: Text('Descrição',
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold))),
-                          DataColumn(
-                              label: Text('Gerar',
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold))),
-                        ], //
-                        rows: <DataRow>[
-                          _buildDataRow(
-                            'Movimentações',
-                            'Entradas, saídas e transferências',
-                            _generateMovimentacoesReport,
-                          ), //
-                          _buildDataRow(
-                            'Itens Críticos',
-                            'Materiais com baixo estoque',
-                            _generateCriticalItemsReport,
-                          ), //
-                          _buildDataRow('Consumo', 'Materiais mais utilizados',
-                              _generateConsumoReport), //
-                        ],
-                      ),
-                    ),
-                  ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  const double desktopBreakpoint = 700.0;
 
-                  const SizedBox(width: 16), // Divisor
-
-                  Expanded(
-                    flex: 3,
-                    child: _isLoadingReport
-                        ? const Center(child: CircularProgressIndicator())
-                        : (_reportRows.isNotEmpty
-                            ? _buildResultsTable() // O widget com scroll horizontal
-                            : _buildPlaceholderResults() // Placeholder
-                        ),
-                  ),
-                ],
+                  if (constraints.maxWidth < desktopBreakpoint) {
+                    // Se a tela for estreita, retorna uma Coluna
+                    return _buildMobileLayout();
+                  } else {
+                    // Se a tela for larga, retorna a Linha
+                    return _buildDesktopLayout();
+                  }
+                },
               ),
             ),
           ],
@@ -199,7 +158,98 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
-  // Adicione este novo widget de placeholder
+  Widget _buildDesktopLayout() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        //Coluna da Esquerda
+        Expanded(
+          flex: 2, // 40%
+          child: SingleChildScrollView(
+            child: DataTable(
+              columns: const <DataColumn>[
+                DataColumn(
+                    label: Text('Relatório',
+                        style: TextStyle(fontWeight: FontWeight.bold))),
+                DataColumn(
+                    label: Text('Descrição',
+                        style: TextStyle(fontWeight: FontWeight.bold))),
+                DataColumn(
+                    label: Text('Gerar',
+                        style: TextStyle(fontWeight: FontWeight.bold))),
+              ],
+              rows: <DataRow>[
+                _buildDataRow(
+                    'Movimentações',
+                    'Entradas, saídas e transferências',
+                    _generateMovimentacoesReport),
+                _buildDataRow('Itens Críticos', 'Materiais com baixo estoque',
+                    _generateCriticalItemsReport),
+                _buildDataRow('Consumo', 'Materiais mais utilizados',
+                    _generateConsumoReport),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(width: 16), // Divisor
+
+        // Coluna da Direit
+        Expanded(
+          flex: 3, // 60%
+          child: _isLoadingReport
+              ? const Center(child: CircularProgressIndicator())
+              : (_reportRows.isNotEmpty
+                  ? _buildResultsTable()
+                  : _buildPlaceholderResults()),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileLayout() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SingleChildScrollView(
+          child: DataTable(
+            columns: const <DataColumn>[
+              DataColumn(label: Text('Relatório')),
+              DataColumn(label: Text('Gerar')),
+            ],
+            rows: <DataRow>[
+              _buildDataRow(
+                'Movimentações',
+                '', // Descrição removida
+                _generateMovimentacoesReport,
+              ),
+              _buildDataRow(
+                'Itens Críticos',
+                '', // Descrição removida
+                _generateCriticalItemsReport,
+              ),
+              _buildDataRow(
+                  'Consumo',
+                  '', // Descrição removida
+                  _generateConsumoReport),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 16), // Divisor
+
+        Expanded(
+          // O 'Expanded' força os resultados a preencher o resto da tela
+          child: _isLoadingReport
+              ? const Center(child: CircularProgressIndicator())
+              : (_reportRows.isNotEmpty
+                  ? _buildResultsTable()
+                  : _buildPlaceholderResults()),
+        ),
+      ],
+    );
+  }
+
   Widget _buildPlaceholderResults() {
     return Container(
       decoration: BoxDecoration(
@@ -219,10 +269,16 @@ class _ReportScreenState extends State<ReportScreen> {
   // Definição do _buildDataRow
   DataRow _buildDataRow(
       String relatorio, String descricao, VoidCallback onGerarPressed) {
+    // Detecta se a descrição está vazia (para o layout mobile)
+    final bool showDescription = descricao.isNotEmpty;
+
     return DataRow(
       cells: <DataCell>[
         DataCell(Text(relatorio)),
-        DataCell(Text(descricao)),
+
+        // Só mostra a célula de Descrição se ela não estiver vazia
+        if (showDescription) DataCell(Text(descricao)),
+
         DataCell(
           ElevatedButton(
             onPressed: onGerarPressed,
@@ -291,8 +347,7 @@ class _ReportScreenState extends State<ReportScreen> {
   /// Widget da Tabela de Resultados
   Widget _buildResultsTable() {
     return Container(
-      width: double
-          .infinity, 
+      width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),

@@ -4,7 +4,6 @@ import 'package:metro_projeto/screens/detalhe_item_screen.dart';
 import '../services/inventory_service.dart';
 import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
-
 import '../utils/models/location.dart';
 
 class InventoryItem {
@@ -63,6 +62,15 @@ class Category {
       nome: json['nome'] ?? '',
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Category && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
 }
 
 class InventoryScreen extends StatefulWidget {
@@ -178,7 +186,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: const BarMenu(),
-      drawer: const VerticalMenu(selectedIndex: 1),
+      drawer: VerticalMenu(selectedIndex: 1),
       body: Padding(
         padding: const EdgeInsets.all(32.0),
         child: Column(
@@ -189,17 +197,33 @@ class _InventoryScreenState extends State<InventoryScreen> {
             _buildSearchAndFilters(),
             const SizedBox(height: 24),
             Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _errorMessage.isNotEmpty
-                      ? Center(
-                          child: Text(_errorMessage,
-                              style: const TextStyle(
-                                  color: Colors.red, fontSize: 16)))
-                      : _buildDataTable(filteredItems),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: _isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : _errorMessage.isNotEmpty
+                            ? Center(
+                                child: Text(_errorMessage,
+                                    style: const TextStyle(
+                                        color: Colors.red, fontSize: 16)))
+                            : LayoutBuilder(
+                                builder: (context, constraints) {
+                                  const double breakpoint = 800.0;
+                                  if (constraints.maxWidth < breakpoint) {
+                                    return _buildMobileList(filteredItems);
+                                  } else {
+                                    return _buildDataTable(filteredItems);
+                                  }
+                                },
+                              ),
+                  ),
+                  const SizedBox(height: 24),
+                  _buildFooter(),
+                ],
+              ),
             ),
-            const SizedBox(height: 24),
-            _buildFooter(),
           ],
         ),
       ),
@@ -219,8 +243,8 @@ class _InventoryScreenState extends State<InventoryScreen> {
         TextField(
           onChanged: (value) => setState(() => _searchText = value),
           decoration: InputDecoration(
-            hintText: 'Pesquisar item...', //
-            prefixIcon: const Icon(Icons.search), //
+            hintText: 'Pesquisar item...',
+            prefixIcon: const Icon(Icons.search),
             filled: true,
             fillColor: Colors.white,
             border: OutlineInputBorder(
@@ -228,23 +252,39 @@ class _InventoryScreenState extends State<InventoryScreen> {
               borderSide: BorderSide.none,
             ),
           ),
-        ),
+        ), //
         const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _buildCategoryDropdown(), //
-            ),
-            const SizedBox(width: 16),
-            // ADICIONADO:
-            Expanded(
-              child: _buildBaseDropdown(), // O novo dropdown
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildStatusDropdown(), //
-            ),
-          ],
+        LayoutBuilder(
+          builder: (context, constraints) {
+            // Se a largura for menor que 700 pixels, muda o layout
+            if (constraints.maxWidth < 700) {
+              return Column(
+                children: [
+                  _buildCategoryDropdown(), //
+                  const SizedBox(height: 16),
+                  _buildBaseDropdown(), //
+                  const SizedBox(height: 16),
+                  _buildStatusDropdown(), //
+                ],
+              );
+            } else {
+              return Row(
+                children: [
+                  Expanded(
+                    child: _buildCategoryDropdown(), //
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildBaseDropdown(), //
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildStatusDropdown(), //
+                  ),
+                ],
+              );
+            }
+          },
         ),
       ],
     );
@@ -330,12 +370,10 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
   Widget _buildDataTable(List<InventoryItem> items) {
     return Container(
-      // ... (decoration)
+      width: double.infinity,
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: DataTable(
-          // ... (headingRowColor)
-
           columns: const [
             DataColumn(label: Text('Código')),
             DataColumn(label: Text('Nome')),
@@ -360,6 +398,78 @@ class _InventoryScreenState extends State<InventoryScreen> {
           }).toList(),
         ),
       ),
+    );
+  }
+
+  /// Constrói uma lista de Cards otimizada para celular
+  Widget _buildMobileList(List<InventoryItem> items) {
+    return ListView.builder(
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        Color statusColor;
+        if (item.quantidadeAtual == 0) {
+          statusColor = Colors.red;
+        } else if (item.quantidadeAtual <= item.qtdBaixo) {
+          statusColor = Colors.orange;
+        } else {
+          statusColor = Colors.green;
+        }
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12.0),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        item.nome,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      item.calibracao ? Icons.check_circle : Icons.cancel,
+                      color: item.calibracao ? Colors.green : Colors.red,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Text('Categoria: ${item.categoriaNome}'),
+                    const Text('  |  '),
+                    Text('Medida: ${item.medidaNome}'),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Text(
+                      'Quantidade: ',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                    Text(
+                      item.quantidadeAtual.toString(),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: statusColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -416,15 +526,21 @@ class _InventoryScreenState extends State<InventoryScreen> {
           ],
         ),
         const SizedBox(height: 24),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Total de itens cadastrados: $totalItens',
-                style: const TextStyle(color: Colors.grey)),
-            Text('Total de itens críticos: $itensCriticos',
-                style: const TextStyle(color: Colors.grey)),
-            Text(ultimaAtualizacao, style: const TextStyle(color: Colors.grey)),
-          ],
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Total de itens cadastrados: $totalItens',
+                  style: const TextStyle(color: Colors.grey)),
+              const SizedBox(width: 24), // Espaçamento
+              Text('Total de itens críticos: $itensCriticos',
+                  style: const TextStyle(color: Colors.grey)),
+              const SizedBox(width: 24), // Espaçamento
+              Text(ultimaAtualizacao,
+                  style: const TextStyle(color: Colors.grey)),
+            ],
+          ),
         )
       ],
     );
