@@ -1,4 +1,4 @@
-import 'dart:ui'; 
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/providers/user_provider.dart';
 import 'package:metro_projeto/screens/dashBoardScreen.dart';
@@ -97,157 +97,213 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: <Widget>[
-          Container(
-            decoration: const BoxDecoration(
-                image: DecorationImage(
-              image: AssetImage('assets/images/fundo_login.png'),
-              fit: BoxFit.cover,
-            )),
-          ),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 400),
-              child: Image.asset(
-                'assets/images/logo_metro_login.png',
-                width: 200,
-                height: 200,
-              ),
-            ),
-          ),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 100),
-              child: SlideTransition(
-                position: _slideAnimation,
-                child: FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(25.0),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-                      child: Container(
-                          width: MediaQuery.of(context).size.width * 0.32,
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 50.0, horizontal: 24.0),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(25.0),
-                            border:
-                                Border.all(color: Colors.white.withOpacity(0.3)),
+      // Usamos LayoutBuilder para checar o tamanho da tela
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Define nosso "ponto de quebra"
+          const double desktopBreakpoint = 700.0;
+
+          if (constraints.maxWidth < desktopBreakpoint) {
+            return Stack(
+              children: <Widget>[
+                // Background Image
+                Container(
+                  decoration: const BoxDecoration(
+                      image: DecorationImage(
+                    image: AssetImage('assets/images/fundo_login.png'),
+                    fit: BoxFit.cover,
+                  )),
+                ),
+                // Filtro de Blur
+                BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                  child: Container(color: Colors.black.withOpacity(0.1)),
+                ),
+                // SafeArea para não cobrir a barra de status
+                SafeArea(
+                  child: Center(
+                    // Permite rolar se o teclado aparecer
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Logo
+                          Image.asset(
+                            'assets/images/logo_metro_login.png',
+                            width: 150, // Logo menor
+                            height: 150,
                           ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              TextField(
-                                controller: emailController,
-                                style: const TextStyle(
-                                    color: Colors.black87,
-                                    fontWeight: FontWeight.w500),
-                                decoration: InputDecoration(
-                                  prefixIcon: Icon(Icons.person_outline,
-                                      color: Colors.black.withOpacity(0.7)),
-                                  labelText: 'Usuário:',
-                                  labelStyle:
-                                      const TextStyle(color: Colors.black87),
-                                  contentPadding:
-                                      const EdgeInsets.symmetric(vertical: 18),
-                                  filled: true,
-                                  fillColor: Colors.white.withOpacity(0.4),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(30),
-                                    borderSide: BorderSide(
-                                        color: Colors.white.withOpacity(0.7),
-                                        width: 1.0),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(30),
-                                    borderSide: const BorderSide(
-                                        color: Color(0xFF1763A6), width: 2.0),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 30),
-                              TextField(
-                                controller: senhaController,
-                                obscureText: true,
-                                style: const TextStyle(
-                                    color: Colors.black87,
-                                    fontWeight: FontWeight.w500),
-                                decoration: InputDecoration(
-                                  prefixIcon: Icon(Icons.lock_outline,
-                                      color: Colors.black.withOpacity(0.7)),
-                                  labelText: 'Senha:',
-                                  labelStyle:
-                                      const TextStyle(color: Colors.black87),
-                                  contentPadding:
-                                      const EdgeInsets.symmetric(vertical: 18),
-                                  filled: true,
-                                  fillColor: Colors.white.withOpacity(0.4),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(30),
-                                    borderSide: BorderSide(
-                                        color: Colors.white.withOpacity(0.7),
-                                        width: 1.0),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(30),
-                                    borderSide: const BorderSide(
-                                        color: Color(0xFF1763A6), width: 2.0),
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(top: 8.0, left: 15.0),
-                                child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: TextButton(
-                                    style: TextButton.styleFrom(
-                                      padding: EdgeInsets.zero,
-                                      tapTargetSize:
-                                          MaterialTapTargetSize.shrinkWrap,
-                                      alignment: Alignment.centerLeft,
-                                    ),
-                                    onPressed: () {
-                                      Navigator.push(context, MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()));
-                                      
-                                    },
-                                    child: const Text(
-                                      'Esqueceu sua senha?',
-                                      style: TextStyle(
-                                        color: Colors.black87,
-                                        decoration: TextDecoration.underline,
-                                        decorationColor: Colors.black87,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 30),
-                              CustomButton(
-                                onPressed: () {
-                                  fazerLogin();
-                                },
-                                text: const Text(
-                                  'ENTRAR',
-                                  style: TextStyle(
-                                      fontSize: 20, color: Colors.white),
-                                ),
-                                color: const Color(0xFF1763A6),
-                                size: const Size(150, 50),
-                              ),
-                            ],
-                          )),
+                          const SizedBox(height: 30),
+                          // Formulário (com 85% de largura)
+                          _buildLoginForm(isMobile: true),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
-          )
-        ],
+              ],
+            );
+          } else {
+            return Stack(
+              children: <Widget>[
+                Container(
+                  decoration: const BoxDecoration(
+                      image: DecorationImage(
+                    image: AssetImage('assets/images/fundo_login.png'),
+                    fit: BoxFit.cover,
+                  )),
+                ),
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 400),
+                    child: Image.asset(
+                      'assets/images/logo_metro_login.png',
+                      width: 200,
+                      height: 200,
+                    ),
+                  ),
+                ),
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 100),
+                    // Formulário (com 32% de largura)
+                    child: _buildLoginForm(isMobile: false),
+                  ),
+                ),
+              ],
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildLoginForm({required bool isMobile}) {
+    // Define a largura do formulário com base no tipo de tela
+    final screenWidth = MediaQuery.of(context).size.width;
+    final formWidth = isMobile ? screenWidth * 0.85 : screenWidth * 0.32;
+
+    final slideAnimation = _slideAnimation;
+    final fadeAnimation = _fadeAnimation;
+
+    return SlideTransition(
+      position: slideAnimation,
+      child: FadeTransition(
+        opacity: fadeAnimation,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(25.0),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+            child: Container(
+                width: formWidth,
+                padding: const EdgeInsets.symmetric(
+                    vertical: 50.0, horizontal: 24.0),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(25.0),
+                  border: Border.all(color: Colors.white.withOpacity(0.3)),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: emailController,
+                      style: const TextStyle(
+                          color: Colors.black87, fontWeight: FontWeight.w500),
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(Icons.person_outline,
+                            color: Colors.black.withOpacity(0.7)),
+                        labelText: 'Usuário:',
+                        labelStyle: const TextStyle(color: Colors.black87),
+                        contentPadding:
+                            const EdgeInsets.symmetric(vertical: 18),
+                        filled: true,
+                        fillColor: Colors.white.withOpacity(0.4),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide(
+                              color: Colors.white.withOpacity(0.7), width: 1.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: const BorderSide(
+                              color: Color(0xFF1763A6), width: 2.0),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    TextField(
+                      controller: senhaController,
+                      obscureText: true,
+                      style: const TextStyle(
+                          color: Colors.black87, fontWeight: FontWeight.w500),
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(Icons.lock_outline,
+                            color: Colors.black.withOpacity(0.7)),
+                        labelText: 'Senha:',
+                        labelStyle: const TextStyle(color: Colors.black87),
+                        contentPadding:
+                            const EdgeInsets.symmetric(vertical: 18),
+                        filled: true,
+                        fillColor: Colors.white.withOpacity(0.4),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide(
+                              color: Colors.white.withOpacity(0.7), width: 1.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: const BorderSide(
+                              color: Color(0xFF1763A6), width: 2.0),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0, left: 15.0),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton(
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            alignment: Alignment.centerLeft,
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ForgotPasswordScreen()));
+                          },
+                          child: const Text(
+                            'Esqueceu sua senha?',
+                            style: TextStyle(
+                              color: Colors.black87,
+                              decoration: TextDecoration.underline,
+                              decorationColor: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    CustomButton(
+                      onPressed: () {
+                        fazerLogin();
+                      },
+                      text: const Text(
+                        'ENTRAR',
+                        style: TextStyle(fontSize: 20, color: Colors.white),
+                      ),
+                      color: const Color(0xFF1763A6),
+                      size: const Size(150, 50),
+                    ),
+                  ],
+                )),
+          ),
+        ),
       ),
     );
   }
