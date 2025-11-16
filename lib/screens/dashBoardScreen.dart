@@ -132,13 +132,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              _buildBottomInfoCards(context),
+              const SizedBox(height: 24),
               _buildTopStatCards(context),
               const SizedBox(height: 24),
               _buildAlertsAndCharts(context),
               const SizedBox(height: 24),
-              _buildBottomInfoCards(context),
-              const SizedBox(height: 24),
-              _buildActionButtons(context),
             ],
           ),
         ),
@@ -336,8 +335,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context) =>
-      const SizedBox.shrink(); // Mantido como placeholder
+
 
   // --- WIDGETS AUXILIARES REUTILIZÁVEIS ---
 

@@ -3,6 +3,7 @@ import 'package:metro_projeto/providers/user_provider.dart';
 import 'package:metro_projeto/screens/dashBoardScreen.dart';
 import 'package:metro_projeto/screens/ItemRegistrationScreen.dart';
 import 'package:metro_projeto/screens/forgot_password_screen.dart';
+import 'package:metro_projeto/screens/graphics_per_base_screen.dart';
 import 'package:metro_projeto/screens/inventoryscreen.dart';
 import 'package:metro_projeto/screens/CadastroMaterialScreen.dart';
 import 'package:metro_projeto/screens/loginscreen.dart';
@@ -43,7 +44,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const LoginScreen(),
+      home: const ChartsByBaseScreen(),
     );
   }
 }
