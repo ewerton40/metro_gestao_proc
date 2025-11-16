@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/providers/user_provider.dart';
 import 'package:metro_projeto/screens/dashBoardScreen.dart';
+import 'package:metro_projeto/screens/loginscreen.dart';
 import 'package:provider/provider.dart';
 import '../services/notification_service.dart';
 import '../utils/models/notification.dart';
@@ -248,12 +249,19 @@ class _BarMenuState extends State<BarMenu> {
           ),
         ),
       ],
-      
-      // onSelected: (String value) {
-      //   if (value == 'sair') {
-      //     // Ex: Provider.of<UserProvider>(context, listen: false).logout();
-      //   }
-      // },
+    
+    onSelected: (value){
+      if(value == 'sair'){
+        try{
+        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (Route<dynamic> route) => false);
+        }catch(e){
+          print("Erro logout: $e");
+        }
+      }
+      else{
+        print("Nao conseguiu retornar e apagar o histórico da aplicação");
+      }
+    }
     );
   }
 }

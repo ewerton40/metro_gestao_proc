@@ -83,7 +83,6 @@ class _InventoryScreenState extends State<InventoryScreen> {
   String _searchText = '';
   List<SimpleLocation> _basesList = [];
   SimpleLocation? _selectedBase;
-  bool _isLoadingBases = true;
 
   final List<String> _statusOptions = [
     'Todos',

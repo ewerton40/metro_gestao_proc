@@ -3,7 +3,7 @@ import '../widgets/custom_button.dart';
 import '../services/recovery_services.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
-  String? email;
+  final String? email;
   ResetPasswordScreen({super.key, required this.email});
 
   @override

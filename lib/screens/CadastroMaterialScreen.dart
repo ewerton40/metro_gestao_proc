@@ -3,7 +3,6 @@ import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/services/inventory_service.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:intl/intl.dart';
 
 
 class CadastroMaterialScreen extends StatefulWidget {
@@ -83,22 +82,6 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
 
       
       }
-  }
-
-  Future<void> _selectDate(BuildContext context) async { //funcao para abrir o datepicker
-    FocusScope.of(context).requestFocus(FocusNode()); //esvita que o teclado abra
-
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2101) //pesquisar o que é esse 2101
-    );
-
-    if (picked != null) {
-      final DateFormat formatter = DateFormat('dd/MM/yyyy');
-      _dateController.text = formatter.format(picked);
-    }
   }
 
 void _restartScreen() {
@@ -422,23 +405,4 @@ void _showSnackBar(String message, {bool isError = false}) {
     }
     
     
-    Widget _buildReadOnlyField({required String label, required String value}) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.black54)),
-          const SizedBox(height: 8),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey[400]!),
-            ),
-            child: Text(value),
-          ),
-        ],
-      );
-    }
-  }
+}
