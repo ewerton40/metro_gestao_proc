@@ -1,7 +1,5 @@
-
-
 import 'package:mysql_client/mysql_client.dart';
-import 'connection.dart'; 
+
 class MaterialDAO {
   final MySQLConnection _conn;
 

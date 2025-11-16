@@ -147,7 +147,7 @@ class VerticalMenu extends StatelessWidget {
                   index: 2, 
                   onTap: () {
                     Navigator.pop(context);
-                    if (selectedIndex == 3) return;
+                    if (selectedIndex == 2) return;
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
