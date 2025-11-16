@@ -1,9 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:metro_projeto/screens/charts_per_base_screen.dart';
 import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
 import '../services/movimentation_services.dart';
 import '../services/inventory_service.dart';
+
+
+const kPrimaryColor = Color(0xFF007BFF); 
+const kWarningColor = Color(0xFFFFC107); 
+const kSuccessColor = Color(0xFF28A745);
+const kDangerColor = Color(0xFFDC3545);
+const kBackgroundColor = Color(0xFFF4F7F9); 
+const kCardColor = Colors.white;
+const kTextColor = Color(0xFF343A40);
 
 class MovementsToday {
   final int entradas;
@@ -35,95 +45,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<Map<String, dynamic>> _topfiveMaterials = [];
   List<Map<String, dynamic>> _criticalItems = [];
   List<Map<String, dynamic>> _categoryDistribution = [];
-  
 
   // Variável para o gráfico de Distribuição por Categorias
   int _touchedCategoryIndex = -1;
-  // Variável para o gráfico de Itens com Baixo Estoque (NOVA)
-  int _touchedLowStockIndex = -1;
 
 
   @override
   void initState() {
     super.initState();
-    _loadMovements();
-    _loadLowStockCount();
-    _loadTotalItems();
-    _loadTopFiveMaterials();
-    _loadCriticalItems();
-    _loadCategoryDistribution();
+    _loadData();
   }
 
-  Future<void> _loadMovements() async {
-    try {
-      final data = await movimentationServices.getMovementsToday();
-      setState(() {
-        _movementsToday = data;
-      });
-    } catch (e) {
-      print('Erro ao carregar movimentações: $e');
-    }
-  }
+Future<void> _loadData() async {
+  try {
+    final results = await Future.wait([
+      movimentationServices.getMovementsToday(),
+      inventoryServices.getLowStockCount(),
+      inventoryServices.getTotalItemsCount(),
+      movimentationServices.getTop5Materials(),
+      inventoryServices.getCriticalItems(),
+      inventoryServices.getMaterialsDistributionByCategory(),
+    ]);
 
-  Future<void> _loadLowStockCount() async {
-    try {
-      final count = await inventoryServices.getLowStockCount();
-      setState(() {
-        _lowStockCount = count;
-      });
-    } catch (e) {
-      print('Erro ao carregar itens de baixo estoque: $e');
-    }
+    setState(() {
+      _movementsToday = results[0] as MovementsToday?;
+      _lowStockCount = results[1] as int;
+      _totalItems = results[2] as int;
+      _topfiveMaterials = results[3] as List<Map<String, dynamic>>;
+      _criticalItems = results[4] as List<Map<String, dynamic>>;
+      _categoryDistribution = results[5] as List<Map<String, dynamic>>;
+    });
+  } catch (e) {
+    print("Erro: $e");
   }
+}
 
-  Future<void> _loadTotalItems() async {
-    try {
-      final count = await inventoryServices.getTotalItemsCount();
-      setState(() {
-        _totalItems = count;
-      });
-    } catch (e) {
-      print('Erro ao carregar total de itens: $e');
-    }
-  }
-
-  Future<void> _loadTopFiveMaterials() async {
-    try {
-      final data = await movimentationServices.getTop5Materials();
-      setState(() {
-        _topfiveMaterials = data;
-      });
-    } catch (e) {
-      print('Erro ao carregar top 5 materiais: $e');
-    }
-  }
-
-  Future<void> _loadCriticalItems() async {
-    try {
-      final items = await InventoryServices().getCriticalItems();
-      setState(() {
-        _criticalItems = items;
-      });
-    } catch (e) {
-      print('Erro ao carregar itens críticos: $e');
-    }
-  }
-
-  Future<void> _loadCategoryDistribution() async {
-    try {
-      final data = await inventoryServices.getMaterialsDistributionByCategory();
-      setState(() {
-        _categoryDistribution = data;
-      });
-    } catch (e) {
-      print('Erro ao carregar distribuição por categoria: $e');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: kBackgroundColor, // Fundo mais suave
       appBar: const BarMenu(),
       drawer: const VerticalMenu(selectedIndex: 0),
       body: SingleChildScrollView(
@@ -132,10 +93,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildBottomInfoCards(context),
-              const SizedBox(height: 24),
+              _buildHeader(context),
+              const SizedBox(height: 16),
+
               _buildTopStatCards(context),
               const SizedBox(height: 24),
+
+              _buildBottomInfoCards(context),
+              const SizedBox(height: 24),
+
               _buildAlertsAndCharts(context),
               const SizedBox(height: 24),
             ],
@@ -145,10 +111,95 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // --- MÉTODOS DE CONSTRUÇÃO DE SEÇÃO ---
 
-  /// Constrói os cards do topo (Itens com baixo estoque, Total de itens)
-  /// USA DADOS: _lowStockCount, _totalItems
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Text(
+        'Dashboard Geral',
+        style: TextStyle(
+          fontSize: 32, // Aumentado
+          fontWeight: FontWeight.w800, // Mais forte
+          color: kTextColor,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatCard({
+    required String title,
+    required String value,
+    required String change,
+    required Color changeColor,
+    required Color color,
+    required IconData icon, // Adicionado ícone
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: kCardColor,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
+        ],
+        border: Border.all(color: color.withOpacity(0.2), width: 1), // Borda sutil
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: kTextColor.withOpacity(0.7),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Icon(icon, color: color, size: 24),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 36, // Aumentado
+              fontWeight: FontWeight.bold,
+              color: kTextColor,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Text(
+                change,
+                style: TextStyle(
+                  color: changeColor,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'último mês',
+                style: TextStyle(
+                  color: kTextColor.withOpacity(0.6),
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTopStatCards(BuildContext context) {
     return Row(
       children: [
@@ -156,28 +207,110 @@ class _DashboardScreenState extends State<DashboardScreen> {
           flex: 1,
           child: _buildStatCard(
             title: 'Itens com baixo estoque',
-            value: '$_lowStockCount', // DADO REAL
-            change: '+2%', // Placeholder
-            changeColor: Colors.red,
-            chartPlaceholder: _buildLowStockPieChart(), // GRÁFICO AGORA DINÂMICO
+            value: '$_lowStockCount',
+            change: '+2%',
+            changeColor: kDangerColor,
+            color: kDangerColor,
+            icon: Icons.warning_amber_rounded,
           ),
         ),
         const SizedBox(width: 24),
         Expanded(
           child: _buildStatCard(
             title: 'Total de itens',
-            value: '$_totalItems', // DADO REAL
-            change: '3%', // Placeholder
-            changeColor: Colors.blue.shade800,
-            chartPlaceholder: _buildTotalItemsChart(),
+            value: '$_totalItems',
+            change: '3%',
+            changeColor: kPrimaryColor,
+            color: kPrimaryColor,
+            icon: Icons.inventory_2_outlined,
           ),
         ),
       ],
     );
   }
 
-  /// Constrói os cards do meio (Alertas, Top 5, Categorias)
-  /// USA DADOS: _criticalItems, _topfiveMaterials
+  Widget _buildBottomInfoCards(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildMovementCard(
+            title: 'Entradas Hoje',
+            value: _movementsToday?.entradas.toString() ?? '...',
+            color: kSuccessColor,
+            icon: Icons.arrow_downward_rounded,
+          ),
+        ),
+        const SizedBox(width: 24),
+        Expanded(
+          child: _buildMovementCard(
+            title: 'Saídas Hoje',
+            value: _movementsToday?.saidas.toString() ?? '...',
+            color: kDangerColor,
+            icon: Icons.arrow_upward_rounded,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMovementCard({
+    required String title,
+    required String value,
+    required Color color,
+    required IconData icon,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: kCardColor,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: color, size: 28),
+          ),
+          const SizedBox(width: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: kTextColor.withOpacity(0.7),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: kTextColor,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildAlertsAndCharts(BuildContext context) {
     return Column(
       children: [
@@ -185,41 +318,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: Card(
-                elevation: 3,
-                shadowColor: Colors.black26,
-                color: Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Alertas recentes',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 16),
-                      if (_criticalItems.isEmpty)
-                        const ListTile(
-                          leading: Icon(Icons.check_circle_outline,
-                              color: Colors.green),
-                          title: Text("Nenhum item com estoque crítico"),
-                          subtitle: Text("Tudo certo!"),
-                        )
-                      else
-                        ..._criticalItems.map((item) {
-                          return ListTile(
+              child: _buildCardContainer(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Alertas recentes',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold, color: kTextColor)),
+                    const SizedBox(height: 16),
+                    if (_criticalItems.isEmpty)
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: Icon(Icons.check_circle_outline,
+                            color: kSuccessColor, size: 30),
+                        title: const Text("Nenhum item com estoque crítico", style: TextStyle(fontWeight: FontWeight.w600)),
+                        subtitle: const Text("Tudo certo!"),
+                      )
+                    else
+                      ..._criticalItems.map((item) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: ListTile(
+                            contentPadding: EdgeInsets.zero,
                             leading: const Icon(Icons.warning_amber_rounded,
-                                color: Colors.orange),
+                                color: kWarningColor, size: 30),
                             title: Text(
-                                "Item \"${item['nome_material']}\" está com estoque baixo"),
+                                "Item \"${item['nome_material']}\" está com estoque baixo", style: const TextStyle(fontWeight: FontWeight.w600)),
                             subtitle:
                                 Text("Estoque atual: ${item['quantidade']}"),
-                          );
-                        }).toList(),
-                    ],
-                  ),
+                          ),
+                        );
+                      }).toList(),
+                  ],
                 ),
               ),
             ),
@@ -230,333 +360,96 @@ class _DashboardScreenState extends State<DashboardScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: Card(
-                elevation: 3,
-                shadowColor: Colors.black26,
-                color: Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Top 5 Materiais mais usados',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 16),
-                      AspectRatio(
-                        aspectRatio: 1.5,
-                        child: _buildTopMaterialsChart(), // DADO REAL
+              child: _buildCardContainer(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Top 5 Materiais mais usados',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold, color: kTextColor)),
+                    const SizedBox(height: 16),
+                    AspectRatio(
+                      aspectRatio: 1.5,
+                      child: _buildTopMaterialsChart(),
+                    ),
+
+                    const SizedBox(height: 16),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: OutlinedButton(
+                        onPressed: () { Navigator.push(context, MaterialPageRoute(builder: (context) => const ChartsByBaseScreen())); },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: kPrimaryColor,
+                          side: BorderSide(color: kPrimaryColor, width: 2), 
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        ),
+                        child: const Text('Ver mais', style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
             const SizedBox(width: 24),
             Expanded(
-              child: Card(
-                elevation: 3,
-                shadowColor: Colors.black26,
-                color: Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Distribuição por Categorias',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 16),
-                      AspectRatio(
-                        aspectRatio: 1.5,
-                        child:
-                            _buildCategoryDistributionChart(), // PLACEHOLDER (Estático e Dinâmico)
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  /// Constrói os cards inferiores (Movimentações, Itens Críticos)
-  /// USA DADOS: _movementsToday, _criticalItems
-  Widget _buildBottomInfoCards(BuildContext context) {
-    final entradas = _movementsToday?.entradas ?? 0;
-    final saidas = _movementsToday?.saidas ?? 0;
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: _buildInfoCard(
-            title: 'Movimentações Hoje',
-            icon: Icons.sync_alt,
-            content: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Entradas: $entradas',
-                    style: const TextStyle(fontSize: 14)), // DADO REAL
-                Text('Saídas: $saidas',
-                    style: const TextStyle(fontSize: 14)), // DADO REAL
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 24),
-        Expanded(
-          child: _buildInfoCard(
-            title: 'Itens Críticos',
-            icon: Icons.error_outline,
-            iconColor: Colors.red,
-            content: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: _criticalItems.isEmpty
-                  ? [const Text('Nenhum item crítico no momento.')]
-                  : _criticalItems.map((item) {
-                      // DADO REAL
-                      return Text(
-                        '${item['nome_material']} (Estoque: ${item['quantidade']})',
-                        style: const TextStyle(fontSize: 14),
-                      );
-                    }).toList(),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-
-
-  // --- WIDGETS AUXILIARES REUTILIZÁVEIS ---
-
-  /// Card de estatística para o topo
-  Widget _buildStatCard({
-    required String title,
-    required String value,
-    required String change,
-    required Color changeColor,
-    required Widget chartPlaceholder,
-  }) {
-    return Card(
-      elevation: 3,
-      shadowColor: Colors.black26,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title,
-                style: TextStyle(color: Colors.grey[600], fontSize: 16)),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
+              child: _buildCardContainer(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(value,
-                        style: const TextStyle(
-                            fontSize: 34, fontWeight: FontWeight.bold)),
-                    Text(change,
+                    const Text('Distribuição por Categorias',
                         style: TextStyle(
-                            color: changeColor, fontWeight: FontWeight.bold)),
+                            fontSize: 20, fontWeight: FontWeight.bold, color: kTextColor)),
+                    const SizedBox(height: 16),
+                    AspectRatio(
+                      aspectRatio: 1.5,
+                      child: _buildCategoryDistributionChart(),
+                    ),
+                    const SizedBox(height: 16),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: OutlinedButton(
+                        onPressed: () { Navigator.push(context, MaterialPageRoute(builder: (context) => const ChartsByBaseScreen())); },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: kPrimaryColor,
+                          side: BorderSide(color: kPrimaryColor, width: 2), 
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        ),
+                        child: const Text('Ver mais', style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                    ),
                   ],
                 ),
-                chartPlaceholder,
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Card de informação genérico (usado na fileira de baixo)
-  Widget _buildInfoCard({
-    required String title,
-    required IconData icon,
-    required Widget content,
-    Color iconColor = Colors.blue,
-  }) {
-    return Card(
-      elevation: 3,
-      shadowColor: Colors.black26,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: iconColor),
-                const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            content,
-          ],
-        ),
-      ),
-    );
-  }
-
-  // --- GRÁFICOS ---
-
-  /// 🥧 Gráfico: Itens com baixo estoque (PLACEHOLDER FUNCIONAL COM LEGENDA e INTERATIVIDADE)
-  Widget _buildLowStockPieChart() {
-    // Dados de placeholder (Crítico, Baixo, Alerta)
-    final sectionsData = [35.0, 20.0, 15.0];
-    final sectionsColors = [
-      Colors.red.shade600,
-      Colors.orange.shade500,
-      Colors.amber.shade400
-    ];
-    final sectionsLabels = ['Crítico', 'Baixo', 'Alerta'];
-
-    return SizedBox(
-      width: 140,
-      height: 140,
-      child: Column(
-        children: [
-          Expanded(
-            child: PieChart(
-              PieChartData(
-                // ADICIONANDO A FUNCIONALIDADE DE TOQUE (Dinamismo)
-                pieTouchData: PieTouchData(
-                  touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                    setState(() {
-                      if (!event.isInterestedForInteractions ||
-                          pieTouchResponse == null ||
-                          pieTouchResponse.touchedSection == null) {
-                        _touchedLowStockIndex = -1;
-                        return;
-                      }
-                      _touchedLowStockIndex =
-                          pieTouchResponse.touchedSection!.touchedSectionIndex;
-                    });
-                  },
-                ),
-                sectionsSpace: 3,
-                centerSpaceRadius: 25,
-                sections: List.generate(sectionsData.length, (i) {
-                  final isTouched = i == _touchedLowStockIndex;
-                  // Aumenta o raio (tamanho) se a fatia for tocada/hovered
-                  final double radius = isTouched ? 40 : 35; 
-                  final double fontSize = isTouched ? 13 : 12;
-
-                  return PieChartSectionData(
-                    value: sectionsData[i],
-                    title: '${sectionsData[i].toInt()}',
-                    color: sectionsColors[i],
-                    radius: radius,
-                    titleStyle: TextStyle(
-                      fontSize: fontSize,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      shadows: isTouched
-                          ? [
-                              const Shadow(
-                                  color: Colors.black45, blurRadius: 2)
-                            ]
-                          : null,
-                    ),
-                  );
-                }),
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          // Legenda
-          Wrap(
-            spacing: 8,
-            runSpacing: 4,
-            alignment: WrapAlignment.center,
-            children: List.generate(sectionsData.length, (i) {
-              return _buildLegendItem(sectionsColors[i], sectionsLabels[i]);
-            }),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Helper para a legenda do gráfico de pizza de "Baixo Estoque"
-  Widget _buildLegendItem(Color color, String label) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 10,
-          height: 10,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ],
         ),
-        const SizedBox(width: 4),
-        Text(label, style: TextStyle(fontSize: 10, color: Colors.grey[700])),
       ],
     );
   }
 
-  /// 📈 Gráfico: Total de Itens (PLACEHOLDER - Gráfico de Linha)
-  Widget _buildTotalItemsChart() {
-    // Dados de placeholder para o gráfico compilar
-    final List<FlSpot> spots = [
-      const FlSpot(0, 2),
-      const FlSpot(1, 2.5),
-      const FlSpot(2, 1.9),
-      const FlSpot(3, 2.8),
-      const FlSpot(4, 3),
-      const FlSpot(5, 3.2),
-      const FlSpot(6, 3.5),
-    ];
-
-    return SizedBox(
-      width: 100, // Ajustado para o tamanho do sparkline
-      height: 40,
-      child: LineChart(
-        LineChartData(
-          gridData: FlGridData(show: false),
-          titlesData: FlTitlesData(show: false),
-          borderData: FlBorderData(show: false),
-          minX: 0,
-          maxX: 6,
-          minY: 0,
-          maxY: 4,
-          lineBarsData: [
-            LineChartBarData(
-              spots: spots, // Usando dados de placeholder
-              isCurved: true,
-              color: Colors.blue.shade800,
-              barWidth: 3,
-              isStrokeCapRound: true,
-              dotData: FlDotData(show: false),
-              belowBarData: BarAreaData(show: false),
-            ),
-          ],
-        ),
+  // Novo helper para o container de Card
+  Widget _buildCardContainer({required Widget child}) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade200, width: 1),
+      ),
+      color: kCardColor,
+      child: Padding(
+        padding: const EdgeInsets.all(24), // Padding maior
+        child: child,
       ),
     );
   }
 
-  /// 📊 Gráfico: Top 5 Materiais mais usados (DATA-DRIVEN)
-  /// USA DADOS: _topfiveMaterials
+  /// 📊 Gráfico: Top 5 Materiais mais usados (Estilizado)
   Widget _buildTopMaterialsChart() {
     if (_topfiveMaterials.isEmpty) {
       return const Center(child: CircularProgressIndicator());
@@ -570,58 +463,60 @@ class _DashboardScreenState extends State<DashboardScreen> {
       return 0.0;
     }).toList();
 
-    // --- [INÍCIO DA NOVA LÓGICA] ---
-
-    // 1. Achar o valor máximo real, ou 0 se a lista estiver vazia
     final double maxVal = totals.isEmpty ? 0 : totals.reduce((a, b) => a > b ? a : b);
-
-    // 2. Definir um maxY "bonito" e robusto
     double maxY;
     if (maxVal == 0) {
-      maxY = 10.0; // Valor default se não houver dados (gráfico de 0 a 10)
+      maxY = 10.0;
     } else {
-      // Adiciona 20% de padding e arredonda para cima para o próximo inteiro
       maxY = (maxVal * 1.2).ceilToDouble();
-      // Garante um mínimo para o gráfico não ficar esmagado se o valor for 1 ou 2
       if (maxY < 5) {
         maxY = 5.0;
       }
     }
-
-    // 3. Calcular um intervalo "bonito" (sempre um número inteiro)
-    // Queremos ~4 divisões.
     double calculatedInterval = maxY / 4;
-    double interval = calculatedInterval.ceilToDouble(); // Arredonda para cima
-
-    // 4. Garantir que o intervalo nunca seja zero
+    double interval = calculatedInterval.ceilToDouble();
     if (interval == 0) {
       interval = 1.0;
     }
 
-    // --- [FIM DA NOVA LÓGICA] ---
-
-
     final List<BarChartGroupData> barGroups = [];
     for (int i = 0; i < _topfiveMaterials.length; i++) {
       final double value = totals[i];
-      barGroups.add(_buildBarGroup(i, value));
+      barGroups.add(_buildBarGroup(i, value, color: kPrimaryColor));
     }
 
     return BarChart(
       BarChartData(
         alignment: BarChartAlignment.spaceAround,
-        maxY: maxY, // [MODIFICADO] Usa o novo maxY robusto
-        gridData: FlGridData(show: false),
-        borderData: FlBorderData(show: false),
+        maxY: maxY,
+        gridData: FlGridData(
+          show: true,
+          drawVerticalLine: false,
+          getDrawingHorizontalLine: (value) {
+            return FlLine(
+              color: Colors.grey.shade200,
+              strokeWidth: 1,
+            );
+          },
+        ),
+        borderData: FlBorderData(
+          show: true,
+          border: Border(
+            bottom: BorderSide(color: Colors.grey.shade300, width: 1),
+            left: BorderSide(color: Colors.grey.shade300, width: 1),
+            right: BorderSide.none,
+            top: BorderSide.none,
+          ),
+        ),
         titlesData: FlTitlesData(
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
               reservedSize: 40,
-              interval: interval, // [MODIFICADO] Usa o novo intervalo (inteiro)
+              interval: interval,
               getTitlesWidget: (value, meta) => Text(
-                value.toInt().toString(), // Agora é seguro usar toInt()
-                style: const TextStyle(fontSize: 10),
+                value.toInt().toString(),
+                style: TextStyle(fontSize: 10, color: kTextColor.withOpacity(0.7)),
               ),
             ),
           ),
@@ -634,7 +529,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 if (idx < 0 || idx >= _topfiveMaterials.length) {
                   return const SizedBox.shrink();
                 }
-                
                 final nome = _topfiveMaterials[idx]['material']?.toString() ?? '';
                 return SideTitleWidget(
                   meta: meta,
@@ -644,7 +538,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     child: Text(
                       nome,
                       style:
-                          const TextStyle(color: Colors.black54, fontSize: 10),
+                          TextStyle(color: kTextColor.withOpacity(0.8), fontSize: 10),
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 2,
@@ -660,9 +554,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         barTouchData: BarTouchData(
           enabled: true,
           touchTooltipData: BarTouchTooltipData(
-            getTooltipColor: (BarChartGroupData) {
-              return Colors.blueGrey.shade700;
-            },
+            getTooltipColor: (group) => kPrimaryColor.withOpacity(0.9),
             getTooltipItem: (group, groupIndex, rod, rodIndex) {
               final nome =
                   _topfiveMaterials[groupIndex]['material'] ?? 'Desconhecido';
@@ -678,16 +570,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-
-  /// Helper para o gráfico de barras (DATA-DRIVEN)
-  BarChartGroupData _buildBarGroup(int x, double y) {
+  /// Helper para o gráfico de barras (Estilizado com gradiente)
+  BarChartGroupData _buildBarGroup(int x, double y,
+      {Color color = kPrimaryColor}) {
     return BarChartGroupData(
       x: x,
       barRods: [
         BarChartRodData(
           toY: y,
-          width: 20,
-          color: const Color(0xFF1763A6),
+          width: 16, // Barra mais fina
+          gradient: LinearGradient(
+            colors: [
+              color.withOpacity(0.6),
+              color,
+            ],
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+          ),
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(4),
             topRight: Radius.circular(4),
@@ -697,127 +596,131 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-
+  /// 🥧 Gráfico: Distribuição por Categorias (Estilizado)
   Widget _buildCategoryDistributionChart() {
-  if (_categoryDistribution.isEmpty) {
-    return const Center(child: CircularProgressIndicator());
-  }
+    if (_categoryDistribution.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-  final totalGeral = _categoryDistribution.fold<int>(
-      0, (sum, item) => sum + ((item['total'] ?? 0) as int));
+    final totalGeral = _categoryDistribution.fold<int>(
+        0, (sum, item) => sum + ((item['total'] ?? 0) as int));
 
-  final colors = [
-    const Color(0xFF1763A6),
-    const Color(0xFF4A90E2),
-    const Color(0xFF7AB8F5),
-    const Color(0xFFA5D0F9),
-    Colors.grey.shade400,
-  ];
+    final colors = [
+      kPrimaryColor,
+      const Color(0xFF17A2B8), // Info Blue
+      kWarningColor,
+      const Color(0xFF6C757D), // Secondary Grey
+      const Color(0xFF20C997), // Teal
+    ];
 
-  return Row(
-    children: [
-      Expanded(
-        flex: 4,
-        child: PieChart(
-          PieChartData(
-            pieTouchData: PieTouchData(
-              touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                setState(() {
-                  if (!event.isInterestedForInteractions ||
-                      pieTouchResponse == null ||
-                      pieTouchResponse.touchedSection == null) {
-                    _touchedCategoryIndex = -1;
-                    return;
-                  }
-                  _touchedCategoryIndex =
-                      pieTouchResponse.touchedSection!.touchedSectionIndex;
-                });
-              },
+    return Row(
+      children: [
+        Expanded(
+          flex: 4,
+          child: PieChart(
+            PieChartData(
+              pieTouchData: PieTouchData(
+                touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                  setState(() {
+                    if (!event.isInterestedForInteractions ||
+                        pieTouchResponse == null ||
+                        pieTouchResponse.touchedSection == null) {
+                      _touchedCategoryIndex = -1;
+                      return;
+                    }
+                    _touchedCategoryIndex =
+                        pieTouchResponse.touchedSection!.touchedSectionIndex;
+                  });
+                },
+              ),
+              sectionsSpace: 4, // Espaço maior
+              centerSpaceRadius: 60, // Centro maior
+              sections: List.generate(_categoryDistribution.length, (i) {
+                final total = ((_categoryDistribution[i]['total'] ?? 0) as int);
+                final percent = (total / totalGeral) * 100;
+                final isTouched = _touchedCategoryIndex == i;
+
+                return PieChartSectionData(
+                  value: total.toDouble(),
+                  title: '${percent.toStringAsFixed(1)}%',
+                  color: colors[i % colors.length],
+                  radius: isTouched ? 80 : 70, // Raio maior
+                  titleStyle: TextStyle(
+                    fontSize: isTouched ? 16 : 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    shadows: const [Shadow(color: Colors.black45, blurRadius: 3)],
+                  ),
+                );
+              }),
             ),
-            sectionsSpace: 3,
-            centerSpaceRadius: 50,
-            sections: List.generate(_categoryDistribution.length, (i) {
-              final total = ((_categoryDistribution[i]['total'] ?? 0) as int);
-              final percent = (total / totalGeral) * 100;
-              final isTouched = _touchedCategoryIndex == i;
+          ),
+        ),
+        const SizedBox(width: 24),
+        Expanded(
+          flex: 3, // Ajustado para dar mais espaço à legenda
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: List.generate(_categoryDistribution.length, (i) {
+              final categoria =
+                  _categoryDistribution[i]['categoria']?.toString() ??
+                      'Sem categoria';
+              final total = _categoryDistribution[i]['total'];
+              final totalStr = (total != null) ? total.toString() : '0';
 
-              return PieChartSectionData(
-                value: total.toDouble(),
-                title: '${percent.toStringAsFixed(1)}%',
-                color: colors[i % colors.length],
-                radius: isTouched ? 70 : 60,
-                titleStyle: TextStyle(
-                  fontSize: isTouched ? 15 : 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10.0), // Espaçamento maior
+                child: _buildCategoryLegendItem(
+                  colors[i % colors.length],
+                  categoria,
+                  totalStr,
+                  i,
                 ),
               );
             }),
           ),
         ),
-      ),
-      const SizedBox(width: 16),
-      Expanded(
-        flex: 1,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: List.generate(_categoryDistribution.length, (i) {
-          final categoria = _categoryDistribution[i]['categoria']?.toString() ?? 'Sem categoria';
-          final total = _categoryDistribution[i]['total'];
-          final totalStr = (total != null) ? total.toString() : '0';
+      ],
+    );
+  }
 
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: _buildCategoryLegendItem(
-              colors[i % colors.length],
-              categoria,
-              totalStr,
-              i,
-            ),
-          );
-        }),
-        ),
-      ),
-    ],
-  );
-}
-
-
-  /// Helper para a legenda do gráfico de pizza (PLACEHOLDER / Estático)
+  /// Helper para a legenda do gráfico de pizza (Estilizado)
   Widget _buildCategoryLegendItem(
       Color color, String label, String value, int index) {
     final isActive = _touchedCategoryIndex == index;
     return Row(
       children: [
         Container(
-          width: isActive ? 14 : 12,
-          height: isActive ? 14 : 12,
+          width: isActive ? 16 : 14, // Tamanho maior
+          height: isActive ? 16 : 14,
           decoration: BoxDecoration(
             color: color,
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: BorderRadius.circular(4), // Borda mais quadrada
             boxShadow: isActive
-                ? [BoxShadow(color: color.withOpacity(0.5), blurRadius: 4)]
+                ? [BoxShadow(color: color.withOpacity(0.4), blurRadius: 6)]
                 : null,
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 12), // Espaço maior
         Expanded(
           child: Text(
             label,
             style: TextStyle(
-              fontSize: isActive ? 13 : 12,
-              fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-              color: isActive ? Colors.grey[900] : Colors.grey[700],
+              fontSize: isActive ? 14 : 13,
+              fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+              color: isActive ? kTextColor : kTextColor.withOpacity(0.8),
             ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
         ),
         Text(
           value,
           style: TextStyle(
-            fontSize: isActive ? 13 : 12,
+            fontSize: isActive ? 14 : 13,
             fontWeight: FontWeight.bold,
-            color: isActive ? Colors.grey[900] : Colors.grey[800],
+            color: kTextColor,
           ),
         ),
       ],
