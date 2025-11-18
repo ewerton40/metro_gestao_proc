@@ -146,7 +146,7 @@ class MovimentationDAO {
     }
   }
 
-  Future<MovementsQuant?> movementsToday() async{
+  Future<MovementsQuant?> getmovementsToday() async{
     String sqlQuery = '''
       SELECT
       SUM(CASE WHEN tipo_movimentacao = 'entrada' THEN 1 ELSE 0 END) AS entradas,

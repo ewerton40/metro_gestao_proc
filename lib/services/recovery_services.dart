@@ -5,7 +5,7 @@ class RecoveryServices {
 
   final String baseUrl = 'http://localhost:8080'; 
 
-  Future<Map<String, dynamic>> enviarEmailRecuperacao(String email) async {
+  Future<Map<String, dynamic>> sendRecoveryEmail(String email) async {
     final response = await http.post(
       Uri.parse('$baseUrl/recovery/sendemail'),
       headers: {'Content-Type': 'application/json'},
@@ -19,7 +19,7 @@ class RecoveryServices {
     }
   }
 
-  Future<Map<String, dynamic>> verificarToken(String email, String token) async {
+  Future<Map<String, dynamic>> verifyToken(String email, String token) async {
     final response = await http.post(
       Uri.parse('$baseUrl/recovery/verify'),
       headers: {'Content-Type': 'application/json'},

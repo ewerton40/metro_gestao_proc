@@ -345,18 +345,20 @@ class _ChartsByBaseScreenState extends State<ChartsByBaseScreen> {
     );
   }
 
-  /// 📊 Gráfico: Itens com Estoque Baixo (Barra Horizontal)
+
   Widget _buildLowStockBarChart() {
     if (_lowStockData.isEmpty) {
       return _buildCardContainer(
-          child: const Center(heightFactor: 8, child: CircularProgressIndicator()));
+          child: const Center(
+              heightFactor: 8, child: CircularProgressIndicator()));
     }
 
     final List<double> totals = _lowStockData.map<double>((e) {
       return (e['qtd'] as num).toDouble();
     }).toList();
 
-    final double maxVal = totals.isEmpty ? 0 : totals.reduce((a, b) => a > b ? a : b);
+    final double maxVal =
+        totals.isEmpty ? 0 : totals.reduce((a, b) => a > b ? a : b);
     double maxX = (maxVal * 1.2).ceilToDouble();
     if (maxX < 5) maxX = 5.0;
 
@@ -365,95 +367,133 @@ class _ChartsByBaseScreenState extends State<ChartsByBaseScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text('Top 5 Itens com Estoque Baixo',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: kTextColor)),
+              style: TextStyle(
+                  fontSize: 20, fontWeight: FontWeight.bold, color: kTextColor)),
           const SizedBox(height: 16),
           AspectRatio(
             aspectRatio: 1.2,
-            child: BarChart(
-              BarChartData(
-                alignment: BarChartAlignment.center,
-                maxY: maxX,
-                barTouchData: BarTouchData(
-                  enabled: true,
-                  touchTooltipData: BarTouchTooltipData(
-                    getTooltipColor: (group) => kDangerColor.withOpacity(0.9),
-                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                      final item = _lowStockData[groupIndex];
-                      return BarTooltipItem(
-                        '${item['nome']}\nEstoque: ${item['qtd']}',
-                        const TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
-                      );
-                    },
-                  ),
-                ),
-                titlesData: FlTitlesData(
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 100, // Mais espaço para o nome do item
-                      getTitlesWidget: (value, meta) {
-                        final int idx = value.toInt();
-                        if (idx < 0 || idx >= _lowStockData.length) {
-                          return const SizedBox.shrink();
-                        }
-                        return SideTitleWidget(
-                          meta: meta,
-                          space: 8.0,
-                          child: Text(
-                            _lowStockData[idx]['nome'].toString(),
-                            style: TextStyle(
-                                color: kTextColor.withOpacity(0.8), fontSize: 12),
-                            textAlign: TextAlign.right,
-                            overflow: TextOverflow.ellipsis,
+            child: RotatedBox(
+              quarterTurns: 1,
+              child: BarChart(
+                BarChartData(
+                  alignment: BarChartAlignment.spaceAround,
+                  maxY: maxX,
+                  barTouchData: BarTouchData(
+                    enabled: true,
+                    touchTooltipData: BarTouchTooltipData(
+                      rotateAngle: -90, 
+                      getTooltipColor: (group) => kDangerColor.withOpacity(0.9),
+                      tooltipPadding: const EdgeInsets.all(8),
+                      tooltipMargin: 8,
+                      getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                        final item = _lowStockData[groupIndex];
+                        return BarTooltipItem(
+                          '${item['nome']}\nEstoque: ${item['qtd']}',
+                          const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
                           ),
                         );
                       },
                     ),
                   ),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 30,
-                      interval: maxX / 4,
-                      getTitlesWidget: (value, meta) => Text(
-                        value.toInt().toString(),
-                        style: TextStyle(fontSize: 10, color: kTextColor.withOpacity(0.7)),
+                  titlesData: FlTitlesData(
+                    show: true,
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 110,
+                        getTitlesWidget: (value, meta) {
+                          final int idx = value.toInt();
+                          if (idx < 0 || idx >= _lowStockData.length) {
+                            return const SizedBox.shrink();
+                          }
+                        
+                          return SideTitleWidget(
+                            meta: meta,
+                            space: 10, 
+                            child: RotatedBox(
+                              quarterTurns: -1,
+                              child: Text(
+                                _lowStockData[idx]['nome'].toString(),
+                                style: TextStyle(
+                                  color: kTextColor.withOpacity(0.8),
+                                  fontSize: 11, 
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.right,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
+                  
+                    rightTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 40,
+                        interval: maxX / 4,
+                        getTitlesWidget: (value, meta) {
+                          
+                          return SideTitleWidget(
+                            meta: meta,
+                            child: RotatedBox(
+                              quarterTurns: -1,
+                              child: Text(
+                                value.toInt().toString(),
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: kTextColor.withOpacity(0.7),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                 
+                    leftTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false)),
+                    topTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false)),
                   ),
-                  topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                ),
-                gridData: FlGridData(
-                  show: true,
-                  drawVerticalLine: false,
-                  getDrawingHorizontalLine: (value) {
-                    return FlLine(
-                      color: Colors.grey.shade200,
-                      strokeWidth: 1,
+                  gridData: FlGridData(
+                    show: true,
+                    drawVerticalLine: false, 
+                    drawHorizontalLine: true, 
+                    getDrawingHorizontalLine: (value) {
+                      return FlLine(
+                        color: Colors.grey.shade200,
+                        strokeWidth: 1,
+                      );
+                    },
+                  ),
+                  borderData: FlBorderData(
+                    show: true,
+                    border: Border(
+                      
+                      bottom:
+                          BorderSide(color: Colors.grey.shade300, width: 1), 
+                      right:
+                          BorderSide(color: Colors.grey.shade300, width: 1), 
+                      left: BorderSide.none,
+                      top: BorderSide.none,
+                    ),
+                  ),
+                  barGroups: List.generate(_lowStockData.length, (i) {
+                    return _buildBarGroup(
+                      i,
+                      (_lowStockData[i]['qtd'] as num).toDouble(),
+                      color: kDangerColor,
                     );
-                  },
+                  }),
                 ),
-                borderData: FlBorderData(
-                  show: true,
-                  border: Border(
-                    bottom: BorderSide(color: Colors.grey.shade300, width: 1),
-                    left: BorderSide(color: Colors.grey.shade300, width: 1),
-                    right: BorderSide.none,
-                    top: BorderSide.none,
-                  ),
-                ),
-                barGroups: List.generate(_lowStockData.length, (i) {
-                  return _buildBarGroup(
-                    i,
-                    (_lowStockData[i]['qtd'] as num).toDouble(),
-                    color: kDangerColor,
-                  );
-                }),
+                swapAnimationDuration: const Duration(milliseconds: 150),
+                swapAnimationCurve: Curves.linear,
               ),
-              swapAnimationDuration: const Duration(milliseconds: 150),
-              swapAnimationCurve: Curves.linear,
             ),
           ),
         ],
@@ -461,7 +501,7 @@ class _ChartsByBaseScreenState extends State<ChartsByBaseScreen> {
     );
   }
 
-  /// 📊 Gráfico: Calibrações por Mês (Barra Vertical)
+  
   Widget _buildCalibrationChart() {
     if (_calibrationData.isEmpty) {
       return _buildCardContainer(
@@ -576,7 +616,7 @@ class _ChartsByBaseScreenState extends State<ChartsByBaseScreen> {
     );
   }
 
-  /// Helper para o gráfico de barras (Reutilizado da tela anterior)
+
   BarChartGroupData _buildBarGroup(int x, double y,
       {Color color = kPrimaryColor}) {
     return BarChartGroupData(
@@ -584,7 +624,7 @@ class _ChartsByBaseScreenState extends State<ChartsByBaseScreen> {
       barRods: [
         BarChartRodData(
           toY: y,
-          width: 16, // Barra mais fina
+          width: 16,
           gradient: LinearGradient(
             colors: [
               color.withOpacity(0.6),
@@ -602,7 +642,7 @@ class _ChartsByBaseScreenState extends State<ChartsByBaseScreen> {
     );
   }
 
-  /// 🥧 Gráfico: Distribuição por Categorias (Pizza)
+
   Widget _buildCategoryDistributionChart() {
     if (_categoryDistribution.isEmpty) {
       return _buildCardContainer(
@@ -612,10 +652,10 @@ class _ChartsByBaseScreenState extends State<ChartsByBaseScreen> {
         0, (sum, item) => sum + ((item['total'] ?? 0) as int));
     final colors = [
       kPrimaryColor,
-      const Color(0xFF17A2B8), // Info Blue
+      const Color(0xFF17A2B8), 
       kWarningColor,
-      const Color(0xFF6C757D), // Secondary Grey
-      const Color(0xFF20C997), // Teal
+      const Color(0xFF6C757D), 
+      const Color(0xFF20C997), 
     ];
 
     return _buildCardContainer(
@@ -647,8 +687,8 @@ class _ChartsByBaseScreenState extends State<ChartsByBaseScreen> {
                           });
                         },
                       ),
-                      sectionsSpace: 4, // Espaço maior
-                      centerSpaceRadius: 60, // Centro maior
+                      sectionsSpace: 4, 
+                      centerSpaceRadius: 60, 
                       sections: List.generate(_categoryDistribution.length, (i) {
                         final total =
                             ((_categoryDistribution[i]['total'] ?? 0) as int);
@@ -659,7 +699,7 @@ class _ChartsByBaseScreenState extends State<ChartsByBaseScreen> {
                           value: total.toDouble(),
                           title: '${percent.toStringAsFixed(0)}%',
                           color: colors[i % colors.length],
-                          radius: isTouched ? 80 : 70, // Raio maior
+                          radius: isTouched ? 80 : 70, 
                           titleStyle: TextStyle(
                             fontSize: isTouched ? 16 : 14,
                             fontWeight: FontWeight.bold,
@@ -706,24 +746,24 @@ class _ChartsByBaseScreenState extends State<ChartsByBaseScreen> {
     );
   }
 
-  /// Helper para a legenda do gráfico de pizza (Reutilizado da tela anterior)
+ 
   Widget _buildPieChartLegendItem(
       Color color, String label, String value, int index) {
     final isActive = _touchedCategoryIndex == index;
     return Row(
       children: [
         Container(
-          width: isActive ? 16 : 14, // Tamanho maior
+          width: isActive ? 16 : 14, 
           height: isActive ? 16 : 14,
           decoration: BoxDecoration(
             color: color,
-            borderRadius: BorderRadius.circular(4), // Borda mais quadrada
+            borderRadius: BorderRadius.circular(4), 
             boxShadow: isActive
                 ? [BoxShadow(color: color.withOpacity(0.4), blurRadius: 6)]
                 : null,
           ),
         ),
-        const SizedBox(width: 12), // Espaço maior
+        const SizedBox(width: 12),
         Expanded(
           child: Text(
             label,
@@ -748,7 +788,7 @@ class _ChartsByBaseScreenState extends State<ChartsByBaseScreen> {
     );
   }
 
-  /// 📈 Gráfico: Fluxo de Estoque Mensal (Linha)
+ 
   Widget _buildMonthlyFlowLineChart() {
     if (_monthlyFlowData.isEmpty) {
       return _buildCardContainer(
@@ -900,7 +940,7 @@ class _ChartsByBaseScreenState extends State<ChartsByBaseScreen> {
         show: true,
         gradient: LinearGradient(
           colors: [
-            color.withOpacity(0.2), // Área mais suave
+            color.withOpacity(0.2), 
             color.withOpacity(0.0),
           ],
           begin: Alignment.topCenter,

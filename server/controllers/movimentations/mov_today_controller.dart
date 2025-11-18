@@ -8,7 +8,7 @@ Future<Response> movTodayHandler(RequestContext context) async{
     try{
       final conexao = Connection.getConnection();
       final dao = MovimentationDAO(await conexao);
-      final items = await dao.movementsToday();
+      final items = await dao.getmovementsToday();
 
       return Response.json(body: {
         'success': true,
