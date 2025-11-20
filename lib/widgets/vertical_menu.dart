@@ -7,8 +7,6 @@ import 'package:metro_projeto/screens/reportscreen.dart';
 import 'package:metro_projeto/screens/user_management_screen.dart';
 
 class VerticalMenu extends StatelessWidget {
-  
-
   final int selectedIndex;
 
   const VerticalMenu({
@@ -18,13 +16,12 @@ class VerticalMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-   
-    const Color primaryColor = Color(0xFF0D47A1); 
-    final Color selectedTileColor = primaryColor.withOpacity(0.1);
-    const Color defaultIconColor = Color(0xFF5F6368); 
-    const Color defaultTextColor = Color(0xFF3C4043); 
+    const Color primaryColor = Color(0xFF0D47A1);
+    final Color selectedTileColor = primaryColor.withOpacity(0.10);
+    const Color defaultIconColor = Color(0xFF5F6368);
+    const Color defaultTextColor = Color(0xFF3C4043);
 
-   final safeIndex = (selectedIndex >= 0 && selectedIndex <= 5) ? selectedIndex : -1;
+    final safeIndex = (selectedIndex >= 0 && selectedIndex <= 5) ? selectedIndex : -1;
 
     return Drawer(
       backgroundColor: Colors.white,
@@ -33,198 +30,84 @@ class VerticalMenu extends StatelessWidget {
       ),
       child: ListView(
         padding: EdgeInsets.zero,
-        children: <Widget>[
-          Container(
-              height: 130, 
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border(
-                  bottom: BorderSide(color: Colors.grey[200]!, width: 1.5),
-                ),
-              ),
-              
-              child: DrawerHeader(
-                decoration: const BoxDecoration(
-                  color: Colors.transparent, 
-                ),
-                
-                padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,  
-                  children: [
-                    Container(
-                      width: 60, 
-                      height: 60,
-                      padding: const EdgeInsets.all(4), 
-                      decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.05),
-                        borderRadius: BorderRadius.circular(12), 
-                      ),
-                      child: Image.asset(
-                        'assets/images/logo_metro_menu.png',
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                    const SizedBox(width: 12), 
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center, 
-                      children: [
-                        Text(
-                          'Metrô de',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w500, 
-                            fontSize: 18, 
-                            color: Colors.black54,  
-                            height: 1.1, 
-                          ),
-                        ),
-                        Text(
-                          'São Paulo',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold, 
-                            fontSize: 20, 
-                            color: Colors.black87, 
-                            height: 1.2, 
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
+        children: [
+          _buildHeader(),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
             child: Column(
               children: [
-                _buildMenuItem(
+                _verticalItem(
                   context: context,
                   icon: Icons.grid_view_outlined,
-                  title: 'Painel',
-                  index: 0, 
-                  onTap: () {
-                    Navigator.pop(context);
-                    if (selectedIndex == 0) return; 
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (Builder) => const DashboardScreen(),
-                      ),
-                    );
-                  },
-                  currentSelectedIndex: safeIndex,
+                  title: "Painel",
+                  index: 0,
+                  currentIndex: safeIndex,
                   selectedColor: primaryColor,
                   selectedTileColor: selectedTileColor,
                   defaultIconColor: defaultIconColor,
                   defaultTextColor: defaultTextColor,
+                  target: const DashboardScreen(),
                 ),
-                _buildMenuItem(
+                _verticalItem(
                   context: context,
                   icon: Icons.inventory_2_outlined,
-                  title: 'Inventário',
-                  index: 1, 
-                  onTap: () {
-                    Navigator.pop(context);
-                    if (selectedIndex == 1) return;
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (Builder) => const InventoryScreen(),
-                      ),
-                    );
-                  },
-                  currentSelectedIndex: safeIndex,
+                  title: "Inventário",
+                  index: 1,
+                  currentIndex: safeIndex,
                   selectedColor: primaryColor,
                   selectedTileColor: selectedTileColor,
                   defaultIconColor: defaultIconColor,
                   defaultTextColor: defaultTextColor,
+                  target: const InventoryScreen(),
                 ),
-                _buildMenuItem(
+                _verticalItem(
                   context: context,
                   icon: Icons.input_outlined,
-                  title: 'Entradas/Saídas',
-                  index: 2, 
-                  onTap: () {
-                    Navigator.pop(context);
-                    if (selectedIndex == 3) return;
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (Builder) => const MovimentacaoScreen(),
-                      ),
-                    );
-                  },
-                  currentSelectedIndex: safeIndex,
+                  title: "Entradas/Saídas",
+                  index: 2,
+                  currentIndex: safeIndex,
                   selectedColor: primaryColor,
                   selectedTileColor: selectedTileColor,
                   defaultIconColor: defaultIconColor,
                   defaultTextColor: defaultTextColor,
+                  target: const MovimentacaoScreen(),
                 ),
-                _buildMenuItem(
+                _verticalItem(
                   context: context,
                   icon: Icons.bar_chart_outlined,
-                  title: 'Relatórios',
-                  index: 3, 
-                  onTap: () {
-                    Navigator.pop(context);
-                    if (selectedIndex == 3) return;
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (Builder) => const ReportScreen(),
-                      ),
-                    );
-                  },
-                  currentSelectedIndex: safeIndex,
+                  title: "Relatórios",
+                  index: 3,
+                  currentIndex: safeIndex,
                   selectedColor: primaryColor,
                   selectedTileColor: selectedTileColor,
                   defaultIconColor: defaultIconColor,
                   defaultTextColor: defaultTextColor,
+                  target: const ReportScreen(),
                 ),
-                _buildMenuItem(
+                _verticalItem(
                   context: context,
                   icon: Icons.people_outline,
-                  title: 'Gestão de Usuários',
-                  index: 4, 
-                  onTap: () {
-                    Navigator.pop(context);
-                    if (selectedIndex == 4) return;
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (Builder) => const UserManagementsScreen(),
-                      ),
-                    );
-                  },
-                  currentSelectedIndex: safeIndex,
+                  title: "Gestão de Usuários",
+                  index: 4,
+                  currentIndex: safeIndex,
                   selectedColor: primaryColor,
                   selectedTileColor: selectedTileColor,
                   defaultIconColor: defaultIconColor,
                   defaultTextColor: defaultTextColor,
+                  target: const UserManagementsScreen(),
                 ),
-                _buildMenuItem(
+                _verticalItem(
                   context: context,
                   icon: Icons.add_box_outlined,
-                  title: 'Cadastrar Material',
-                  index: 5, 
-                  onTap: () {
-                    Navigator.pop(context);
-                    if (selectedIndex == 5) return;
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (Builder) => const CadastroMaterialScreen(),
-                      ),
-                    );
-                  },
-                  currentSelectedIndex: safeIndex,
+                  title: "Cadastrar Material",
+                  index: 5,
+                  currentIndex: safeIndex,
                   selectedColor: primaryColor,
                   selectedTileColor: selectedTileColor,
                   defaultIconColor: defaultIconColor,
                   defaultTextColor: defaultTextColor,
+                  target: const CadastroMaterialScreen(),
                 ),
-          
               ],
             ),
           ),
@@ -233,42 +116,142 @@ class VerticalMenu extends StatelessWidget {
     );
   }
 
+  // HEADER DO MENU
+  Widget _buildHeader() {
+    return Container(
+      height: 130,
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: Colors.grey[200]!, width: 1.5),
+        ),
+      ),
+      child: DrawerHeader(
+        decoration: const BoxDecoration(color: Colors.transparent),
+        padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Image.asset(
+                'assets/images/logo_metro_menu.png',
+                fit: BoxFit.contain,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Metrô de',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 18,
+                    color: Colors.black54,
+                    height: 1.1,
+                  ),
+                ),
+                Text(
+                  'São Paulo',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    color: Colors.black87,
+                    height: 1.2,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-  Widget _buildMenuItem({
+  // ITEM MODERNO COM ANIMAÇÃO + HOVER
+  Widget _verticalItem({
     required BuildContext context,
     required IconData icon,
     required String title,
-    required int index, 
-    required int currentSelectedIndex, 
-    required VoidCallback onTap,
+    required int index,
+    required int currentIndex,
     required Color selectedColor,
     required Color selectedTileColor,
     required Color defaultIconColor,
     required Color defaultTextColor,
+    required Widget target,
   }) {
+    final bool isSelected = currentIndex == index;
 
-    final bool isSelected = currentSelectedIndex >= 0 && index == currentSelectedIndex;
+    return _HoverBuilder(
+      builder: (isHovering) {
+        final bool highlight = isHovering || isSelected;
 
-    return ListTile(
-      leading: Icon(
-        icon,
-        color: isSelected ? selectedColor : defaultIconColor,
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          color: isSelected ? selectedColor : defaultTextColor,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        ),
-      ),
-      onTap: onTap, 
-      selected: isSelected,
-      selectedTileColor: selectedTileColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      horizontalTitleGap: 10,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          margin: const EdgeInsets.symmetric(vertical: 6),
+          decoration: BoxDecoration(
+            color: highlight ? selectedTileColor : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: ListTile(
+            leading: Icon(
+              icon,
+              color: highlight ? selectedColor : defaultIconColor,
+            ),
+            title: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2.0),
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: highlight ? selectedColor : defaultTextColor,
+                  fontWeight: highlight ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ),
+            onTap: () {
+              Navigator.pop(context);
+              if (!isSelected) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => target),
+                );
+              }
+            },
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          ),
+        );
+      },
+    );
+  }
+}
+
+// DETECTOR DE HOVER GENÉRICO
+class _HoverBuilder extends StatefulWidget {
+  final Widget Function(bool isHovering) builder;
+  const _HoverBuilder({required this.builder});
+
+  @override
+  State<_HoverBuilder> createState() => _HoverBuilderState();
+}
+
+class _HoverBuilderState extends State<_HoverBuilder> {
+  bool hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => hovering = true),
+      onExit: (_) => setState(() => hovering = false),
+      child: widget.builder(hovering),
     );
   }
 }

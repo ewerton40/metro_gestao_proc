@@ -3,7 +3,7 @@ import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/services/inventory_service.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-
+import 'package:metro_projeto/widgets/animated_screen.dart';
 
 class CadastroMaterialScreen extends StatefulWidget {
   const CadastroMaterialScreen({super.key});
@@ -105,39 +105,40 @@ void _showSnackBar(String message, {bool isError = false}) {
 }
 
     @override
-    Widget build(BuildContext context) {
-      // A tela principal é envolvida por um Scaffold para a estrutura básica.
-      return Scaffold(
-        backgroundColor: Colors.white,
-        appBar: const BarMenu(),
-        drawer: const VerticalMenu(selectedIndex: 5), ////////////////////////////////////////////////////
+Widget build(BuildContext context) {
+  return AnimatedScreen(
+    child: Scaffold(
+      backgroundColor: Colors.white,
+      appBar: const BarMenu(),
+      drawer: const VerticalMenu(selectedIndex: 5),
 
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 48.0, vertical: 32.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Cadastro de materiais',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black87),
-                ),
-                const SizedBox(height: 32),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      flex: 1, 
-                      child: _buildFormCard(),
-                    ),
-                  ],
-                 ),
-              ],
-            ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 48.0, vertical: 32.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Cadastro de materiais',
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black87),
+              ),
+              const SizedBox(height: 32),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: _buildFormCard(),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
-      );
-    }
+      ),
+    ),
+  );
+}
 
     // Constrói o card principal do formulário
     Widget _buildFormCard() {

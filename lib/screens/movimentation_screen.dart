@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../services/auth_services.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:flutter/services.dart';
+import 'package:metro_projeto/widgets/animated_screen.dart';
 
 class MovimentacaoScreen extends StatefulWidget {
   const MovimentacaoScreen({super.key});
@@ -166,8 +167,9 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return DefaultTabController(
+Widget build(BuildContext context) {
+  return AnimatedScreen(
+    child: DefaultTabController(
       length: 2,
       child: Scaffold(
         backgroundColor: const Color(0xFFF8F9FA),
@@ -186,24 +188,19 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
                     color: Colors.black87),
               ),
               const SizedBox(height: 24),
-
-              // Abas para "Registrar Entrada" e "Registrar Saída"
               TabBar(
                 tabs: const [
                   Tab(text: 'Registrar Entrada'),
                   Tab(text: 'Registrar Saída'),
                 ],
-                labelStyle:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                unselectedLabelColor: Colors.grey[600],
+                labelStyle: const TextStyle(
+                    fontSize: 16, fontWeight: FontWeight.bold),
+                unselectedLabelColor: Colors.grey,
                 labelColor: const Color(0xFF1763A6),
                 indicatorColor: const Color(0xFF1763A6),
                 indicatorWeight: 3,
               ),
-
               const SizedBox(height: 24),
-
-              // Conteúdo das Abas
               Expanded(
                 child: Container(
                   padding: const EdgeInsets.all(32.0),
@@ -224,8 +221,9 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   /// Constrói o formulário de "Registrar Entrada"
   Widget _buildEntradaForm() {

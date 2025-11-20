@@ -4,6 +4,7 @@ import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
 import '../services/report_service.dart';
 import '../services/inventory_service.dart';
+import 'package:metro_projeto/widgets/animated_screen.dart';
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -22,13 +23,13 @@ class _ReportScreenState extends State<ReportScreen> {
   List<DataColumn> _reportColumns = [];
   List<DataRow> _reportRows = [];
 
-  /// Gera o Relatório de Movimentações
-
+  /// =========================================================
+  /// GERA RELATÓRIO: Movimentações
+  /// =========================================================
   Future<void> _generateMovimentacoesReport() async {
     _resetReportState('Relatório de Movimentações');
 
     try {
-      // Chama o novo serviço
       final results = await _reportService.fetchMovimentacoes();
 
       final columns = const <DataColumn>[
@@ -42,17 +43,23 @@ class _ReportScreenState extends State<ReportScreen> {
       ];
 
       final rows = results.map((item) {
-        // Colore a linha de 'entrada' ou 'saida'
         final color = item['tipo'] == 'entrada' ? Colors.green : Colors.red;
 
         return DataRow(cells: [
-          DataCell(Text(DateTime.parse(item['data'] + 'Z')
-              .toLocal()
-              .toString()
-              .substring(0, 16))),
+          DataCell(Text(
+            DateTime.parse(item['data'] + 'Z')
+                .toLocal()
+                .toString()
+                .substring(0, 16),
+          )),
           DataCell(Text(item['material'])),
-          DataCell(Text(item['quantidade'].toString(),
-              style: TextStyle(color: color, fontWeight: FontWeight.bold))),
+          DataCell(Text(
+            item['quantidade'].toString(),
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
+          )),
           DataCell(Text(item['tipo'])),
           DataCell(Text(item['funcionario'])),
           DataCell(Text(item['origem'])),
@@ -66,18 +73,13 @@ class _ReportScreenState extends State<ReportScreen> {
         _isLoadingReport = false;
       });
     } catch (e) {
-      setState(() {
-        _isLoadingReport = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Erro ao gerar relatório: $e'),
-            backgroundColor: Colors.red),
-      );
+      _showError('Erro ao gerar relatório: $e');
     }
   }
 
-  //Gera o relatório de consumo
+  /// =========================================================
+  /// GERA RELATÓRIO: Consumo (Top 10)
+  /// =========================================================
   Future<void> _generateConsumoReport() async {
     _resetReportState('Relatório de Consumo (Top 10)');
 
@@ -105,105 +107,179 @@ class _ReportScreenState extends State<ReportScreen> {
         _isLoadingReport = false;
       });
     } catch (e) {
-      setState(() {
-        _isLoadingReport = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Erro ao gerar relatório: $e'),
-            backgroundColor: Colors.red),
-      );
+      _showError('Erro ao gerar relatório: $e');
     }
   }
 
+  /// =========================================================
+  /// GERA RELATÓRIO: Itens Críticos
+  /// =========================================================
+  Future<void> _generateCriticalItemsReport() async {
+    _resetReportState('Relatório de Itens Críticos');
+
+    try {
+      final results = await _inventoryService.getCriticalItems();
+
+      final columns = const <DataColumn>[
+        DataColumn(label: Text('Material')),
+        DataColumn(label: Text('Qtd. Atual')),
+        DataColumn(label: Text('Limite Baixo')),
+      ];
+
+      final rows = results.map((item) {
+        return DataRow(cells: [
+          DataCell(Text(item['nome_material'])),
+          DataCell(Text(
+            item['quantidade'].toString(),
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.red,
+            ),
+          )),
+          DataCell(Text(item['limite_baixo'].toString())),
+        ]);
+      }).toList();
+
+      setState(() {
+        _reportColumns = columns;
+        _reportRows = rows;
+        _isLoadingReport = false;
+      });
+    } catch (e) {
+      _showError('Erro ao gerar relatório: $e');
+    }
+  }
+
+  /// =========================================================
+  /// RESET DE ESTADOS
+  /// =========================================================
+  void _resetReportState(String title) {
+    setState(() {
+      _isLoadingReport = true;
+      _reportColumns = [];
+      _reportRows = [];
+      _currentReportTitle = title;
+    });
+  }
+
+  void _showError(String msg) {
+    setState(() => _isLoadingReport = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), backgroundColor: Colors.red),
+    );
+  }
+
+  /// =========================================================
+  /// BUILD PRINCIPAL — COM ANIMAÇÃO
+  /// =========================================================
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const BarMenu(),
-      drawer: const VerticalMenu(selectedIndex: 3),
-      backgroundColor: const Color(0xFFF7F8F9),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          // Coluna principal (vertical)
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Relatórios',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
+    return AnimatedScreen(
+      child: Scaffold(
+        appBar: const BarMenu(),
+        drawer: const VerticalMenu(selectedIndex: 3),
+        backgroundColor: const Color(0xFFF7F8F9),
+        body: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Relatórios',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ), //
-            const SizedBox(height: 16),
-
-            Expanded(
-              // Faz a Row preencher o resto do espaço vertical
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Coluna da Esquerda (Opções)
-                  Expanded(
-                    flex: 2,
-                    child: SingleChildScrollView(
-                      child: DataTable(
-                        columns: const <DataColumn>[
-                          DataColumn(
-                              label: Text('Relatório',
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold))),
-                          DataColumn(
-                              label: Text('Descrição',
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold))),
-                          DataColumn(
-                              label: Text('Gerar',
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold))),
-                        ], //
-                        rows: <DataRow>[
-                          _buildDataRow(
-                            'Movimentações',
-                            'Entradas, saídas e transferências',
-                            _generateMovimentacoesReport,
-                          ), //
-                          _buildDataRow(
-                            'Itens Críticos',
-                            'Materiais com baixo estoque',
-                            _generateCriticalItemsReport,
-                          ), //
-                          _buildDataRow('Consumo', 'Materiais mais utilizados',
-                              _generateConsumoReport), //
-                          _buildDataRow('Financeiro',
-                              'Custos e valor de estoque', () {}), //
-                          _buildDataRow('Pendências',
-                              'Pedidos e aprovações aguardando', () {}), //
-                        ],
+              const SizedBox(height: 16),
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    /// =============================================
+                    /// LISTA DE RELATÓRIOS (MENU LATERAL)
+                    /// =============================================
+                    Expanded(
+                      flex: 2,
+                      child: SingleChildScrollView(
+                        child: DataTable(
+                          columns: const <DataColumn>[
+                            DataColumn(
+                              label: Text(
+                                'Relatório',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            DataColumn(
+                              label: Text(
+                                'Descrição',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            DataColumn(
+                              label: Text(
+                                'Gerar',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                          rows: <DataRow>[
+                            _buildDataRow(
+                              'Movimentações',
+                              'Entradas, saídas e transferências',
+                              _generateMovimentacoesReport,
+                            ),
+                            _buildDataRow(
+                              'Itens Críticos',
+                              'Materiais com baixo estoque',
+                              _generateCriticalItemsReport,
+                            ),
+                            _buildDataRow(
+                              'Consumo',
+                              'Materiais mais utilizados',
+                              _generateConsumoReport,
+                            ),
+                            _buildDataRow(
+                              'Financeiro',
+                              'Custos e valor de estoque',
+                              () {},
+                            ),
+                            _buildDataRow(
+                              'Pendências',
+                              'Pedidos e aprovações aguardando',
+                              () {},
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
 
-                  const SizedBox(width: 16), // Divisor
+                    const SizedBox(width: 16),
 
-                  Expanded(
-                    flex: 3,
-                    child: _isLoadingReport
-                        ? const Center(child: CircularProgressIndicator())
-                        : (_reportRows.isNotEmpty
-                            ? _buildResultsTable() // O widget com scroll horizontal
-                            : _buildPlaceholderResults() // Placeholder
-                        ),
-                  ),
-                ],
+                    /// =============================================
+                    /// ÁREA DE RESULTADOS
+                    /// =============================================
+                    Expanded(
+                      flex: 3,
+                      child: _isLoadingReport
+                          ? const Center(child: CircularProgressIndicator())
+                          : (_reportRows.isNotEmpty
+                              ? _buildResultsTable()
+                              : _buildPlaceholderResults()),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // Adicione este novo widget de placeholder
+  /// =========================================================
+  /// PLACEHOLDER
+  /// =========================================================
   Widget _buildPlaceholderResults() {
     return Container(
       decoration: BoxDecoration(
@@ -220,7 +296,9 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
-  // Definição do _buildDataRow
+  /// =========================================================
+  /// LINHA DA TABELA DE RELATÓRIOS
+  /// =========================================================
   DataRow _buildDataRow(
       String relatorio, String descricao, VoidCallback onGerarPressed) {
     return DataRow(
@@ -237,66 +315,12 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
-  /// Limpa os resultados e define o estado de loading
-  void _resetReportState(String title) {
-    setState(() {
-      _isLoadingReport = true;
-      _reportColumns = [];
-      _reportRows = [];
-      _currentReportTitle = title;
-    });
-  }
-
-  /// Gera o Relatório de Itens Críticos
-  Future<void> _generateCriticalItemsReport() async {
-    _resetReportState('Relatório de Itens Críticos');
-
-    try {
-      // Usa o inventory_service que já existia
-      final results = await _inventoryService.getCriticalItems();
-
-      // Define as colunas para este relatório
-      final columns = const <DataColumn>[
-        DataColumn(label: Text('Material')),
-        DataColumn(label: Text('Qtd. Atual')),
-        DataColumn(label: Text('Limite Baixo')),
-      ];
-
-      // Define as linhas para este relatório
-      final rows = results.map((item) {
-        return DataRow(cells: [
-          DataCell(Text(item['nome_material'])),
-          DataCell(Text(
-            item['quantidade'].toString(),
-            style:
-                const TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
-          )),
-          DataCell(Text(item['limite_baixo'].toString())),
-        ]);
-      }).toList();
-
-      setState(() {
-        _reportColumns = columns;
-        _reportRows = rows;
-        _isLoadingReport = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoadingReport = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Erro ao gerar relatório: $e'),
-            backgroundColor: Colors.red),
-      );
-    }
-  }
-
-  /// Widget da Tabela de Resultados
+  /// =========================================================
+  /// TABELA DOS RESULTADOS
+  /// =========================================================
   Widget _buildResultsTable() {
     return Container(
-      width: double
-          .infinity, // Garante que o container preencha o espaço horizontal
+      width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
@@ -309,14 +333,18 @@ class _ReportScreenState extends State<ReportScreen> {
             padding: const EdgeInsets.all(16.0),
             child: Text(
               _currentReportTitle,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           Flexible(
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: DataTable(
-                headingRowColor: MaterialStateProperty.all(Colors.grey[50]),
+                headingRowColor:
+                    MaterialStateProperty.all(Colors.grey[50]),
                 columns: _reportColumns,
                 rows: _reportRows,
               ),

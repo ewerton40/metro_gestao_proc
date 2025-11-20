@@ -4,6 +4,7 @@ import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
 import '../services/movimentation_services.dart';
 import '../services/inventory_service.dart';
+import 'package:metro_projeto/widgets/animated_screen.dart';
 
 class MovementsToday {
   final int entradas;
@@ -27,6 +28,7 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  bool _showContent = false;
   MovementsToday? _movementsToday;
   final movimentationServices = MovimentationServices();
   final inventoryServices = InventoryServices();
@@ -52,6 +54,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _loadTopFiveMaterials();
     _loadCriticalItems();
     _loadCategoryDistribution();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+  setState(() => _showContent = true);
+});
   }
 
   Future<void> _loadMovements() async {
@@ -120,9 +125,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+@override
+Widget build(BuildContext context) {
+  return AnimatedScreen(
+    child: Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: const BarMenu(),
       drawer: const VerticalMenu(selectedIndex: 0),
@@ -143,8 +149,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   // --- MÉTODOS DE CONSTRUÇÃO DE SEÇÃO ---
 
