@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:metro_projeto/screens/CadastroMaterialScreen.dart';
-import 'package:metro_projeto/screens/dashBoardScreen.dart';
-import 'package:metro_projeto/screens/inventoryscreen.dart';
+import 'package:metro_projeto/screens/material_registration_screen.dart';
+import 'package:metro_projeto/screens/dashboard_screen.dart';
+import 'package:metro_projeto/screens/inventory_screen.dart';
 import 'package:metro_projeto/screens/movimentation_screen.dart';
-import 'package:metro_projeto/screens/reportscreen.dart';
+import 'package:metro_projeto/screens/report_screen.dart';
 import 'package:metro_projeto/screens/user_management_screen.dart';
 
 class VerticalMenu extends StatelessWidget {
@@ -214,7 +214,7 @@ class VerticalMenu extends StatelessWidget {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (Builder) => const CadastroMaterialScreen(),
+                        builder: (Builder) => const MaterialRegistrationScreen(),
                       ),
                     );
                   },

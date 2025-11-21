@@ -43,7 +43,6 @@ dependencies:
   provider: ^6.1.5
   intl: ^0.20.2
   mailer: ^6.6.0
-  mysql1: ^0.20.0
 
 dev_dependencies:
   flutter_test:

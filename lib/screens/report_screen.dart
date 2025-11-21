@@ -1,9 +1,13 @@
-// Em: lib/screens/reportscreen.dart
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
 import '../services/report_service.dart';
 import '../services/inventory_service.dart';
+
+
+const Color primaryBlue = Color(0xFF001789); 
+const Color lightBlue = Color(0xFF42A5F5); 
+const Color whiteBackground = Colors.white; 
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -22,13 +26,11 @@ class _ReportScreenState extends State<ReportScreen> {
   List<DataColumn> _reportColumns = [];
   List<DataRow> _reportRows = [];
 
-  /// Gera o Relatório de Movimentações
-
   Future<void> _generateMovimentacoesReport() async {
     _resetReportState('Relatório de Movimentações');
 
     try {
-      // Chama o novo serviço
+
       final results = await _reportService.fetchMovimentacoes();
 
       final columns = const <DataColumn>[
@@ -42,7 +44,7 @@ class _ReportScreenState extends State<ReportScreen> {
       ];
 
       final rows = results.map((item) {
-        // Colore a linha de 'entrada' ou 'saida'
+        
         final color = item['tipo'] == 'entrada' ? Colors.green : Colors.red;
 
         return DataRow(cells: [
@@ -94,7 +96,7 @@ class _ReportScreenState extends State<ReportScreen> {
           DataCell(Text(item['nome_material'])),
           DataCell(Text(
             item['total_consumido'].toString(),
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: const TextStyle(fontWeight: FontWeight.bold, color: primaryBlue), 
           )),
         ]);
       }).toList();
@@ -121,7 +123,7 @@ class _ReportScreenState extends State<ReportScreen> {
     return Scaffold(
       appBar: const BarMenu(),
       drawer: VerticalMenu(selectedIndex: 3),
-      backgroundColor: const Color(0xFFF7F8F9),
+      backgroundColor: whiteBackground, 
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -132,11 +134,12 @@ class _ReportScreenState extends State<ReportScreen> {
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
+                color: primaryBlue, 
               ),
             ), //
             const SizedBox(height: 16),
 
-            // Layout Responsivo
+         
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
@@ -162,43 +165,54 @@ class _ReportScreenState extends State<ReportScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        //Coluna da Esquerda
+ 
         Expanded(
-          flex: 2, // 40%
+          flex: 2, 
           child: SingleChildScrollView(
-            child: DataTable(
-              columns: const <DataColumn>[
-                DataColumn(
-                    label: Text('Relatório',
-                        style: TextStyle(fontWeight: FontWeight.bold))),
-                DataColumn(
-                    label: Text('Descrição',
-                        style: TextStyle(fontWeight: FontWeight.bold))),
-                DataColumn(
-                    label: Text('Gerar',
-                        style: TextStyle(fontWeight: FontWeight.bold))),
-              ],
-              rows: <DataRow>[
-                _buildDataRow(
-                    'Movimentações',
-                    'Entradas, saídas e transferências',
-                    _generateMovimentacoesReport),
-                _buildDataRow('Itens Críticos', 'Materiais com baixo estoque',
-                    _generateCriticalItemsReport),
-                _buildDataRow('Consumo', 'Materiais mais utilizados',
-                    _generateConsumoReport),
-              ],
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: primaryBlue.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: DataTable(
+                headingRowColor: MaterialStateProperty.all(const Color.fromARGB(148, 0, 80, 145)), 
+                headingTextStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                columns: const <DataColumn>[
+                  DataColumn(
+                      label: Text('Relatório')),
+                  DataColumn(
+                      label: Text('Descrição')),
+                  DataColumn(
+                      label: Text('Gerar')),
+                ],
+                rows: <DataRow>[
+                  _buildDataRow(
+                      'Movimentações',
+                      'Entradas, saídas e transferências',
+                      _generateMovimentacoesReport),
+                  _buildDataRow('Itens Críticos', 'Materiais com baixo estoque',
+                      _generateCriticalItemsReport),
+                  _buildDataRow('Consumo', 'Materiais mais utilizados',
+                      _generateConsumoReport),
+                ],
+              ),
             ),
           ),
         ),
 
-        const SizedBox(width: 16), // Divisor
+        const SizedBox(width: 16), 
 
-        // Coluna da Direit
         Expanded(
-          flex: 3, // 60%
+          flex: 3, 
           child: _isLoadingReport
-              ? const Center(child: CircularProgressIndicator())
+              ? const Center(child: CircularProgressIndicator(color: primaryBlue)) 
               : (_reportRows.isNotEmpty
                   ? _buildResultsTable()
                   : _buildPlaceholderResults()),
@@ -212,36 +226,51 @@ class _ReportScreenState extends State<ReportScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SingleChildScrollView(
-          child: DataTable(
-            columns: const <DataColumn>[
-              DataColumn(label: Text('Relatório')),
-              DataColumn(label: Text('Gerar')),
-            ],
-            rows: <DataRow>[
-              _buildDataRow(
-                'Movimentações',
-                '', // Descrição removida
-                _generateMovimentacoesReport,
-              ),
-              _buildDataRow(
-                'Itens Críticos',
-                '', // Descrição removida
-                _generateCriticalItemsReport,
-              ),
-              _buildDataRow(
-                  'Consumo',
-                  '', // Descrição removida
-                  _generateConsumoReport),
-            ],
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: primaryBlue.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: DataTable(
+              headingRowColor: MaterialStateProperty.all(lightBlue), 
+              headingTextStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              columns: const <DataColumn>[
+                DataColumn(label: Text('Relatório')),
+                DataColumn(label: Text('Gerar')),
+              ],
+              rows: <DataRow>[
+                _buildDataRow(
+                  'Movimentações',
+                  '', 
+                  _generateMovimentacoesReport,
+                ),
+                _buildDataRow(
+                  'Itens Críticos',
+                  '',
+                  _generateCriticalItemsReport,
+                ),
+                _buildDataRow(
+                    'Consumo',
+                    '', 
+                    _generateConsumoReport),
+              ],
+            ),
           ),
         ),
 
-        const SizedBox(height: 16), // Divisor
+        const SizedBox(height: 16), 
 
         Expanded(
-          // O 'Expanded' força os resultados a preencher o resto da tela
+          
           child: _isLoadingReport
-              ? const Center(child: CircularProgressIndicator())
+              ? const Center(child: CircularProgressIndicator(color: primaryBlue)) 
               : (_reportRows.isNotEmpty
                   ? _buildResultsTable()
                   : _buildPlaceholderResults()),
@@ -255,33 +284,40 @@ class _ReportScreenState extends State<ReportScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: primaryBlue.withOpacity(0.3)), 
       ),
       child: const Center(
         child: Text(
           'Selecione um relatório para gerar.',
-          style: TextStyle(color: Colors.grey, fontSize: 16),
+          style: TextStyle(color: primaryBlue, fontSize: 16), 
         ),
       ),
     );
   }
 
-  // Definição do _buildDataRow
   DataRow _buildDataRow(
       String relatorio, String descricao, VoidCallback onGerarPressed) {
-    // Detecta se a descrição está vazia (para o layout mobile)
+   
     final bool showDescription = descricao.isNotEmpty;
 
     return DataRow(
       cells: <DataCell>[
         DataCell(Text(relatorio)),
 
-        // Só mostra a célula de Descrição se ela não estiver vazia
+      
         if (showDescription) DataCell(Text(descricao)),
 
         DataCell(
           ElevatedButton(
             onPressed: onGerarPressed,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primaryBlue, 
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+            ),
             child: const Text('Gerar'),
           ),
         ),
@@ -289,7 +325,7 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
-  /// Limpa os resultados e define o estado de loading
+  
   void _resetReportState(String title) {
     setState(() {
       _isLoadingReport = true;
@@ -299,29 +335,28 @@ class _ReportScreenState extends State<ReportScreen> {
     });
   }
 
-  /// Gera o Relatório de Itens Críticos
+
   Future<void> _generateCriticalItemsReport() async {
     _resetReportState('Relatório de Itens Críticos');
 
     try {
-      // Usa o inventory_service que já existia
+   
       final results = await _inventoryService.getCriticalItems();
 
-      // Define as colunas para este relatório
       final columns = const <DataColumn>[
         DataColumn(label: Text('Material')),
         DataColumn(label: Text('Qtd. Atual')),
         DataColumn(label: Text('Limite Baixo')),
       ];
 
-      // Define as linhas para este relatório
+  
       final rows = results.map((item) {
         return DataRow(cells: [
           DataCell(Text(item['nome_material'])),
           DataCell(Text(
             item['quantidade'].toString(),
             style:
-                const TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+                const TextStyle(fontWeight: FontWeight.bold, color: Colors.red), 
           )),
           DataCell(Text(item['limite_baixo'].toString())),
         ]);
@@ -344,14 +379,21 @@ class _ReportScreenState extends State<ReportScreen> {
     }
   }
 
-  /// Widget da Tabela de Resultados
+
   Widget _buildResultsTable() {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: primaryBlue.withOpacity(0.3)), 
+        boxShadow: [
+          BoxShadow(
+            color: primaryBlue.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -360,7 +402,7 @@ class _ReportScreenState extends State<ReportScreen> {
             padding: const EdgeInsets.all(16.0),
             child: Text(
               _currentReportTitle,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: primaryBlue), 
             ),
           ),
           Flexible(
@@ -369,7 +411,8 @@ class _ReportScreenState extends State<ReportScreen> {
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: DataTable(
-                  headingRowColor: MaterialStateProperty.all(Colors.grey[50]),
+                  headingRowColor: MaterialStateProperty.all(lightBlue), 
+                  headingTextStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                   columns: _reportColumns,
                   rows: _reportRows,
                 ),

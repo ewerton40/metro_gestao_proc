@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:metro_projeto/screens/loginscreen.dart';
+import 'package:metro_projeto/screens/login_screen.dart';
 import 'package:metro_projeto/screens/reset_password_screen.dart';
 import '../widgets/custom_button.dart';
 import '../services/recovery_services.dart';
@@ -63,7 +63,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
 
   setState(() => isLoading = true);
   try {
-    final response = await recoveryServices.enviarEmailRecuperacao(email);
+    final response = await recoveryServices.sendRecoveryEmail(email);
 
     if (response['success'] == true) {
       _showSnackBar('E-mail de recuperação enviado!', Colors.green);
@@ -94,7 +94,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
 }
   setState(() => isLoading = true);
   try {
-    final response = await recoveryServices.verificarToken(_userEmail!, token);
+    final response = await recoveryServices.verifyToken(_userEmail!, token);
 
     if (response['success'] == true) {
       _showSnackBar('Token verificado com sucesso!', Colors.green);

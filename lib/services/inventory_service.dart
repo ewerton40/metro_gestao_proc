@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../screens/inventoryscreen.dart';
+import '../screens/inventory_screen.dart';
 import '../utils/models/location.dart';
 
 class InventoryServices {

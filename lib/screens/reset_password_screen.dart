@@ -3,7 +3,7 @@ import '../widgets/custom_button.dart';
 import '../services/recovery_services.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
-  String? email;
+  final String? email;
   ResetPasswordScreen({super.key, required this.email});
 
   @override
@@ -51,7 +51,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
     super.dispose();
   }
 
-  // Helper para mostrar SnackBar
+
   void _showSnackBar(String message, Color color) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -76,14 +76,14 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
   setState(() => isLoading = true);
 
   try {
-    // Chama o serviço passando o email recebido da tela anterior
+
     final success = await recoveryServices.resetPassword(widget.email!, novaSenha);
 
     if (success) {
       _showSnackBar('Senha redefinida com sucesso!', Colors.green);
-      // Redireciona após 1 segundo para que o usuário veja a mensagem
+ 
       Future.delayed(const Duration(seconds: 1), () {
-        if (mounted) Navigator.pop(context); // volta para login
+        if (mounted) Navigator.pop(context); 
       });
     } else {
       _showSnackBar('Falha ao redefinir a senha.', Colors.redAccent);
@@ -95,7 +95,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
   }
 }
 
-  // Helper para construir os campos de texto
+
   Widget _buildTextField({
     required TextEditingController controller,
     required String labelText,
@@ -133,7 +133,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
     return Scaffold(
       body: Stack(
         children: [
-          // Fundo com imagem
+  
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -142,7 +142,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
               ),
             ),
           ),
-          // Logo
+      
           Center(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 450),
@@ -153,7 +153,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
               ),
             ),
           ),
-          // Caixa central
+         
           Center(
             child: Padding(
               padding: const EdgeInsets.only(top: 100),
@@ -193,7 +193,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
                         ),
                         const SizedBox(height: 30),
 
-                        // Campo de Nova Senha
+               
                         _buildTextField(
                           controller: novaSenhaController,
                           labelText: 'Nova Senha:',
@@ -211,7 +211,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
                         ),
                         const SizedBox(height: 20),
 
-                        // Campo de Confirmar Senha
+                    
                         _buildTextField(
                           controller: confirmNovaSenhaController,
                           labelText: 'Confirmar Senha:',
@@ -230,7 +230,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
                         ),
                         const SizedBox(height: 30),
 
-                        // Botão
+                   
                         isLoading
                             ? const CircularProgressIndicator(
                                 color: Color(0xFF1763A6),
@@ -247,7 +247,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
                               ),
                         const SizedBox(height: 20),
 
-                        // Voltar
+                    
                         TextButton(
                           onPressed: () => Navigator.pop(context),
                           child: const Text(

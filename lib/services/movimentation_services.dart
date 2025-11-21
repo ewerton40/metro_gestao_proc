@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../screens/dashBoardScreen.dart';
+import '../screens/dashboard_screen.dart';
 
 class MovimentationServices {
   final _baseUrl = 'http://localhost:8080';

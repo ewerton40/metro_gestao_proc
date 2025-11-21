@@ -1,23 +1,20 @@
-// Em: lib/screens/CadastroMaterialScreen.dart
 
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/services/inventory_service.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:intl/intl.dart';
-
 import '../utils/models/location.dart';
-import 'inventoryscreen.dart';
+import 'inventory_screen.dart'; 
 
-class CadastroMaterialScreen extends StatefulWidget {
-  const CadastroMaterialScreen({super.key});
+class MaterialRegistrationScreen extends StatefulWidget {
+  const MaterialRegistrationScreen({super.key});
 
   @override
-  State<CadastroMaterialScreen> createState() => CadastroMaterialScreenState();
+  State<MaterialRegistrationScreen> createState() => MaterialRegistrationScreenState();
 }
 
-class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
+class MaterialRegistrationScreenState extends State<MaterialRegistrationScreen  > {
   final _formKey = GlobalKey<FormState>();
 
   // Variáveis de Estado para os Dropdowns
@@ -145,39 +142,25 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
     }
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    FocusScope.of(context).requestFocus(FocusNode());
+void _restartScreen() {
 
-    final DateTime? picked = await showDatePicker(
-        context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime.now(),
-        lastDate: DateTime(2101));
-
-    if (picked != null) {
-      final DateFormat formatter = DateFormat('dd/MM/yyyy');
-      _dateController.text = formatter.format(picked);
-    }
-  }
-
-  void _restartScreen() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => const CadastroMaterialScreen(),
-      ),
-    );
-  }
-
-  void _showSnackBar(String message, {bool isError = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red.shade700 : Colors.green.shade700,
-        duration: const Duration(seconds: 3),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
+  Navigator.of(context).pushReplacement(
+    MaterialPageRoute(
+      builder: (context) => const MaterialRegistrationScreen(),
+    ),
+  );
+}
+/////////////////////////mostra falah ao cadastrar material
+void _showSnackBar(String message, {bool isError = false}) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(message),
+      backgroundColor: isError ? Colors.red.shade700 : Colors.green.shade700,
+      duration: const Duration(seconds: 3),
+      behavior: SnackBarBehavior.floating,
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -390,157 +373,152 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
     );
   }
 
-  Widget _buildDateField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Vencimento / Calibração',
-            style:
-                TextStyle(fontWeight: FontWeight.w500, color: Colors.black54)),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: _dateController,
-          keyboardType: TextInputType.number,
-          maxLength: 10,
-          inputFormatters: [
-            dateMaskFormatter,
-          ],
-          decoration: InputDecoration(
-            hintText: 'DD/MM/AAAA',
-            suffixIcon: IconButton(
-              icon: const Icon(Icons.calendar_today_outlined,
-                  color: Colors.black54),
-              onPressed: () => _selectDate(context),
-            ),
-            counterText: '',
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey[400]!),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey[400]!),
-            ),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          ),
-          validator: (value) {
-            if (_isDateRequired && (value == null || value.isEmpty)) {
-              return 'Obrigatório selecionar a data.';
-            }
-            if (_isDateRequired && value != null && value.length < 10) {
-              return "A data deve estar completa (DD/MM/AAAA)";
-            }
-            return null;
-          },
-        ),
-      ],
-    );
-  }
+   
+    Widget _buildDateField(){
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(' vencimento/calibração', style: TextStyle(fontWeight: FontWeight.w500, color: Colors.black54)),
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: _dateController,
+            
+            keyboardType: TextInputType.number,
+            maxLength: 10,
+            inputFormatters: [
+              dateMaskFormatter,
+            ],
 
-  Widget _buildTextField({
-    required String label,
-    required TextEditingController controller,
-    int maxLines = 1,
-    TextInputType keyboardType = TextInputType.text,
-    FormFieldValidator<String>? customValidator,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label,
-            style: const TextStyle(
-                fontWeight: FontWeight.w500, color: Colors.black54)),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          maxLines: maxLines,
-          keyboardType: keyboardType,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey[400]!),
+              decoration: InputDecoration(
+              hintText: 'DD/MM/AAAA',
+              suffixIcon: const Icon(Icons.calendar_today_outlined, color: Colors.black54),
+              counterText: '',
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey[400]!),            
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey[400]!),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey[400]!),
-            ),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            validator: (value) {
+            
+              if (_isDateRequired && (value == null || value.isEmpty)) {
+                return 'Obrigatório selecionar a data.';
+              }
+              if (_isDateRequired && value != null && value.length < 10 ){
+                return "A data deve estar completa (DD/MM/AAAA)";
+              }
+              return null;
+            },
           ),
-          validator: customValidator ??
-              (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Este campo é obrigatório.';
-                }
-                if (keyboardType == TextInputType.number &&
-                    int.tryParse(value) == null) {
-                  return 'Insira um valor numérico inteiro válido.';
-                }
-                return null;
-              },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDropdownField({
-    required String label,
-    required String? value,
-    required List<String> items,
-    required ValueChanged<String?> onChanged,
-    String hint = '',
-  }) {
-    // Se o valor selecionado não existir na nova lista (ex: mudança no banco), reseta.
-    if (value != null && !items.contains(value)) {
-      value = null;
+        ],
+      );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label,
-            style: const TextStyle(
-                fontWeight: FontWeight.w500, color: Colors.black54)),
-        const SizedBox(height: 8),
-        DropdownButtonFormField<String>(
-          isExpanded: true,
-          value: value,
-          items: items.map((String item) {
-            return DropdownMenuItem<String>(
-              value: item,
-              child: Text(item),
-            );
-          }).toList(),
-          onChanged: onChanged,
-          decoration: InputDecoration(
-            hintText: hint,
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey[400]!),
+
+    
+    Widget _buildTextField({
+      required String label, 
+      required TextEditingController controller, 
+      int maxLines = 1,
+      TextInputType keyboardType = TextInputType.text,
+
+      FormFieldValidator<String>? customValidator,
+    }) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.black54)),
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: controller,
+            maxLines: maxLines,
+            keyboardType: keyboardType,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey[400]!),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey[400]!),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey[400]!),
-            ),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            validator: customValidator ?? (value) { 
+              if (value == null || value.isEmpty) {
+                return 'Este campo é obrigatório.';
+              }
+              if (keyboardType == TextInputType.number && int.tryParse(value) == null) {
+                return 'Insira um valor numérico inteiro válido.';
+              }
+              return null;
+            }, 
           ),
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Selecione uma opção.';
-            }
-            return null;
-          },
-        ),
-      ],
-    );
+        ],
+      );
+    }
+    
+    
+    Widget _buildDropdownField({
+
+      required String label,
+      required String? value,
+      required List<String> items,
+      required ValueChanged<String?> onChanged,
+      String hint = '',
+    }) 
+      {
+      if(value != null && !items.contains(value)){
+        value = null;
+      }
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.black54)),
+          const SizedBox(height: 8),
+          DropdownButtonFormField<String>(
+            isExpanded: true,
+            value: value,
+            items: items.map((String item) {
+              return DropdownMenuItem<String>(
+                value: item,
+                child: Text(item),
+              );
+            }).toList(),
+            onChanged: onChanged,
+            decoration: InputDecoration(
+              hintText: hint,
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey[400]!),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey[400]!),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+            validator: (value) { 
+              if (value == null || value.isEmpty) {
+                return 'Selecione uma opção.';
+              }
+              return null;
+            },
+          ),
+        ],
+      );
+    }
   }
 
   Widget _buildReadOnlyField({required String label, required String value}) {
@@ -564,4 +542,4 @@ class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
       ],
     );
   }
-}
+
