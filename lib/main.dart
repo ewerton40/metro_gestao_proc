@@ -12,9 +12,9 @@ import 'package:metro_projeto/screens/report_screen.dart';
 import 'package:metro_projeto/screens/reset_password_screen.dart';
 import 'package:metro_projeto/screens/user_management_screen.dart';
 import 'package:metro_projeto/screens/user_registration_screen.dart';
-import 'package:metro_projeto/screens/detalhe_item_screen.dart';
+import 'package:metro_projeto/screens/detail_item_screen.dart';
 import 'package:metro_projeto/screens/report_screen.dart';
-import 'package:metro_projeto/screens/detalhe_item_screen.dart';
+import 'package:metro_projeto/screens/detail_item_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
@@ -44,7 +44,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const ChartsByBaseScreen(),
+      home: const DashboardScreen(),
     );
   }
 }

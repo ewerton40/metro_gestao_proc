@@ -5,6 +5,10 @@ import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
 import '../utils/models/location.dart';
 
+// ====================================================================
+// MODELOS (MANTIDOS INTACTOS)
+// ====================================================================
+
 class InventoryItem {
   final int code;
   final String nome;
@@ -72,6 +76,8 @@ class Category {
   int get hashCode => id.hashCode;
 }
 
+
+
 class InventoryScreen extends StatefulWidget {
   const InventoryScreen({super.key});
 
@@ -80,11 +86,11 @@ class InventoryScreen extends StatefulWidget {
 }
 
 class _InventoryScreenState extends State<InventoryScreen> {
+
   List<InventoryItem> _items = [];
   List<Category> _categories = [];
   InventoryServices inventario = InventoryServices();
 
-  // Filtros selecionados
   String? _selectedStatus;
   Category? _selectedCategory;
   String _searchText = '';
@@ -107,66 +113,58 @@ class _InventoryScreenState extends State<InventoryScreen> {
     _fetchData();
   }
 
+
   Future<void> _fetchData() async {
     setState(() => _isLoading = true);
 
     try {
-      // Agora buscamos os 3 conjuntos de dados em paralelo
       final results = await Future.wait([
-        inventario.getAllItems(baseId: _selectedBase?.id), // Passa o ID da base
+        inventario.getAllItems(baseId: _selectedBase?.id),
         inventario.getAllCategories(),
-        inventario
-            .getAllLocations(), // Busca as bases (da tela de movimentação)
+        inventario.getAllLocations(),
       ]);
 
       setState(() {
         _items = results[0] as List<InventoryItem>;
         _categories = results[1] as List<Category>;
-        _basesList =
-            results[2] as List<SimpleLocation>; // Salva a lista de bases
+        _basesList = results[2] as List<SimpleLocation>;
 
         _isLoading = false;
         _errorMessage = '';
       });
     } catch (e) {
-      print('Erro ao carregar dados: $e'); //
+      print('Erro ao carregar dados: $e');
       setState(() {
-        _errorMessage = 'Erro ao carregar dados do servidor.'; //
+        _errorMessage = 'Erro ao carregar dados do servidor.';
         _isLoading = false;
       });
     }
   }
 
-  // Filtros
+
   List<InventoryItem> _applyFilters(List<InventoryItem> items) {
     List<InventoryItem> filtered = items;
 
-    // Filtro por categoria
     if (_selectedCategory != null) {
       filtered = filtered
           .where((item) => item.categoriaId == _selectedCategory!.id)
           .toList();
     }
 
-    // Filtro por status (estoque)
     if (_selectedStatus != null && _selectedStatus != 'Todos') {
       filtered = filtered.where((item) {
         if (_selectedStatus == 'Em estoque') {
-          // Em estoque = A quantidade real é maior que o limite baixo
           return item.quantidadeAtual > item.qtdBaixo;
         } else if (_selectedStatus == 'Baixo estoque') {
-          // Baixo estoque = A qtd real está entre 0 e o limite baixo
           return item.quantidadeAtual <= item.qtdBaixo &&
               item.quantidadeAtual > 0;
         } else if (_selectedStatus == 'Esgotado') {
-          // Esgotado = A qtd real é 0
           return item.quantidadeAtual == 0;
         }
         return true;
       }).toList();
     }
 
-    // Filtro de busca
     if (_searchText.isNotEmpty) {
       filtered = filtered
           .where((item) =>
@@ -177,22 +175,24 @@ class _InventoryScreenState extends State<InventoryScreen> {
     return filtered;
   }
 
+
   @override
   Widget build(BuildContext context) {
     List<InventoryItem> filteredItems = _applyFilters(_items);
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Colors.white, 
       appBar: const BarMenu(),
       drawer: VerticalMenu(selectedIndex: 1),
       body: Padding(
-        padding: const EdgeInsets.all(32.0),
+        padding: const EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildHeader(),
+            _buildHeader(theme),
             const SizedBox(height: 24),
-            _buildSearchAndFilters(),
+            _buildSearchAndFilters(theme),
             const SizedBox(height: 24),
             Expanded(
               child: Column(
@@ -204,21 +204,21 @@ class _InventoryScreenState extends State<InventoryScreen> {
                         : _errorMessage.isNotEmpty
                             ? Center(
                                 child: Text(_errorMessage,
-                                    style: const TextStyle(
-                                        color: Colors.red, fontSize: 16)))
+                                    style: theme.textTheme.titleMedium!
+                                        .copyWith(color: theme.colorScheme.error)))
                             : LayoutBuilder(
                                 builder: (context, constraints) {
                                   const double breakpoint = 800.0;
                                   if (constraints.maxWidth < breakpoint) {
-                                    return _buildMobileList(filteredItems);
+                                    return _buildMobileList(filteredItems, theme);
                                   } else {
-                                    return _buildDataTable(filteredItems);
+                                    return _buildDataTable(filteredItems, theme);
                                   }
                                 },
                               ),
                   ),
                   const SizedBox(height: 24),
-                  _buildFooter(),
+                  _buildFooter(theme),
                 ],
               ),
             ),
@@ -228,57 +228,54 @@ class _InventoryScreenState extends State<InventoryScreen> {
     );
   }
 
-  Widget _buildHeader() {
-    return const Text(
+  Widget _buildHeader(ThemeData theme) {
+    return Text(
       'Inventário',
-      style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+      style: theme.textTheme.headlineLarge!.copyWith(
+        fontWeight: FontWeight.bold,
+        color: const Color(0xFF082583), 
+      ),
     );
   }
 
-  Widget _buildSearchAndFilters() {
+  Widget _buildSearchAndFilters(ThemeData theme) {
     return Column(
       children: [
         TextField(
           onChanged: (value) => setState(() => _searchText = value),
           decoration: InputDecoration(
-            hintText: 'Pesquisar item...',
+            hintText: 'Pesquisar item por nome...',
             prefixIcon: const Icon(Icons.search),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: Colors.white, 
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(12), 
               borderSide: BorderSide.none,
             ),
+            contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
           ),
-        ), //
+        ),
         const SizedBox(height: 16),
         LayoutBuilder(
           builder: (context, constraints) {
-            // Se a largura for menor que 700 pixels, muda o layout
             if (constraints.maxWidth < 700) {
               return Column(
                 children: [
-                  _buildCategoryDropdown(), //
+                  _buildCategoryDropdown(theme),
                   const SizedBox(height: 16),
-                  _buildBaseDropdown(), //
+                  _buildBaseDropdown(theme),
                   const SizedBox(height: 16),
-                  _buildStatusDropdown(), //
+                  _buildStatusDropdown(theme),
                 ],
               );
             } else {
               return Row(
                 children: [
-                  Expanded(
-                    child: _buildCategoryDropdown(), //
-                  ),
+                  Expanded(child: _buildCategoryDropdown(theme)),
                   const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildBaseDropdown(), //
-                  ),
+                  Expanded(child: _buildBaseDropdown(theme)),
                   const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildStatusDropdown(), //
-                  ),
+                  Expanded(child: _buildStatusDropdown(theme)),
                 ],
               );
             }
@@ -288,12 +285,24 @@ class _InventoryScreenState extends State<InventoryScreen> {
     );
   }
 
-  Widget _buildBaseDropdown() {
+  InputDecoration _dropdownDecoration(ThemeData theme, String hint) {
+    return InputDecoration(
+      hintText: hint,
+      filled: true,
+      fillColor: Colors.white, // Fundo branco para os dropdowns
+      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+    );
+  }
+
+  Widget _buildBaseDropdown(ThemeData theme) {
     return DropdownButtonFormField<SimpleLocation>(
       value: _selectedBase,
-      hint: const Text('Todas as Bases'),
+      decoration: _dropdownDecoration(theme, 'Todas as Bases'),
       items: [
-        // Adiciona a opção "Todas as Bases" (valor null)
         const DropdownMenuItem<SimpleLocation>(
           value: null,
           child: Text('Todas as Bases'),
@@ -307,162 +316,174 @@ class _InventoryScreenState extends State<InventoryScreen> {
       ],
       onChanged: (newValue) {
         setState(() => _selectedBase = newValue);
-        _fetchData();
+        _fetchData(); 
       },
-      decoration: InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: BorderSide(color: Colors.grey[300]!),
-        ),
-      ),
     );
   }
 
-  Widget _buildCategoryDropdown() {
+  Widget _buildCategoryDropdown(ThemeData theme) {
     return DropdownButtonFormField<Category>(
       value: _selectedCategory,
-      hint: const Text('Todas as categorias'),
+      decoration: _dropdownDecoration(theme, 'Todas as categorias'),
       items: [
         const DropdownMenuItem<Category>(
           value: null,
           child: Text('Todas as categorias'),
         ),
         ..._categories.map(
-          (cat) => DropdownMenuItem<Category>(
-            value: cat,
-            child: Text(cat.nome),
+          (category) => DropdownMenuItem<Category>(
+            value: category,
+            child: Text(category.nome),
           ),
         ),
       ],
-      onChanged: (newValue) => setState(() => _selectedCategory = newValue),
-      decoration: InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: BorderSide(color: Colors.grey[300]!),
-        ),
-      ),
+      onChanged: (newValue) {
+        setState(() => _selectedCategory = newValue);
+      },
     );
   }
 
-  Widget _buildStatusDropdown() {
+  Widget _buildStatusDropdown(ThemeData theme) {
     return DropdownButtonFormField<String>(
-      value: _selectedStatus ?? 'Todos',
-      items: _statusOptions.map((status) {
-        return DropdownMenuItem<String>(
-          value: status,
-          child: Text(status),
-        );
-      }).toList(),
-      onChanged: (newValue) => setState(() => _selectedStatus = newValue),
-      decoration: InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: BorderSide(color: Colors.grey[300]!),
-        ),
-      ),
+      value: _selectedStatus,
+      decoration: _dropdownDecoration(theme, 'Status de Estoque'),
+      items: _statusOptions
+          .map(
+            (status) => DropdownMenuItem<String>(
+              value: status,
+              child: Text(status),
+            ),
+          )
+          .toList(),
+      onChanged: (newValue) {
+        setState(() => _selectedStatus = newValue);
+      },
     );
   }
 
-  Widget _buildDataTable(List<InventoryItem> items) {
-    return Container(
-      width: double.infinity,
+  Color _getStatusColor(InventoryItem item) {
+    if (item.quantidadeAtual == 0) {
+      return Colors.red.shade700;
+    } else if (item.quantidadeAtual <= item.qtdBaixo) {
+      return Colors.orange.shade700;
+    } else {
+      return Colors.green.shade700;
+    }
+  }
+
+  String _getStatusText(InventoryItem item) {
+    if (item.quantidadeAtual == 0) {
+      return 'Esgotado';
+    } else if (item.quantidadeAtual <= item.qtdBaixo) {
+      return 'Baixo Estoque';
+    } else {
+      return 'Em Estoque';
+    }
+  }
+
+  Widget _buildDataTable(List<InventoryItem> items, ThemeData theme) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
         child: DataTable(
+          columnSpacing: 24,
+          dataRowMinHeight: 50,
+          dataRowMaxHeight: 60,
+          headingRowColor: MaterialStateProperty.all(Colors.blue.shade50), // Fundo azul claro para o cabeçalho da tabela
+          headingTextStyle: theme.textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onPrimaryContainer),
           columns: const [
-            DataColumn(label: Text('Código')),
-            DataColumn(label: Text('Nome')),
-            DataColumn(label: Text('Categoria')),
-            DataColumn(label: Text('Quantidade')),
-            DataColumn(label: Text('Medida')),
-            DataColumn(label: Text('Status Calibração')),
+            DataColumn(label: Text('CÓDIGO')),
+            DataColumn(label: Text('NOME')),
+            DataColumn(label: Text('CATEGORIA')),
+            DataColumn(label: Text('QTD. ATUAL'), numeric: true),
+            DataColumn(label: Text('STATUS')),
+            DataColumn(label: Text('CALIBRAÇÃO')),
           ],
           rows: items.map((item) {
-            return DataRow(cells: [
-              DataCell(Text(item.code.toString())),
-              DataCell(Text(item.nome)),
-              DataCell(Text(item.categoriaNome)),
-              DataCell(Text(item.quantidadeAtual.toString(),
-                  style: const TextStyle(fontWeight: FontWeight.bold))),
-              DataCell(Text(item.medidaNome)),
-              DataCell(Icon(
-                item.calibracao ? Icons.check_circle : Icons.cancel,
-                color: item.calibracao ? Colors.green : Colors.red,
-              )),
-            ]);
+            final statusColor = _getStatusColor(item);
+            final statusText = _getStatusText(item);
+
+            return DataRow(
+              cells: [
+                DataCell(Text(item.code.toString())),
+                DataCell(Text(item.nome, style: const TextStyle(fontWeight: FontWeight.w500))),
+                DataCell(Text(item.categoriaNome)),
+                DataCell(Text('${item.quantidadeAtual}', textAlign: TextAlign.right)),
+                DataCell(
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: statusColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      statusText,
+                      style: theme.textTheme.bodySmall!.copyWith(color: statusColor, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                DataCell(
+                  Icon(
+                    item.calibracao ? Icons.check_circle : Icons.cancel,
+                    color: item.calibracao ? Colors.green : Colors.grey,
+                    size: 20,
+                  ),
+                ),
+              ],
+            );
           }).toList(),
         ),
       ),
     );
   }
 
-  /// Constrói uma lista de Cards otimizada para celular
-  Widget _buildMobileList(List<InventoryItem> items) {
+  Widget _buildMobileList(List<InventoryItem> items, ThemeData theme) {
     return ListView.builder(
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
-        Color statusColor;
-        if (item.quantidadeAtual == 0) {
-          statusColor = Colors.red;
-        } else if (item.quantidadeAtual <= item.qtdBaixo) {
-          statusColor = Colors.orange;
-        } else {
-          statusColor = Colors.green;
-        }
+        final statusColor = _getStatusColor(item);
+        final statusText = _getStatusText(item);
+
         return Card(
-          margin: const EdgeInsets.only(bottom: 12.0),
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
+          margin: const EdgeInsets.only(bottom: 12),
+          elevation: 2,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: ListTile(
+            contentPadding: const EdgeInsets.all(16),
+            leading: CircleAvatar(
+              backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+              child: Text(item.code.toString(), style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.primary)),
+            ),
+            title: Text(item.nome, style: theme.textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold)),
+            subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        item.nome,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    Icon(
-                      item.calibracao ? Icons.check_circle : Icons.cancel,
-                      color: item.calibracao ? Colors.green : Colors.red,
-                    ),
-                  ],
+                const SizedBox(height: 4),
+                Text('Categoria: ${item.categoriaNome}'),
+                Text('Qtd. Atual: ${item.quantidadeAtual}'),
+              ],
+            ),
+            trailing: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: statusColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    statusText,
+                    style: theme.textTheme.bodySmall!.copyWith(color: statusColor, fontWeight: FontWeight.bold),
+                  ),
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Text('Categoria: ${item.categoriaNome}'),
-                    const Text('  |  '),
-                    Text('Medida: ${item.medidaNome}'),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Text(
-                      'Quantidade: ',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    Text(
-                      item.quantidadeAtual.toString(),
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: statusColor,
-                      ),
-                    ),
-                  ],
-                ),
+                const SizedBox(height: 4),
+                item.calibracao
+                    ? const Icon(Icons.check_circle, color: Colors.green, size: 16)
+                    : const Icon(Icons.cancel, color: Colors.grey, size: 16),
               ],
             ),
           ),
@@ -471,55 +492,36 @@ class _InventoryScreenState extends State<InventoryScreen> {
     );
   }
 
-  Widget _buildFooter() {
-    // Cálculos dinâmicos
+  Widget _buildFooter(ThemeData theme) {
+    // Lógica de negócio mantida: cálculo de totais e navegação
     int totalItens = _items.length;
-
-    int itensCriticos = _items.where((item) {
-      bool baixoEstoque =
-          item.quantidadeAtual <= item.qtdBaixo && item.quantidadeAtual > 0;
-      bool esgotado = item.quantidadeAtual == 0;
-      return baixoEstoque || esgotado;
-    }).length;
-
-    // Formata a data atual
-    final String ultimaAtualizacao =
-        'Última atualização: ${DateTime.now().toLocal().toString().substring(0, 16)}';
+    int itensCriticos = _items.where((item) => item.quantidadeAtual <= item.qtdBaixo).length;
+    String ultimaAtualizacao = 'Última atualização: ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}';
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1763A6),
-                foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-              ),
-              child: const Text('Visualizar Item'),
-            ),
-            const SizedBox(width: 16),
-            ElevatedButton(
+            ElevatedButton.icon(
               onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (builder) => const MaterialRegistrationScreen()));
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const MaterialRegistrationScreen(),
+                  ),
+                );
               },
+              icon: const Icon(Icons.add_box_outlined),
+              label: const Text('Cadastrar Itens'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1763A6),
-                foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                backgroundColor: Colors.blue.shade700, // Usando um azul mais forte para o botão
+                foregroundColor: theme.colorScheme.onPrimary,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
+                    borderRadius: BorderRadius.circular(12)), // Borda mais arredondada
+                elevation: 4,
               ),
-              child: const Text('Cadastrar Itens'),
             ),
           ],
         ),
@@ -529,18 +531,24 @@ class _InventoryScreenState extends State<InventoryScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Total de itens cadastrados: $totalItens',
-                  style: const TextStyle(color: Colors.grey)),
-              const SizedBox(width: 24), // Espaçamento
-              Text('Total de itens críticos: $itensCriticos',
-                  style: const TextStyle(color: Colors.grey)),
-              const SizedBox(width: 24), // Espaçamento
-              Text(ultimaAtualizacao,
-                  style: const TextStyle(color: Colors.grey)),
+              _buildFooterStat(
+                  'Total de itens cadastrados: $totalItens', theme.colorScheme.onSurface),
+              const SizedBox(width: 24),
+              _buildFooterStat(
+                  'Total de itens críticos: $itensCriticos', theme.colorScheme.error),
+              const SizedBox(width: 24),
+              _buildFooterStat(ultimaAtualizacao, theme.colorScheme.onSurface.withOpacity(0.7)),
             ],
           ),
         )
       ],
+    );
+  }
+
+  Widget _buildFooterStat(String text, Color color) {
+    return Text(
+      text,
+      style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.w500),
     );
   }
 }
