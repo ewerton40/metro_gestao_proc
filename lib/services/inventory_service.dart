@@ -80,38 +80,30 @@ Future<List<Category>> getAllCategories() async {
 
 
 
- Future<Map<String, dynamic>> addItem(Map<String, dynamic> itemData) async {
-    final url = Uri.parse('$_baseUrl/materiais');
+ Future<Map<String, dynamic>> addItem(InventoryItem item) async {
+    final url = Uri.parse('$_baseUrl/inventory/add');
 
     final body = jsonEncode({
-      'name': itemData['name'],
-      'category': itemData['category'],
-      'code': itemData['code'],
-  //  'medidaId': itemData['medida'],
-      'base': itemData['base'],
-      'supplier': itemData['supplier'],
-      'validityType': itemData['validityType'],
-      'minStock': itemData['minStock'],
-      'maxStock': itemData['maxStock'],
-      'description': itemData['description'],
-      'validityDate': itemData['validityDate'],
+      'id': item.code, 
+      'nome': item.nome,
+      'categoriaId': item.categoriaId,
+      'medidaId': item.medidaId, 
+      'requerCalibracao': item.calibracao,
+      'qtdAlto': item.qtdAlto,
+      'qtdBaixo': item.qtdBaixo,
+      'descricao': item.descricao,
     });
 
-    try { 
-        final response = await http.post(
-          url,
-          headers: {'Content-Type': 'application/json'},
-          body: body,
-        );
-        if (response.statusCode == 201) {
-          return jsonDecode(response.body);
-        } else {  
-          final Map<String, dynamic> errorBody = jsonDecode(response.body);
-          final errorMessage = errorBody['message'] ?? 'Falha desconhecida (Status: ${response.statusCode}).';
-          throw Exception(errorMessage);
-        }
-    } catch (e) {
-      throw Exception('Erro ao conectar ou processar dados: $e');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: body,
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Falha ao cadastrar item: ${response.statusCode} - ${response.body}');
     }
   }
   

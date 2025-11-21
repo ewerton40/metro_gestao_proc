@@ -582,4 +582,49 @@ Future<List<Map<String, dynamic>>> getCriticalItems() async {
       rethrow;
     }
   }
+
+  
+  Future<int> createItem({
+    required int id,
+    required String nome,
+    required int categoriaId,
+    required int medidaId,
+    required bool requerCalibracao,
+    required int qtdAlto,
+    required int qtdBaixo,
+    required String descricao,
+  }) async {
+    const String sqlQuery = '''
+      INSERT INTO materiais 
+      (id_material, nome, id_categoria, id_medida, requer_calibracao, qtd_alto, qtd_alerta_baixo, DESCRICAO)
+      VALUES (:id, :nome, :catId, :medId, :calib, :qtdAlto, :qtdBaixo, :desc)
+    ''';
+
+    try {
+      final result = await connection.execute(
+        sqlQuery,
+        {
+          'id': id,
+          'nome': nome,
+          'catId': categoriaId,
+          'medId': medidaId,
+          'calib': requerCalibracao ? 1 : 0,
+          'qtdAlto': qtdAlto,
+          'qtdBaixo': qtdBaixo,
+          'desc': descricao,
+        },
+      );
+      
+      // Se der certo, insere também uma linha na tabela estoque com 0
+      // (Para garantir que ele apareça nas buscas com quantidade 0)
+      // Vamos assumir que ele entra na primeira base disponível ou fica sem base por enquanto.
+      // Mas para evitar erros de chave estrangeira no futuro, deixamos apenas o cadastro do material.
+      
+      return result.lastInsertID.toInt();
+    } catch (e) {
+      print('Erro no DAO ao criar item: $e');
+      rethrow;
+    }
+  }
+
 }
