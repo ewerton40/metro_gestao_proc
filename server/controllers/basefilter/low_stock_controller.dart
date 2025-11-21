@@ -21,6 +21,7 @@ Future<Response> lowStockBaseHandler(RequestContext context, String base) async 
 
     return Response.json(body: {'success': true, 'data': data});
   } catch (e) {
+    print("Erro no controller lowStockBaseHandler: $e");
     return Response.json(statusCode: 500, body: {'error': e.toString()});
   }
 }

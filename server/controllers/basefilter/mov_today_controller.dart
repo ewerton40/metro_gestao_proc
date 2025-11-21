@@ -20,6 +20,7 @@ Future<Response> movTodayBaseHandler(RequestContext context, String id) async {
 
     return Response.json(body: {'success': true, 'data': data});
   } catch (e) {
+    print("Erro no controller movTodayBaseHandler: $e");
     return Response.json(statusCode: 500, body: {'error': e.toString()});
   }
 }

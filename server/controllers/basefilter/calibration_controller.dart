@@ -19,6 +19,7 @@ Future<Response> countCalibrationBaseHandler(RequestContext context, String base
 
     return Response.json(body: {'success': true, 'data': result});
   } catch (e) {
+    print("Erro no controller countCalibrationBaseHandler: $e");
     return Response.json(statusCode: 500, body: {'error': e.toString()});
   }
 }

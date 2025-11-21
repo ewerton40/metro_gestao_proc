@@ -20,6 +20,7 @@ Future<Response> criticalItensBaseHandler(RequestContext context, String id) asy
 
     return Response.json(body: {'success': true, 'data': items});
   } catch (e) {
+    print("Erro no controller criticalItensBaseHandler: $e");
     return Response.json(statusCode: 500, body: {'error': e.toString()});
   }
 }

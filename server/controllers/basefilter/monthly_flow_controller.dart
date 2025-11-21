@@ -22,6 +22,7 @@ Future<Response> monthlyFlowBaseHandler(RequestContext context, String base) asy
 
     return Response.json(body: {'success': true, 'data': data});
   } catch (e) {
+    print("Erro no controller monthlyFlowBaseHandler: $e");
     return Response.json(statusCode: 500, body: {'error': e.toString()});
   }
 }

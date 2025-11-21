@@ -22,6 +22,7 @@ Future<Response> categoriesBaseHandler(RequestContext context, String base) asyn
 
     return Response.json(body: {'success': true, 'data': data});
   } catch (e) {
+    print("Erro no controller categoriesBaseHandler: $e");
     return Response.json(statusCode: 500, body: {'error': e.toString()});
   }
 }

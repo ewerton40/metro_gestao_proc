@@ -101,13 +101,14 @@ class BaseFilterDAO {
     const sql = '''
   SELECT 
     m.nome AS nome_material,
+    m.qtd_alerta_baixo,
     SUM(e.quantidade) AS quantidade
     FROM materiais m
     LEFT JOIN estoque e 
           ON m.id_material = e.id_material
-          AND e.id_base = :baseId              
-    GROUP BY m.id_material, m.nome
-    HAVING SUM(e.quantidade) <= COALESCE(m.qtd_alerta_baixo, 999999)
+          AND e.id_base = :baseId
+    GROUP BY m.id_material, m.nome, m.qtd_alerta_baixo
+    HAVING quantidade <= COALESCE(m.qtd_alerta_baixo, 999999)
     ORDER BY quantidade ASC
     LIMIT 5;
   ''';
