@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/providers/user_provider.dart';
-import 'package:metro_projeto/screens/dashBoardScreen.dart';
-import 'package:metro_projeto/screens/loginscreen.dart';
+import 'package:metro_projeto/screens/dashboard_screen.dart';
+import 'package:metro_projeto/screens/login_screen.dart';
 import 'package:provider/provider.dart';
 import '../services/notification_service.dart';
 import '../utils/models/notification.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:metro_projeto/screens/loginscreen.dart';
+import 'package:metro_projeto/screens/login_screen.dart';
 import 'package:metro_projeto/screens/reset_password_screen.dart';
 import '../widgets/custom_button.dart';
 import '../services/recovery_services.dart';

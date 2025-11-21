@@ -5,14 +5,14 @@ import 'package:metro_projeto/widgets/vertical_menu.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 
-class CadastroMaterialScreen extends StatefulWidget {
-  const CadastroMaterialScreen({super.key});
+class MaterialRegistrationScreen extends StatefulWidget {
+  const MaterialRegistrationScreen({super.key});
 
   @override
-  State<CadastroMaterialScreen> createState() => CadastroMaterialScreenState();
+  State<MaterialRegistrationScreen> createState() => MaterialRegistrationScreenState();
 }
 
-class CadastroMaterialScreenState extends State<CadastroMaterialScreen> {
+class MaterialRegistrationScreenState extends State<MaterialRegistrationScreen  > {
   final _formKey = GlobalKey<FormState>();
   String? _selectedCategory = 'Equipamentos';
   String? _selectedBase;
@@ -88,7 +88,7 @@ void _restartScreen() {
 
   Navigator.of(context).pushReplacement(
     MaterialPageRoute(
-      builder: (context) => const CadastroMaterialScreen(),
+      builder: (context) => const MaterialRegistrationScreen(),
     ),
   );
 }

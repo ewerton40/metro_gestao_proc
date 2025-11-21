@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/providers/user_provider.dart';
-import 'package:metro_projeto/screens/dashBoardScreen.dart';
+import 'package:metro_projeto/screens/dashboard_screen.dart';
 import 'package:metro_projeto/screens/forgot_password_screen.dart';
 import 'package:metro_projeto/widgets/custom_button.dart';
 import '../services/auth_services.dart';

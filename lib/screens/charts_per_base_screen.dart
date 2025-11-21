@@ -6,7 +6,7 @@ import '../services/movimentation_services.dart';
 import '../services/inventory_service.dart';
 import '../services/base_filter_services.dart';
 import '../utils/models/location.dart';
-import 'dashBoardScreen.dart'; 
+import 'dashboard_screen.dart'; 
 
 const kPrimaryColor = Color(0xFF007BFF);
 const kWarningColor = Color(0xFFFFC107);
