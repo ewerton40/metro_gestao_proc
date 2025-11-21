@@ -409,6 +409,7 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
                 color: theme.colorScheme.onSurface)),
         const SizedBox(height: 8),
         DropdownButtonFormField<SimpleLocation>(
+          isExpanded: true,
           value: _selectedLocal,
           hint: const Text('Selecione uma base de destino'),
           items: _locaisList.map((SimpleLocation local) {
@@ -464,6 +465,7 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
                 color: theme.colorScheme.onSurface)),
         const SizedBox(height: 8),
         DropdownButtonFormField<InventoryItem>(
+          isExpanded: true,
           value: _selectedItem,
           hint: const Text('Selecione um item'),
           items: _itemsList.map((InventoryItem item) {
@@ -572,6 +574,7 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
                 color: theme.colorScheme.onSurface)),
         const SizedBox(height: 8),
         DropdownButtonFormField<InventoryItem>(
+          isExpanded: true,
           value: _selectedSaidaItem,
           hint: const Text('Selecione um item'),
           items: _itemsList.map((InventoryItem item) {
@@ -624,6 +627,7 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
                 color: theme.colorScheme.onSurface)),
         const SizedBox(height: 8),
         DropdownButtonFormField<SimpleLocation>(
+          isExpanded: true,
           value: _selectedSaidaLocalOrigem,
           hint: const Text('Selecione o local de origem'),
           items: _locaisList.map((SimpleLocation local) {

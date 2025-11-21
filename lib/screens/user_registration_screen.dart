@@ -4,12 +4,11 @@ import 'package:metro_projeto/widgets/vertical_menu.dart';
 import '../services/auth_services.dart';
 import '../utils/models/employee.dart';
 
-
 const Color primaryBlue = Color(0xFF001789);
-const Color lightBlue = Color(0xFF42A5F5); 
+const Color lightBlue = Color(0xFF42A5F5);
 const Color whiteBackground = Colors.white;
-const Color inputFillColor = Color(0xFFF0F4F8); 
-const Color neutralDark = Color(0xFF333333); 
+const Color inputFillColor = Color(0xFFF0F4F8);
+const Color neutralDark = Color(0xFF333333);
 
 class UserRegistrationScreen extends StatefulWidget {
   final Funcionario? usuarioParaEditar;
@@ -20,16 +19,13 @@ class UserRegistrationScreen extends StatefulWidget {
 }
 
 class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
- 
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
- 
   String? _selectedRole;
 
-  
   bool _isPasswordObscured = true;
   bool _isConfirmPasswordObscured = true;
 
@@ -41,7 +37,6 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
   @override
   void initState() {
     super.initState();
-
     if (_isEditing) {
       final user = widget.usuarioParaEditar!;
       _nameController.text = user.nome;
@@ -65,46 +60,59 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
       backgroundColor: whiteBackground,
       appBar: const BarMenu(),
       drawer: const VerticalMenu(selectedIndex: -1),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 48.0, vertical: 32.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-               Text(
-                _isEditing ? 'Editar Usuário' : 'Cadastro de Usuário',
-                style: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: primaryBlue), 
+
+      // 1. Usamos LayoutBuilder para saber o tamanho da tela
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Consideramos "Mobile" se for menor que 700px
+          bool isMobile = constraints.maxWidth < 700;
+
+          // Ajustamos o padding externo dinamicamente
+          double horizontalPadding = isMobile ? 16.0 : 48.0;
+          double verticalPadding = isMobile ? 24.0 : 32.0;
+
+          return SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: horizontalPadding, vertical: verticalPadding),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _isEditing ? 'Editar Usuário' : 'Cadastro de Usuário',
+                    style: TextStyle(
+                        // Fonte um pouco menor no celular para não quebrar
+                        fontSize: isMobile ? 24 : 32,
+                        fontWeight: FontWeight.bold,
+                        color: primaryBlue),
+                  ),
+                  const SizedBox(height: 32),
+                  Center(
+                    // Passamos a flag 'isMobile' para o cartão
+                    child: _buildFormCard(context, isMobile),
+                  ),
+                ],
               ),
-              const SizedBox(height: 32), 
-              Center(
-                child: _buildFormCard(context), 
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
 
   /// Constrói o card principal do formulário
-  Widget _buildFormCard(BuildContext context) {
-   
-    final double maxWidth = MediaQuery.of(context).size.width * 0.9 > 900
-        ? 900
-        : MediaQuery.of(context).size.width * 0.9;
-
+  Widget _buildFormCard(BuildContext context, bool isMobile) {
     return Container(
-      width: maxWidth, 
-      padding: const EdgeInsets.all(40.0), 
+      width: isMobile ? double.infinity : 900,
+
+      padding: EdgeInsets.all(isMobile ? 20.0 : 40.0),
+
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: primaryBlue.withOpacity(0.15), 
+            color: primaryBlue.withOpacity(0.15),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -125,23 +133,15 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
             icon: Icons.email_outlined,
           ),
           const SizedBox(height: 24),
-          
-          Row(
-            children: [
-              Expanded(
-                child: _buildDropdownField(
-                  label: 'Privilégio',
-                  value: _selectedRole,
-                  items: const [
-                    'Administrador',
-                    'Funcionario'
-                  ], 
-                  onChanged: (value) => setState(() => _selectedRole = value),
-                  hint: 'Selecione o privilégio',
-                ),
-              ),
-            ],
+
+          _buildDropdownField(
+            label: 'Privilégio',
+            value: _selectedRole,
+            items: const ['Administrador', 'Funcionario'],
+            onChanged: (value) => setState(() => _selectedRole = value),
+            hint: 'Selecione o privilégio',
           ),
+
           const SizedBox(height: 24),
           _buildPasswordField(
             label: 'Senha',
@@ -161,14 +161,71 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
                   _isConfirmPasswordObscured = !_isConfirmPasswordObscured);
             },
           ),
-          const SizedBox(height: 40), 
-          _buildFormButtons(),
+          const SizedBox(height: 40),
+
+          _buildFormButtons(isMobile),
         ],
       ),
     );
   }
 
-  /// Campo de texto padrão
+  /// Botões de ação (Responsivos)
+  Widget _buildFormButtons(bool isMobile) {
+    // Botão Salvar
+    Widget saveButton = ElevatedButton(
+      onPressed: _salvarUsuario,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.blue.shade700,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        elevation: 5,
+      ),
+      child: Text(_isEditing ? 'Salvar Alterações' : 'Salvar Usuário',
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+    );
+
+    // Botão Cancelar
+    Widget cancelButton = OutlinedButton(
+      onPressed: _limparCampos,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: neutralDark,
+        side: BorderSide(color: Colors.grey.shade400, width: 1),
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      child: const Text('Cancelar', style: TextStyle(fontSize: 16)),
+    );
+
+    // Loading...
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator(color: primaryBlue));
+    }
+
+    // Layout dos botões
+    if (isMobile) {
+      // No Celular: Um em cima do outro, esticados
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          saveButton,
+          const SizedBox(height: 12),
+          cancelButton,
+        ],
+      );
+    } else {
+      // No Desktop: Lado a lado
+      return Row(
+        children: [
+          saveButton,
+          const SizedBox(width: 16),
+          cancelButton,
+        ],
+      );
+    }
+  }
+
+
   Widget _buildTextField({
     required String label,
     required TextEditingController controller,
@@ -179,32 +236,33 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
       children: [
         Text(label,
             style: const TextStyle(
-                fontWeight: FontWeight.bold, color: neutralDark)), 
+                fontWeight: FontWeight.bold, color: neutralDark)),
+        const SizedBox(height: 8),
         TextFormField(
           controller: controller,
           decoration: InputDecoration(
-            prefixIcon: Icon(icon, color: lightBlue), 
+            prefixIcon: Icon(icon, color: lightBlue),
             filled: true,
             fillColor: inputFillColor,
-            contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+            contentPadding:
+                const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none, 
+              borderSide: BorderSide.none,
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey.shade300, width: 1), 
+              borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: lightBlue, width: 2), 
+              borderSide: const BorderSide(color: lightBlue, width: 2),
             ),
           ),
         ),
       ],
     );
   }
-
 
   Widget _buildPasswordField({
     required String label,
@@ -217,7 +275,7 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
       children: [
         Text(label,
             style: const TextStyle(
-                fontWeight: FontWeight.bold, color: neutralDark)), 
+                fontWeight: FontWeight.bold, color: neutralDark)),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
@@ -229,24 +287,25 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
                 isObscured
                     ? Icons.visibility_off_outlined
                     : Icons.visibility_outlined,
-                color: lightBlue, 
+                color: lightBlue,
               ),
               onPressed: onToggleVisibility,
             ),
             filled: true,
-            fillColor: inputFillColor, 
-            contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+            fillColor: inputFillColor,
+            contentPadding:
+                const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none, 
+              borderSide: BorderSide.none,
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey.shade300, width: 1), 
+              borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: lightBlue, width: 2), 
+              borderSide: const BorderSide(color: lightBlue, width: 2),
             ),
           ),
         ),
@@ -254,7 +313,6 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
     );
   }
 
-  /// Campo de Dropdown
   Widget _buildDropdownField({
     required String label,
     required String? value,
@@ -267,7 +325,7 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
       children: [
         Text(label,
             style: const TextStyle(
-                fontWeight: FontWeight.bold, color: neutralDark)), 
+                fontWeight: FontWeight.bold, color: neutralDark)),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           value: value,
@@ -281,60 +339,22 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
           onChanged: onChanged,
           decoration: InputDecoration(
             filled: true,
-            fillColor: inputFillColor, 
-            contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+            fillColor: inputFillColor,
+            contentPadding:
+                const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none, 
+              borderSide: BorderSide.none,
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey.shade300, width: 1), 
+              borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: lightBlue, width: 2), 
+              borderSide: const BorderSide(color: lightBlue, width: 2),
             ),
           ),
-        ),
-      ],
-    );
-  }
-
-
-  Widget _buildFormButtons() {
-    return Row(
-      children: [
-        _isLoading
-            ? const CircularProgressIndicator(color: primaryBlue) 
-            : ElevatedButton(
-              
-                onPressed: _salvarUsuario,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue.shade700, 
-                  foregroundColor: Colors.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                  elevation: 5, 
-                ),
-                child: Text(
-                    _isEditing ? 'Salvar Alterações' : 'Salvar Usuário',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              ),
-        const SizedBox(width: 16),
-        OutlinedButton(
-       
-          onPressed: _limparCampos,
-          style: OutlinedButton.styleFrom(
-            foregroundColor: neutralDark, 
-            side: BorderSide(color: Colors.grey.shade400, width: 1), 
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          ),
-          child: const Text('Cancelar', style: TextStyle(fontSize: 16)),
         ),
       ],
     );
@@ -342,26 +362,21 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
 
   Future<void> _salvarUsuario() async {
     setState(() => _isLoading = true);
-
     try {
-     
       if (_nameController.text.isEmpty || _emailController.text.isEmpty) {
         throw Exception('Nome e E-mail são obrigatórios.');
       }
       if (_selectedRole == null) {
         throw Exception('Selecione um privilégio.');
       }
-
       final senha = _passwordController.text;
       final confirmarSenha = _confirmPasswordController.text;
 
       if (_isEditing) {
- 
         if (senha.isNotEmpty && senha != confirmarSenha) {
           throw Exception('As senhas não conferem.');
         }
       } else {
-   
         if (senha.isEmpty || confirmarSenha.isEmpty) {
           throw Exception('A senha é obrigatória.');
         }
@@ -372,14 +387,12 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
 
       if (_isEditing) {
         final response = await _authService.updateUser(
-          id: widget
-              .usuarioParaEditar!.id, 
+          id: widget.usuarioParaEditar!.id,
           nome: _nameController.text,
           email: _emailController.text,
           cargo: _selectedRole!,
-          senha: senha, 
+          senha: senha,
         );
-
         if (response['success'] == true) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -398,7 +411,6 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
           confirmarSenha: confirmarSenha,
           cargo: _selectedRole!,
         );
-
         if (response['success'] == true) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -406,7 +418,7 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
                     'Usuário cadastrado com sucesso! ID: ${response['id']}'),
                 backgroundColor: Colors.green),
           );
-          _limparCampos(); 
+          _limparCampos();
         } else {
           throw Exception(response['message']);
         }
@@ -417,11 +429,9 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
             content: Text('Erro ao salvar: $e'), backgroundColor: Colors.red),
       );
     }
-
     setState(() => _isLoading = false);
   }
 
-  // Função de limpar
   void _limparCampos() {
     _nameController.clear();
     _emailController.clear();
