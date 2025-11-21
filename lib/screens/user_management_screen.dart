@@ -1,10 +1,13 @@
-// Em: lib/screens/usermanagementscreen.dart
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
 import 'user_registration_screen.dart';
-import '../utils/models/employee.dart'; // 
-import '../services/auth_services.dart'; // 
+import '../utils/models/employee.dart'; 
+import '../services/auth_services.dart'; 
+
+const Color primaryBlue = Color(0xFF001789); 
+const Color lightBlue = Color(0xFF42A5F5); 
+const Color whiteBackground = Colors.white; 
 
 class UserManagementsScreen extends StatefulWidget {
   const UserManagementsScreen({super.key});
@@ -25,7 +28,7 @@ class _UserManagementScreenState extends State<UserManagementsScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchUsers(); // Busca os dados reais
+    _fetchUsers(); 
     _searchController.addListener(_filterUsers);
   }
 
@@ -49,10 +52,10 @@ class _UserManagementScreenState extends State<UserManagementsScreen> {
     setState(() {
       _filteredUsers = _users
           .where((user) =>
-              user.nome // Usa o modelo Funcionario
+              user.nome
                   .toLowerCase()
                   .contains(_searchController.text.toLowerCase()) ||
-              user.email // Usa o modelo Funcionario
+              user.email 
                   .toLowerCase()
                   .contains(_searchController.text.toLowerCase()))
           .toList();
@@ -64,7 +67,7 @@ class _UserManagementScreenState extends State<UserManagementsScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Confirmar desativação'),
+          title: const Text('Confirmar desativação', style: TextStyle(color: primaryBlue)),
           content: Text('Tem certeza se quer desativar o usuário ${user.nome}?'),
           actions: [
             TextButton(
@@ -91,7 +94,7 @@ class _UserManagementScreenState extends State<UserManagementsScreen> {
                 );
               },
               style: TextButton.styleFrom(
-                backgroundColor: Colors.red,
+                backgroundColor: Colors.red, 
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
@@ -108,7 +111,7 @@ class _UserManagementScreenState extends State<UserManagementsScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => UserRegistrationScreen(
-          usuarioParaEditar: user, // Passa o usuário para a tela de edição
+          usuarioParaEditar: user,
         ),
       ),
     ).then((_) {
@@ -128,7 +131,7 @@ class _UserManagementScreenState extends State<UserManagementsScreen> {
     return Scaffold(
       appBar: const BarMenu(),
       drawer: const VerticalMenu(selectedIndex: 4),
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: whiteBackground,
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -139,7 +142,7 @@ class _UserManagementScreenState extends State<UserManagementsScreen> {
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: primaryBlue, 
               ),
             ),
             const SizedBox(height: 24),
@@ -149,13 +152,17 @@ class _UserManagementScreenState extends State<UserManagementsScreen> {
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText: 'Buscar por nome ou e-mail...', // Hint atualizado
-                      prefixIcon: const Icon(Icons.search),
+                      hintText: 'Buscar por nome ou e-mail...', 
+                      prefixIcon: const Icon(Icons.search, color: primaryBlue), 
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
+                        borderSide: BorderSide(color: primaryBlue.withOpacity(0.5)), 
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(color: primaryBlue, width: 2), 
                       ),
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
@@ -178,7 +185,7 @@ class _UserManagementScreenState extends State<UserManagementsScreen> {
                     });
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF4285F4),
+                    backgroundColor: Colors.blue.shade700, 
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -200,21 +207,21 @@ class _UserManagementScreenState extends State<UserManagementsScreen> {
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: primaryBlue.withOpacity(0.1), 
                       blurRadius: 10,
                       offset: const Offset(0, 2),
                     ),
                   ],
                 ),
                 child: _isLoading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const Center(child: CircularProgressIndicator(color: primaryBlue)) 
                     : _errorMessage.isNotEmpty
                         ? Center(child: Text(_errorMessage, style: const TextStyle(color: Colors.red)))
-                        : Column( // Seu layout de Tabela
+                        : Column(
                             children: [
                               Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.grey[100],
+                                  color: const Color.fromARGB(148, 0, 80, 145),
                                   borderRadius: const BorderRadius.only(
                                     topLeft: Radius.circular(8),
                                     topRight: Radius.circular(8),
@@ -232,7 +239,7 @@ class _UserManagementScreenState extends State<UserManagementsScreen> {
                                       children: [
                                         _buildHeaderCell('Nome'),
                                         _buildHeaderCell('E-mail'),
-                                        _buildHeaderCell('Cargo'), // Era 'Role'
+                                        _buildHeaderCell('Cargo'), 
                                         _buildHeaderCell('Ações'),
                                       ],
                                     ),
@@ -253,7 +260,7 @@ class _UserManagementScreenState extends State<UserManagementsScreen> {
                                         decoration: BoxDecoration(
                                           border: Border(
                                             bottom: BorderSide(
-                                              color: Colors.grey[200]!,
+                                              color: primaryBlue.withOpacity(0.1), 
                                               width: 1,
                                             ),
                                           ),
@@ -262,7 +269,7 @@ class _UserManagementScreenState extends State<UserManagementsScreen> {
                                           _buildDataCell(user.nome),
                                           _buildDataCell(user.email),
                                           _buildDataCell(user.cargo),
-                                          _buildActionCell(user), // Passa o objeto
+                                          _buildActionCell(user), 
                                         ],
                                       );
                                     }).toList(),
@@ -287,7 +294,7 @@ class _UserManagementScreenState extends State<UserManagementsScreen> {
         style: const TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: 14,
-          color: Colors.black87,
+          color: Colors.white, 
         ),
       ),
     );
@@ -307,16 +314,16 @@ class _UserManagementScreenState extends State<UserManagementsScreen> {
     );
   }
 
-  Widget _buildActionCell(Funcionario user) { // Aceita Funcionario
+  Widget _buildActionCell(Funcionario user) { 
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           ElevatedButton(
-            onPressed: () => _showEditDialog(user), // Passa o 'user'
+            onPressed: () => _showEditDialog(user),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF4285F4),
+              backgroundColor: lightBlue, 
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               minimumSize: const Size(70, 32),
@@ -331,9 +338,9 @@ class _UserManagementScreenState extends State<UserManagementsScreen> {
           ),
           const SizedBox(width: 8),
           ElevatedButton(
-            onPressed: () => _showDeleteConfirmationDialog(user), // Passa o 'user'
+            onPressed: () => _showDeleteConfirmationDialog(user), 
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: Colors.red, 
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               minimumSize: const Size(70, 32),

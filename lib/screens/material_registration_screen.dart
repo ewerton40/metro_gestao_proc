@@ -3,7 +3,6 @@ import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/services/inventory_service.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:intl/intl.dart';
 
 class MaterialRegistrationScreen extends StatefulWidget {
   const MaterialRegistrationScreen({super.key});
@@ -93,22 +92,6 @@ class MaterialRegistrationScreenState extends State<MaterialRegistrationScreen  
           _showSnackBar(errorMessage , isError: true);
         }
       }
-  }
-
-  Future<void> _selectDate(BuildContext context) async { 
-    FocusScope.of(context).requestFocus(FocusNode()); 
-
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2101) //pesquisar o que é esse 2101
-    );
-
-    if (picked != null) {
-      final DateFormat formatter = DateFormat('dd/MM/yyyy');
-      _dateController.text = formatter.format(picked);
-    }
   }
 
 void _restartScreen() {
@@ -307,14 +290,7 @@ void _showSnackBar(String message, {bool isError = false}) {
     );////////// ) do form
   }
 
-
-
-
-
-
-    // Construia(foi apagado) o card para upload da imagem e resumo ////TEM QUE TIRAR O CAMPO DE COLOCAR A IMAGEM!!!!!
    
-
     Widget _buildDateField(){
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,

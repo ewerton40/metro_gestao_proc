@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:metro_projeto/screens/detail_item_screen.dart';
 import 'package:metro_projeto/screens/material_registration_screen.dart';
 import '../services/inventory_service.dart';
 import 'package:metro_projeto/widgets/bar_menu.dart';
@@ -76,8 +77,6 @@ class Category {
   int get hashCode => id.hashCode;
 }
 
-
-
 class InventoryScreen extends StatefulWidget {
   const InventoryScreen({super.key});
 
@@ -86,7 +85,6 @@ class InventoryScreen extends StatefulWidget {
 }
 
 class _InventoryScreenState extends State<InventoryScreen> {
-
   List<InventoryItem> _items = [];
   List<Category> _categories = [];
   InventoryServices inventario = InventoryServices();
@@ -112,7 +110,6 @@ class _InventoryScreenState extends State<InventoryScreen> {
     super.initState();
     _fetchData();
   }
-
 
   Future<void> _fetchData() async {
     setState(() => _isLoading = true);
@@ -140,7 +137,6 @@ class _InventoryScreenState extends State<InventoryScreen> {
       });
     }
   }
-
 
   List<InventoryItem> _applyFilters(List<InventoryItem> items) {
     List<InventoryItem> filtered = items;
@@ -175,14 +171,13 @@ class _InventoryScreenState extends State<InventoryScreen> {
     return filtered;
   }
 
-
   @override
   Widget build(BuildContext context) {
     List<InventoryItem> filteredItems = _applyFilters(_items);
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: Colors.white, 
+      backgroundColor: Colors.white,
       appBar: const BarMenu(),
       drawer: VerticalMenu(selectedIndex: 1),
       body: Padding(
@@ -218,7 +213,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                               ),
                   ),
                   const SizedBox(height: 24),
-                  _buildFooter(theme),
+                  _buildFooter(theme), // RODAPÉ COM OS BOTÕES
                 ],
               ),
             ),
@@ -233,7 +228,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
       'Inventário',
       style: theme.textTheme.headlineLarge!.copyWith(
         fontWeight: FontWeight.bold,
-        color: const Color(0xFF082583), 
+        color: const Color(0xFF082583),
       ),
     );
   }
@@ -247,9 +242,9 @@ class _InventoryScreenState extends State<InventoryScreen> {
             hintText: 'Pesquisar item por nome...',
             prefixIcon: const Icon(Icons.search),
             filled: true,
-            fillColor: Colors.white, 
+            fillColor: Colors.white,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12), 
+              borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
             ),
             contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
@@ -316,7 +311,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
       ],
       onChanged: (newValue) {
         setState(() => _selectedBase = newValue);
-        _fetchData(); 
+        _fetchData();
       },
     );
   }
@@ -492,8 +487,10 @@ class _InventoryScreenState extends State<InventoryScreen> {
     );
   }
 
+  // ====================================================================
+  // RODAPÉ COM A ALTERAÇÃO SOLICITADA
+  // ====================================================================
   Widget _buildFooter(ThemeData theme) {
-    // Lógica de negócio mantida: cálculo de totais e navegação
     int totalItens = _items.length;
     int itensCriticos = _items.where((item) => item.quantidadeAtual <= item.qtdBaixo).length;
     String ultimaAtualizacao = 'Última atualização: ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}';
@@ -504,6 +501,30 @@ class _InventoryScreenState extends State<InventoryScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
+            // --- NOVO BOTÃO: VISUALIZAR ITENS ---
+            ElevatedButton.icon(
+              onPressed: () {
+                
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const DetalheItemScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.visibility_outlined), // Ícone de olho/visualizar
+              label: const Text('Visualizar Itens'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue.shade700,
+                foregroundColor: theme.colorScheme.onPrimary,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                elevation: 4,
+              ),
+            ),
+
+            const SizedBox(width: 16),
+
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.of(context).push(
@@ -515,11 +536,11 @@ class _InventoryScreenState extends State<InventoryScreen> {
               icon: const Icon(Icons.add_box_outlined),
               label: const Text('Cadastrar Itens'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue.shade700, // Usando um azul mais forte para o botão
+                backgroundColor: Colors.blue.shade700,
                 foregroundColor: theme.colorScheme.onPrimary,
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)), // Borda mais arredondada
+                    borderRadius: BorderRadius.circular(12)),
                 elevation: 4,
               ),
             ),

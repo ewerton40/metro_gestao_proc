@@ -4,6 +4,11 @@ import 'package:metro_projeto/widgets/vertical_menu.dart';
 import 'package:metro_projeto/services/inventory_service.dart';
 import '../services/movimentation_services.dart';
 
+
+const Color primaryBlue = Color(0xFF001789);
+const Color lightBlue = Color(0xFF42A5F5); 
+const Color whiteBackground = Colors.white; 
+
 class DetalheItemScreen extends StatefulWidget {
   const DetalheItemScreen({super.key});
 
@@ -47,27 +52,27 @@ class _DetalheItemScreenState extends State<DetalheItemScreen> {
   }
 
   Widget _buildHistoricoTable(List<dynamic> movimentacoes) {
-
-    final headerRow = const TableRow(
-      decoration: BoxDecoration(color: Color.fromARGB(168, 95, 165, 251)), // Cabeçalho com fundo
+    
+    final headerRow = TableRow(
+      decoration: const BoxDecoration(color: lightBlue), 
       children: [
-        Padding(
-          padding: EdgeInsets.all(10.0), // Aumentei o padding  
-          child: Text("Data", style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        Padding(
+        const Padding(
           padding: EdgeInsets.all(10.0),
-          child: Text("Tipo", style: TextStyle(fontWeight: FontWeight.bold)),
+          child: Text("Data", style: TextStyle(fontWeight: FontWeight.bold, color: whiteBackground)),
         ),
-        Padding(
+        const Padding(
           padding: EdgeInsets.all(10.0),
-          child:
-              Text("Quantidade", style: TextStyle(fontWeight: FontWeight.bold)),
+          child: Text("Tipo", style: TextStyle(fontWeight: FontWeight.bold, color: whiteBackground)),
         ),
-        Padding(
+        const Padding(
           padding: EdgeInsets.all(10.0),
           child:
-              Text("Responsável", style: TextStyle(fontWeight: FontWeight.bold)),
+              Text("Quantidade", style: TextStyle(fontWeight: FontWeight.bold, color: whiteBackground)),
+        ),
+        const Padding(
+          padding: EdgeInsets.all(10.0),
+          child:
+              Text("Responsável", style: TextStyle(fontWeight: FontWeight.bold, color: whiteBackground)),
         ),
       ],
     );
@@ -98,8 +103,8 @@ class _DetalheItemScreenState extends State<DetalheItemScreen> {
 
     return Table(
       border: TableBorder.symmetric(
-        inside: const BorderSide(color: Colors.black12),
-        outside: const BorderSide(color: Colors.grey), 
+        inside: const BorderSide(color: Colors.blueGrey, width: 0.5), 
+        outside: const BorderSide(color: Colors.blueGrey),
       ),
       columnWidths: const {
         0: FlexColumnWidth(2),
@@ -109,7 +114,7 @@ class _DetalheItemScreenState extends State<DetalheItemScreen> {
       },
       children: [
         headerRow,
-        ...dataRows, // Linhas de dados dinâmicas
+        ...dataRows, 
       ],
     );
   }
@@ -121,18 +126,18 @@ class _DetalheItemScreenState extends State<DetalheItemScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Histórico Completo de Movimentações"),
+          title: const Text("Histórico Completo de Movimentações", style: TextStyle(color: primaryBlue)),
           content: Container(
             width: MediaQuery.of(context).size.width * 0.6, 
             height: MediaQuery.of(context).size.height * 0.7, 
             child: SingleChildScrollView(
-              // Permite rolar se o histórico for muito grande
+             
               child: _buildHistoricoTable(historico), 
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Fechar'),
+              child: const Text('Fechar', style: TextStyle(color: primaryBlue)),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -146,12 +151,12 @@ class _DetalheItemScreenState extends State<DetalheItemScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F7FB),
+      backgroundColor: whiteBackground,
       appBar: const BarMenu(),
       drawer: const VerticalMenu(selectedIndex: 10),
       body: Column(
         children: [
-          // WIDGET DE PESQUISA
+       
           Padding(
             padding: const EdgeInsets.fromLTRB(32, 20, 32, 0),
             child: Autocomplete<String>(
@@ -204,23 +209,23 @@ class _DetalheItemScreenState extends State<DetalheItemScreen> {
                     hintText: _isLoading
                         ? 'Carregando materiais...'
                         : 'Pesquisar material...',
-                    prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                    prefixIcon: const Icon(Icons.search, color: primaryBlue), 
                     filled: true,
                     fillColor: Colors.white,
                     contentPadding:
                         const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide.none,
+                      borderSide: BorderSide(color: primaryBlue, width: 1), 
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide.none,
+                      borderSide: BorderSide(color: primaryBlue.withOpacity(0.5), width: 1), 
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide(
-                          color: Theme.of(context).primaryColor, width: 2),
+                      borderSide: const BorderSide(
+                          color: primaryBlue, width: 2), 
                     ),
                   ),
                 );
@@ -267,7 +272,7 @@ class _DetalheItemScreenState extends State<DetalheItemScreen> {
             child: const Padding(
               padding: EdgeInsets.symmetric(horizontal: 32.0, vertical: 8.0),
               child: LinearProgressIndicator(
-                color: Color(0xFF001789),
+                color: primaryBlue, 
               ),
             ),
           ),
@@ -293,15 +298,16 @@ class _DetalheItemScreenState extends State<DetalheItemScreen> {
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
+                            color: primaryBlue, 
                           ),
                         ),
                         const SizedBox(height: 20),
 
                         if (_isLoadingDetalhe)
-                          const Center(child: CircularProgressIndicator())
+                          const Center(child: CircularProgressIndicator(color: primaryBlue))
                         else if (_itemDetalhe == null)
                           const Text("Selecione um item para ver os detalhes.",
-                              style: TextStyle(color: Colors.red))
+                              style: TextStyle(color: primaryBlue)) 
                         else
                           Flexible(
                             child: SingleChildScrollView(
@@ -315,7 +321,7 @@ class _DetalheItemScreenState extends State<DetalheItemScreen> {
                                       borderRadius: BorderRadius.circular(12),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black12,
+                                          color: primaryBlue.withOpacity(0.1), 
                                           blurRadius: 8,
                                           offset: const Offset(0, 3),
                                         ),
@@ -323,10 +329,10 @@ class _DetalheItemScreenState extends State<DetalheItemScreen> {
                                     ),
                                     child: Row(
                                       children: [
-                                        const CircleAvatar(
+                                        CircleAvatar(
                                           radius: 35,
-                                          backgroundColor: Colors.grey,
-                                          child: Icon(Icons.inventory_2,
+                                          backgroundColor: primaryBlue, 
+                                          child: const Icon(Icons.inventory_2,
                                               color: Colors.white, size: 40),
                                         ),
                                         const SizedBox(width: 20),
@@ -341,7 +347,8 @@ class _DetalheItemScreenState extends State<DetalheItemScreen> {
                                                 style: const TextStyle(
                                                     fontSize: 18,
                                                     fontWeight:
-                                                        FontWeight.bold),
+                                                        FontWeight.bold,
+                                                    color: primaryBlue), 
                                               ),
                                               const SizedBox(height: 5),
                                               Text(
@@ -357,7 +364,7 @@ class _DetalheItemScreenState extends State<DetalheItemScreen> {
                                                 "Quantidade: ${_itemDetalhe!['quantidade']}",
                                                 style: const TextStyle(
                                                   fontSize: 18,
-                                                  color: Colors.blue,
+                                                  color: lightBlue, 
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
@@ -369,6 +376,7 @@ class _DetalheItemScreenState extends State<DetalheItemScreen> {
                                                     _itemDetalhe!['status'] ??
                                                         '',
                                                     style: TextStyle(
+                                                   
                                                       color: _itemDetalhe![
                                                                   'status'] ==
                                                               'Crítico'
@@ -394,6 +402,7 @@ class _DetalheItemScreenState extends State<DetalheItemScreen> {
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
+                                      color: primaryBlue,
                                     ),
                                   ),
                                   const SizedBox(height: 15),
@@ -430,7 +439,7 @@ class _DetalheItemScreenState extends State<DetalheItemScreen> {
                                                     todasMovimentacoes);
                                               },
                                               style: ElevatedButton.styleFrom(
-                                                backgroundColor: Color(0xFF001789), 
+                                                backgroundColor: primaryBlue, 
                                                 shape: RoundedRectangleBorder(
                                                   borderRadius: BorderRadius.circular(8),
                                                 ),

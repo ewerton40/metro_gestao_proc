@@ -46,7 +46,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<Map<String, dynamic>> _criticalItems = [];
   List<Map<String, dynamic>> _categoryDistribution = [];
 
-  // Variável para o gráfico de Distribuição por Categorias
+  
   int _touchedCategoryIndex = -1;
 
 
@@ -84,7 +84,7 @@ Future<void> _loadData() async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kBackgroundColor, // Fundo mais suave
+      backgroundColor: kBackgroundColor, 
       appBar: const BarMenu(),
       drawer: const VerticalMenu(selectedIndex: 0),
       body: SingleChildScrollView(
@@ -118,9 +118,9 @@ Future<void> _loadData() async {
       child: Text(
         'Dashboard Geral',
         style: TextStyle(
-          fontSize: 32, // Aumentado
-          fontWeight: FontWeight.w800, // Mais forte
-          color: kTextColor,
+          fontSize: 32, 
+          fontWeight: FontWeight.w800, 
+          color: Color(0xFF001789),
         ),
       ),
     );
@@ -132,7 +132,7 @@ Future<void> _loadData() async {
     required String change,
     required Color changeColor,
     required Color color,
-    required IconData icon, // Adicionado ícone
+    required IconData icon, 
   }) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -147,7 +147,7 @@ Future<void> _loadData() async {
             offset: const Offset(0, 3),
           ),
         ],
-        border: Border.all(color: color.withOpacity(0.2), width: 1), // Borda sutil
+        border: Border.all(color: color.withOpacity(0.2), width: 1), 
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,7 +170,7 @@ Future<void> _loadData() async {
           Text(
             value,
             style: TextStyle(
-              fontSize: 36, // Aumentado
+              fontSize: 36, 
               fontWeight: FontWeight.bold,
               color: kTextColor,
             ),
@@ -433,7 +433,7 @@ Future<void> _loadData() async {
     );
   }
 
-  // Novo helper para o container de Card
+
   Widget _buildCardContainer({required Widget child}) {
     return Card(
       elevation: 0,
@@ -443,13 +443,13 @@ Future<void> _loadData() async {
       ),
       color: kCardColor,
       child: Padding(
-        padding: const EdgeInsets.all(24), // Padding maior
+        padding: const EdgeInsets.all(24), 
         child: child,
       ),
     );
   }
 
-  /// 📊 Gráfico: Top 5 Materiais mais usados (Estilizado)
+ 
   Widget _buildTopMaterialsChart() {
     if (_topfiveMaterials.isEmpty) {
       return const Center(child: CircularProgressIndicator());
@@ -570,7 +570,7 @@ Future<void> _loadData() async {
     );
   }
 
-  /// Helper para o gráfico de barras (Estilizado com gradiente)
+ 
   BarChartGroupData _buildBarGroup(int x, double y,
       {Color color = kPrimaryColor}) {
     return BarChartGroupData(
@@ -578,7 +578,7 @@ Future<void> _loadData() async {
       barRods: [
         BarChartRodData(
           toY: y,
-          width: 16, // Barra mais fina
+          width: 16, 
           gradient: LinearGradient(
             colors: [
               color.withOpacity(0.6),
@@ -596,7 +596,7 @@ Future<void> _loadData() async {
     );
   }
 
-  /// 🥧 Gráfico: Distribuição por Categorias (Estilizado)
+ 
   Widget _buildCategoryDistributionChart() {
     if (_categoryDistribution.isEmpty) {
       return const Center(child: CircularProgressIndicator());
@@ -607,10 +607,10 @@ Future<void> _loadData() async {
 
     final colors = [
       kPrimaryColor,
-      const Color(0xFF17A2B8), // Info Blue
+      const Color(0xFF17A2B8), 
       kWarningColor,
-      const Color(0xFF6C757D), // Secondary Grey
-      const Color(0xFF20C997), // Teal
+      const Color(0xFF6C757D), 
+      const Color(0xFF20C997), 
     ];
 
     return Row(
@@ -633,8 +633,8 @@ Future<void> _loadData() async {
                   });
                 },
               ),
-              sectionsSpace: 4, // Espaço maior
-              centerSpaceRadius: 60, // Centro maior
+              sectionsSpace: 4, 
+              centerSpaceRadius: 60, 
               sections: List.generate(_categoryDistribution.length, (i) {
                 final total = ((_categoryDistribution[i]['total'] ?? 0) as int);
                 final percent = (total / totalGeral) * 100;
@@ -644,7 +644,7 @@ Future<void> _loadData() async {
                   value: total.toDouble(),
                   title: '${percent.toStringAsFixed(1)}%',
                   color: colors[i % colors.length],
-                  radius: isTouched ? 80 : 70, // Raio maior
+                  radius: isTouched ? 80 : 70, 
                   titleStyle: TextStyle(
                     fontSize: isTouched ? 16 : 14,
                     fontWeight: FontWeight.bold,
@@ -658,7 +658,7 @@ Future<void> _loadData() async {
         ),
         const SizedBox(width: 24),
         Expanded(
-          flex: 3, // Ajustado para dar mais espaço à legenda
+          flex: 3, 
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -670,7 +670,7 @@ Future<void> _loadData() async {
               final totalStr = (total != null) ? total.toString() : '0';
 
               return Padding(
-                padding: const EdgeInsets.only(bottom: 10.0), // Espaçamento maior
+                padding: const EdgeInsets.only(bottom: 10.0), 
                 child: _buildCategoryLegendItem(
                   colors[i % colors.length],
                   categoria,
@@ -685,24 +685,24 @@ Future<void> _loadData() async {
     );
   }
 
-  /// Helper para a legenda do gráfico de pizza (Estilizado)
+
   Widget _buildCategoryLegendItem(
       Color color, String label, String value, int index) {
     final isActive = _touchedCategoryIndex == index;
     return Row(
       children: [
         Container(
-          width: isActive ? 16 : 14, // Tamanho maior
+          width: isActive ? 16 : 14, 
           height: isActive ? 16 : 14,
           decoration: BoxDecoration(
             color: color,
-            borderRadius: BorderRadius.circular(4), // Borda mais quadrada
+            borderRadius: BorderRadius.circular(4), 
             boxShadow: isActive
                 ? [BoxShadow(color: color.withOpacity(0.4), blurRadius: 6)]
                 : null,
           ),
         ),
-        const SizedBox(width: 12), // Espaço maior
+        const SizedBox(width: 12), 
         Expanded(
           child: Text(
             label,

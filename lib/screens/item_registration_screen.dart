@@ -15,7 +15,7 @@ class _ItemRegistrationScreenState extends State<ItemRegistrationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // A tela principal é envolvida por um Scaffold para a estrutura básica.
+
     return Scaffold(
       backgroundColor: Colors.white,
       drawer: const VerticalMenu(selectedIndex: -1),
@@ -35,12 +35,12 @@ class _ItemRegistrationScreenState extends State<ItemRegistrationScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    flex: 2, // A coluna do formulário ocupa 2/3 do espaço
+                    flex: 2, 
                     child: _buildFormCard(),
                   ),
                   const SizedBox(width: 32),
                   Expanded(
-                    flex: 1, // A coluna da imagem ocupa 1/3 do espaço
+                    flex: 1, 
                     child: _buildImageUploadCard(),
                   ),
                 ],
@@ -52,7 +52,7 @@ class _ItemRegistrationScreenState extends State<ItemRegistrationScreen> {
     );
   }
 
-  // Constrói o card principal do formulário
+
   Widget _buildFormCard() {
     return Container(
       padding: const EdgeInsets.all(24.0),
@@ -130,7 +130,7 @@ class _ItemRegistrationScreenState extends State<ItemRegistrationScreen> {
     );
   }
 
-  // Constrói o card para upload da imagem e resumo
+ 
   Widget _buildImageUploadCard() {
     return Container(
       padding: const EdgeInsets.all(24.0),
@@ -165,7 +165,7 @@ class _ItemRegistrationScreenState extends State<ItemRegistrationScreen> {
     );
   }
 
-  // Widget auxiliar para criar campos de texto padrão
+ 
   Widget _buildTextField({required String label, String initialValue = '', int maxLines = 1}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,7 +193,7 @@ class _ItemRegistrationScreenState extends State<ItemRegistrationScreen> {
     );
   }
   
-  // Widget auxiliar para criar campos de dropdown
+
   Widget _buildDropdownField({
     required String label,
     required String? value,
@@ -234,7 +234,7 @@ class _ItemRegistrationScreenState extends State<ItemRegistrationScreen> {
     );
   }
   
-  // Widget auxiliar para campos de texto somente leitura
+
   Widget _buildReadOnlyField({required String label, required String value}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

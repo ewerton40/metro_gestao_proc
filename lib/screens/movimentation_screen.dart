@@ -9,12 +9,6 @@ import '../services/auth_services.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:flutter/services.dart';
 
-// Modelos e Serviços (MANTIDOS INTACTOS)
-// ... (Assumindo que InventoryItem e SimpleLocation estão definidos em outro lugar)
-
-// ====================================================================
-// TELA DE MOVIMENTAÇÃO (ESTILIZADA)
-// ====================================================================
 
 class MovimentacaoScreen extends StatefulWidget {
   const MovimentacaoScreen({super.key});
@@ -25,13 +19,12 @@ class MovimentacaoScreen extends StatefulWidget {
 
 class _MovimentacaoScreenState extends State<MovimentacaoScreen>
     with TickerProviderStateMixin {
-  // Variáveis de estado para os dropdowns do formulário de Saída
+ 
   String? _selectedDestino;
   String? _selectedMotivo;
 
   final _inventoryService = InventoryServices();
 
-  // Controladores para os campos de texto da Entrada
   final _entradaQtdController = TextEditingController();
   final _entradaObsController = TextEditingController();
   final _entradaDataController = TextEditingController();
@@ -39,7 +32,6 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
       mask: "##/##/####",
       filter: {"#": RegExp(r'[0-9]')});
 
-  // Variáveis para o dropdown de Locais (Base de Destino)
   List<SimpleLocation> _locaisList = [];
   SimpleLocation? _selectedLocal;
   bool _isLoadingLocais = true;
@@ -48,21 +40,21 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
   InventoryItem? _selectedItem;
   bool _isLoadingItems = true;
 
-  // Variável de estado de carregamento para o botão Salvar
+
   bool _isLoadingEntrada = false;
 
-  // Controladores para os campos de texto da Saída
+
   final _saidaQtdController = TextEditingController();
   final _saidaObsController = TextEditingController();
 
-  // Variáveis para os dropdowns da Saída
+
   InventoryItem? _selectedSaidaItem;
   SimpleLocation? _selectedSaidaLocalOrigem;
 
-  // Variável de estado de carregamento para o botão Salvar Saída
+
   bool _isLoadingSaida = false;
 
-  // Lógica de negócio (MANTIDA INTACTA)
+
   void _limparFormularioEntrada() {
     _entradaQtdController.clear();
     _entradaObsController.clear();
@@ -78,7 +70,6 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
     _loadDropdownData();
   }
 
-  // Lógica de negócio (MANTIDA INTACTA)
   Future<void> _loadDropdownData() async {
     setState(() {
       _isLoadingLocais = true;
@@ -112,9 +103,9 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
     }
   }
 
-  // Lógica de negócio (MANTIDA INTACTA)
+
   Future<void> _salvarSaida() async {
-    // Trava o formulário de Saída
+
     setState(() => _isLoadingSaida = true);
 
     try {
@@ -131,15 +122,15 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
         throw Exception(
             'Erro: Usuário não está logado. Faça o login novamente.');
       }
-      // Assumindo que InventoryItem tem um campo 'code'
+ 
       final int idMaterial = _selectedSaidaItem!.code;
       final int quantidade = int.parse(_saidaQtdController.text);
       final int idLocalOrigem = _selectedSaidaLocalOrigem!.id;
-      // Assumindo que authService.usuario tem um campo 'id'
+ 
       final int idFuncionario = authService.usuario!.id;
       final String observacao = _saidaObsController.text;
 
-      // Assumindo que _inventoryService.registerSaida existe
+  
       final response = await _inventoryService.registerSaida(
         idMaterial: idMaterial,
         quantidade: quantidade,
@@ -156,23 +147,22 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
               backgroundColor: Colors.green),
         );
       } else {
-        // Assumindo que a resposta de erro tem um campo 'message'
+   
         throw Exception(response['message']);
       }
     } catch (e) {
-      // Mostra o erro para o usuário
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content: Text('Erro ao salvar: $e'), backgroundColor: Colors.red),
       );
     }
-    // Libera o formulário
+
     setState(() => _isLoadingSaida = false);
   }
 
-  // Lógica de negócio (MANTIDA INTACTA)
+  
   Future<void> _salvarEntrada() async {
-    // Implementação de _salvarEntrada (Não estava no código original, mas é necessária)
+   
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
           content: Text('Lógica de _salvarEntrada não implementada.'),
@@ -180,7 +170,7 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
     );
   }
 
-  // Lógica de negócio (MANTIDA INTACTA)
+
   void _limparFormularioSaida() {
     _saidaQtdController.clear();
     _saidaObsController.clear();
@@ -190,9 +180,6 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
     });
   }
 
-  // ====================================================================
-  // CONSTRUÇÃO DA INTERFACE (ESTILIZAÇÃO APLICADA)
-  // ====================================================================
 
   @override
   Widget build(BuildContext context) {
@@ -218,7 +205,6 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
               ),
               const SizedBox(height: 24),
 
-              // Abas para "Registrar Entrada" e "Registrar Saída"
               Container(
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surfaceVariant,
@@ -273,7 +259,7 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
     );
   }
 
-  /// Constrói o formulário de "Registrar Entrada"
+
   Widget _buildEntradaForm(ThemeData theme) {
     return SingleChildScrollView(
       child: Column(
@@ -307,7 +293,7 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
               maxLines: 3),
           const SizedBox(height: 24),
 
-          // Botão de salvar agora com lógica de loading
+  
           _isLoadingEntrada
               ? const Center(child: CircularProgressIndicator())
               : _buildFormButtons(
@@ -320,7 +306,7 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
     );
   }
 
-  /// Constrói o formulário de "Registrar Saída"
+
   Widget _buildSaidaForm(ThemeData theme) {
     return SingleChildScrollView(
       child: Column(
@@ -351,7 +337,7 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
               maxLines: 3),
           const SizedBox(height: 24),
 
-          // Botão de salvar agora com lógica de loading
+        
           _isLoadingSaida
               ? const Center(child: CircularProgressIndicator())
               : _buildFormButtons(
@@ -364,11 +350,7 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
     );
   }
 
-  // ====================================================================
-  // COMPONENTES ESTILIZADOS
-  // ====================================================================
-
-  /// Constrói um campo de texto estilizado
+ 
   Widget _buildFormTextField({
     required ThemeData theme,
     required String label,
@@ -391,7 +373,7 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
           decoration: InputDecoration(
             filled: true,
             fillColor:
-                Colors.white, // Fundo branco puro para os campos de formulário
+                Colors.white, 
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: theme.colorScheme.outlineVariant),
@@ -412,7 +394,7 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
     );
   }
 
-  /// Constrói o Dropdown de Locais (Entrada)
+
   Widget _buildLocalDropdown(ThemeData theme) {
     if (_isLoadingLocais) {
       return const Center(child: CircularProgressIndicator());
@@ -443,7 +425,7 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
           decoration: InputDecoration(
             filled: true,
             fillColor:
-                Colors.white, // Fundo branco puro para os campos de formulário
+                Colors.white, 
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: theme.colorScheme.outlineVariant),
@@ -465,8 +447,6 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
     );
   }
 
-  /// Constrói o Dropdown de Itens (Entrada)
-  /// CORREÇÃO APLICADA AQUI
   Widget _buildItemDropdown(ThemeData theme) {
     if (_isLoadingItems) {
       return const Padding(
@@ -500,10 +480,10 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
           decoration: InputDecoration(
             filled: true,
             fillColor:
-                Colors.white, // Fundo branco puro para os campos de formulário
+                Colors.white, 
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              // A LINHA ABAIXO ESTAVA COM ERRO DE SINTAXE
+         
               borderSide: BorderSide(color: theme.colorScheme.outlineVariant),
             ),
             enabledBorder: OutlineInputBorder(
@@ -523,7 +503,7 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
     );
   }
 
-  /// Constrói o campo de Data (Entrada)
+
   Widget _buildDateField(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -547,7 +527,7 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
             counterText: '',
             filled: true,
             fillColor:
-                Colors.white, // Fundo branco puro para os campos de formulário
+                Colors.white, 
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: theme.colorScheme.outlineVariant),
@@ -574,7 +554,7 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
     );
   }
 
-  /// Constrói o Dropdown de Itens (Saída)
+
   Widget _buildSaidaItemDropdown(ThemeData theme) {
     if (_isLoadingItems) {
       return const Padding(
@@ -608,7 +588,7 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
           decoration: InputDecoration(
             filled: true,
             fillColor:
-                Colors.white, // Fundo branco puro para os campos de formulário
+                Colors.white, 
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: theme.colorScheme.outlineVariant),
@@ -629,7 +609,7 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
     );
   }
 
-  /// Constrói o Dropdown de Locais para a Saída
+
   Widget _buildSaidaLocalOrigemDropdown(ThemeData theme) {
     if (_isLoadingLocais) {
       return const Center(child: CircularProgressIndicator());
@@ -660,7 +640,7 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
           decoration: InputDecoration(
             filled: true,
             fillColor:
-                Colors.white, // Fundo branco puro para os campos de formulário
+                Colors.white, 
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: theme.colorScheme.outlineVariant),
@@ -681,7 +661,6 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
     );
   }
 
-  /// Botões de ação do formulário
   Widget _buildFormButtons({
     required ThemeData theme,
     required String primaryText,

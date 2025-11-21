@@ -247,7 +247,7 @@ class _ChartsByBaseScreenState extends State<ChartsByBaseScreen> {
           style: TextStyle(
             fontSize: 36,
             fontWeight: FontWeight.w900,
-            color: kTextColor,
+            color: Color(0xFF001789),
           ),
         ),
         const SizedBox(height: 4),

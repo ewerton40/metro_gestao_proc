@@ -97,16 +97,16 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Usamos LayoutBuilder para checar o tamanho da tela
+
       body: LayoutBuilder(
         builder: (context, constraints) {
-          // Define nosso "ponto de quebra"
+      
           const double desktopBreakpoint = 700.0;
 
           if (constraints.maxWidth < desktopBreakpoint) {
             return Stack(
               children: <Widget>[
-                // Background Image
+       
                 Container(
                   decoration: const BoxDecoration(
                       image: DecorationImage(
@@ -114,28 +114,28 @@ class _LoginScreenState extends State<LoginScreen>
                     fit: BoxFit.cover,
                   )),
                 ),
-                // Filtro de Blur
+        
                 BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
                   child: Container(color: Colors.black.withOpacity(0.1)),
                 ),
-                // SafeArea para não cobrir a barra de status
+            
                 SafeArea(
                   child: Center(
-                    // Permite rolar se o teclado aparecer
+                 
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // Logo
+               
                           Image.asset(
                             'assets/images/logo_metro_login.png',
-                            width: 150, // Logo menor
+                            width: 150, 
                             height: 150,
                           ),
                           const SizedBox(height: 30),
-                          // Formulário (com 85% de largura)
+                          
                           _buildLoginForm(isMobile: true),
                         ],
                       ),
@@ -167,7 +167,7 @@ class _LoginScreenState extends State<LoginScreen>
                 Center(
                   child: Padding(
                     padding: const EdgeInsets.only(top: 100),
-                    // Formulário (com 32% de largura)
+                
                     child: _buildLoginForm(isMobile: false),
                   ),
                 ),
@@ -180,7 +180,7 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Widget _buildLoginForm({required bool isMobile}) {
-    // Define a largura do formulário com base no tipo de tela
+
     final screenWidth = MediaQuery.of(context).size.width;
     final formWidth = isMobile ? screenWidth * 0.85 : screenWidth * 0.32;
 
