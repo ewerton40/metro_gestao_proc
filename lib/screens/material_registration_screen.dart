@@ -3,7 +3,7 @@ import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/services/inventory_service.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-
+import 'package:intl/intl.dart';
 
 class MaterialRegistrationScreen extends StatefulWidget {
   const MaterialRegistrationScreen({super.key});
@@ -17,6 +17,16 @@ class MaterialRegistrationScreenState extends State<MaterialRegistrationScreen  
   String? _selectedCategory = 'Equipamentos';
   String? _selectedBase;
   String? _selectedValidityType;
+
+  final Map<String, ({int min, int max})> _codeRanges = {
+    'Material de consumo': (min: 10000000, max: 10999999),
+    'Material de Giro': (min: 15000000, max: 15999999),
+    'Material Patrimoniado': (min: 16000000, max: 16999999),
+    'Ferramentas Manuais': (min: 17000000, max: 17999999),
+    'Debito Direto': (min: 20000000, max: 20999999),
+    'material sobressalente': (min: 21000000, max: 21999999),
+  };
+ 
 
   final _nameController = TextEditingController();
   final _codeController = TextEditingController();
@@ -52,7 +62,7 @@ class MaterialRegistrationScreenState extends State<MaterialRegistrationScreen  
       if (_formKey.currentState!.validate()) {
         final itemData = {
           'name': _nameController.text,
-          'code': _codeController.text, ///estava comentado
+          'code': _codeController.text, 
           'category': _selectedCategory,
           'base': _selectedBase,
           'supplier': _supplierController.text,
@@ -74,14 +84,31 @@ class MaterialRegistrationScreenState extends State<MaterialRegistrationScreen  
 
           _restartScreen();
         } catch (e){
+          final String fullError = e.toString();
+          final String errorMessage = fullError.contains('Exception:') 
+          ? fullError.substring(11)
+          : 'falha desconhecida no cadastro';
+
           print('ERRO NO ENVIO PARA O BACKEND: $e');
-          _showSnackBar('falha ao cadastrar material.', isError: true);
+          _showSnackBar(errorMessage , isError: true);
         }
-
-        //print(itemData);////////////////////////////////////RESOLVER PROBLEA QUE QUANDO CLICA NO BOTAO SALVAR APARECE COISAS DIFERENTES NO TERMINAL///////////////////////
-
-      
       }
+  }
+
+  Future<void> _selectDate(BuildContext context) async { 
+    FocusScope.of(context).requestFocus(FocusNode()); 
+
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2101) //pesquisar o que é esse 2101
+    );
+
+    if (picked != null) {
+      final DateFormat formatter = DateFormat('dd/MM/yyyy');
+      _dateController.text = formatter.format(picked);
+    }
   }
 
 void _restartScreen() {
@@ -158,7 +185,36 @@ void _showSnackBar(String message, {bool isError = false}) {
             children: [
             _buildTextField(label: 'Nome do Item', controller: _nameController),
             const SizedBox(height: 16),
-            _buildTextField(label: 'Código do Item', controller: _codeController),
+            _buildTextField(
+              label: 'Código do Item', 
+              controller: _codeController,
+              keyboardType: TextInputType.number,
+              customValidator: (value) { // <--- LÓGICA DE FAIXA INJETADA
+                if (value == null || value.isEmpty) {
+                  return 'Este campo é obrigatório.';
+                }
+                final codeNumber = int.tryParse(value);
+
+                if (codeNumber == null) {
+                  return 'Insira apenas números inteiros para o código.';
+                }
+
+                final selectedCategory = _selectedCategory;
+                if (selectedCategory != null && _codeRanges.containsKey(selectedCategory)) {
+                  final range = _codeRanges[selectedCategory]!;
+                  if (codeNumber < range.min || codeNumber > range.max) {
+                    final minStr = range.min.toString();
+                    final maxStr = range.max.toString();
+                    return 'O código deve estar entre $minStr e $maxStr para a categoria "${selectedCategory}".';
+                  }
+                } else {
+                  if (_selectedCategory == null) {
+                    return 'Selecione a Categoria para validar o código.';
+                  }
+                }
+                return null;
+              },
+            ),
             const SizedBox(height: 16),
             Row(
               children: [
@@ -311,7 +367,9 @@ void _showSnackBar(String message, {bool isError = false}) {
       required String label, 
       required TextEditingController controller, 
       int maxLines = 1,
-      TextInputType keyboardType = TextInputType.text 
+      TextInputType keyboardType = TextInputType.text,
+
+      FormFieldValidator<String>? customValidator,
     }) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -335,16 +393,15 @@ void _showSnackBar(String message, {bool isError = false}) {
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
-            validator: (value) { 
+            validator: customValidator ?? (value) { 
               if (value == null || value.isEmpty) {
                 return 'Este campo é obrigatório.';
               }
-              
-              if (keyboardType == TextInputType.number && double.tryParse(value) == null) {
-                return 'Insira um valor numérico válido.';
+              if (keyboardType == TextInputType.number && int.tryParse(value) == null) {
+                return 'Insira um valor numérico inteiro válido.';
               }
               return null;
-            },
+            }, 
           ),
         ],
       );
@@ -403,6 +460,4 @@ void _showSnackBar(String message, {bool isError = false}) {
         ],
       );
     }
-    
-    
-}
+  }
