@@ -1,5 +1,7 @@
 
 
+
+
 import 'package:mysql_client/mysql_client.dart';
 import 'connection.dart'; 
 class MaterialDAO {
@@ -36,18 +38,15 @@ class MaterialDAO {
     return idCategoria;
   }
 
-  
   Future<int> _getBaseId(MySQLConnection conn, String nomeBase) async {
     final results = await conn.execute(
       'SELECT id_local FROM locais_estoque WHERE localizacao = :nome',
       {'nome': nomeBase},
     );
-    
+ 
     if (results.rows.isEmpty) {
       throw Exception('Base não encontrada: $nomeBase. Verifique a tabela `locais_estoque`.');
     }
-    
-    
     final idBaseString = results.rows.first.colByName('id_local');
 
     if (idBaseString == null) {
@@ -55,18 +54,17 @@ class MaterialDAO {
     }
 
     final idBase = int.tryParse(idBaseString.toString()); 
-    
+ 
     if (idBase == null) {
       throw Exception('Falha ao converter ID de Localização ($idBaseString) para inteiro.');
     }
 
     return idBase;
   }
-
   
   Future<void> saveNewMaterial({
     required String name,
-    required String code, 
+    required int code, 
     required String category,
     required String base,
     required String supplier,
@@ -120,5 +118,16 @@ class MaterialDAO {
         }
       );
     });
+  }
+    Future<bool> checkIfCodeExists(int code) async { 
+    final query = 'SELECT COUNT(*) AS count FROM materiais WHERE codigo_material = :code;';
+    
+    final result = await _conn.execute(query, {'code': code}); 
+    
+    final count = result.rows.first.assoc()['count']; 
+    
+    final countInt = int.tryParse(count?.toString() ?? '0') ?? 0;
+    
+    return countInt > 0;
   }
 }
