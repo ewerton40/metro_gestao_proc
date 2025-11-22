@@ -6,9 +6,6 @@ import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
 import '../utils/models/location.dart';
 
-// ====================================================================
-// MODELOS (MANTIDOS INTACTOS)
-// ====================================================================
 
 class InventoryItem {
   final int code;

@@ -7,6 +7,14 @@ import 'package:intl/intl.dart';
 import '../utils/models/location.dart';
 import 'inventory_screen.dart';
 
+
+const Color primaryColor = Color(0xFF1976D2); 
+const Color accentColor = Color(0xFF42A5F5); 
+const Color backgroundColor = Color(0xFFF4F6F8); 
+const Color cardColor = Colors.white; 
+const Color textColor = Color(0xFF212121); 
+const Color hintColor = Color(0xFF757575); 
+
 class MaterialRegistrationScreen extends StatefulWidget {
   const MaterialRegistrationScreen({super.key});
 
@@ -113,6 +121,7 @@ class _MaterialRegistrationScreenState
       );
 
       try {
+   
         await _inventoryService.addItem(newItem);
         _showSnackBar('Material cadastrado com sucesso!', isError: false);
         await Future.delayed(const Duration(seconds: 1));
@@ -133,7 +142,23 @@ class _MaterialRegistrationScreenState
         context: context,
         initialDate: DateTime.now(),
         firstDate: DateTime.now(),
-        lastDate: DateTime(2101));
+        lastDate: DateTime(2101),
+        builder: (context, child) {
+          return Theme(
+            data: ThemeData.light().copyWith(
+              colorScheme: const ColorScheme.light(
+                primary: primaryColor, 
+                onPrimary: Colors.white,
+                surface: cardColor,
+                onSurface: textColor,
+              ),
+              textButtonTheme: TextButtonThemeData(
+                style: TextButton.styleFrom(foregroundColor: primaryColor),
+              ),
+            ),
+            child: child!,
+          );
+        });
     if (picked != null) {
       final DateFormat formatter = DateFormat('dd/MM/yyyy');
       _dateController.text = formatter.format(picked);
@@ -162,7 +187,7 @@ class _MaterialRegistrationScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor, 
       appBar: const BarMenu(),
       drawer: const VerticalMenu(selectedIndex: 5),
       body: LayoutBuilder(
@@ -179,11 +204,11 @@ class _MaterialRegistrationScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Cadastro de materiais',
+                    'Cadastro de Materiais', 
                     style: TextStyle(
-                        fontSize: isMobile ? 24 : 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87),
+                        fontSize: isMobile ? 28 : 36, 
+                        fontWeight: FontWeight.w800, 
+                        color: const Color(0xFF082583)),
                   ),
                   const SizedBox(height: 32),
                   Center(
@@ -203,17 +228,25 @@ class _MaterialRegistrationScreenState
       key: _formKey,
       child: Container(
         width: isMobile ? double.infinity : 1000,
-        padding: EdgeInsets.all(isMobile ? 20.0 : 24.0),
+        padding: EdgeInsets.all(isMobile ? 24.0 : 32.0), 
         decoration: BoxDecoration(
-          color: const Color(0xFFF8F9FA),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey[300]!),
+          color: cardColor, 
+          borderRadius: BorderRadius.circular(16), 
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              spreadRadius: 0,
+              blurRadius: 20,
+              offset: const Offset(0, 5), 
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+         
             _buildTextField(label: 'Nome do Item', controller: _nameController),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24), 
             _buildTextField(
               label: 'Código do Item',
               controller: _codeController,
@@ -235,12 +268,14 @@ class _MaterialRegistrationScreenState
                 return null;
               },
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
+            
+          
             _buildResponsiveRow(
               isMobile: isMobile,
               children: [
                 _isLoadingData
-                    ? const Center(child: LinearProgressIndicator())
+                    ? const Center(child: LinearProgressIndicator(color: primaryColor))
                     : _buildDropdownField(
                         label: 'Categoria',
                         value: _selectedCategory,
@@ -254,14 +289,16 @@ class _MaterialRegistrationScreenState
                     controller: _supplierController),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
+            
+           
             _buildResponsiveRow(
               isMobile: isMobile,
               children: [
                 _buildDropdownField(
                   label: 'Tipo de validade',
                   value: _selectedValidityType,
-                  items: [
+                  items: const [
                     'Tem validade ou calibração',
                     'Não tem validade nem calibração'
                   ],
@@ -275,7 +312,7 @@ class _MaterialRegistrationScreenState
                   hint: 'Selecione o tipo',
                 ),
                 _isLoadingData
-                    ? const Center(child: LinearProgressIndicator())
+                    ? const Center(child: LinearProgressIndicator(color: primaryColor))
                     : _buildDropdownField(
                         label: 'Base',
                         value: _selectedBase,
@@ -286,7 +323,9 @@ class _MaterialRegistrationScreenState
                       ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
+            
+           
             _buildResponsiveRow(
               isMobile: isMobile,
               children: [
@@ -294,44 +333,63 @@ class _MaterialRegistrationScreenState
                   _buildDateField()
                 else
                   const SizedBox.shrink(),
-                Row(
+                
+          
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                        child: _buildTextField(
-                      label: 'Estoque baixo',
-                      controller: _minStockController,
-                      keyboardType: TextInputType.number,
-                    )),
-                    const SizedBox(width: 16),
-                    Expanded(
-                        child: _buildTextField(
-                      label: 'Estoque alto',
-                      controller: _maxStockController,
-                      keyboardType: TextInputType.number,
-                    )),
+                    Text('Controle de Estoque', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: textColor)),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                            child: _buildTextField(
+                          label: 'Estoque baixo',
+                          controller: _minStockController,
+                          keyboardType: TextInputType.number,
+                          isInlineLabel: true,
+                        )),
+                        const SizedBox(width: 16),
+                        Expanded(
+                            child: _buildTextField(
+                          label: 'Estoque atual',
+                          controller: _maxStockController,
+                          keyboardType: TextInputType.number,
+                          isInlineLabel: true,
+                        )),
+                      ],
+                    ),
                   ],
                 )
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
+            
+     
             _buildTextField(
                 label: 'Descrição',
                 controller: _descriptionController,
-                maxLines: 3),
-            const SizedBox(height: 24),
+                maxLines: 4), 
+            const SizedBox(height: 32),
+            
+ 
             SizedBox(
-              width: isMobile ? double.infinity : null,
+              width: isMobile ? double.infinity : 250,
               child: ElevatedButton(
                 onPressed: _saveItem,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1763A6),
+                  backgroundColor: primaryColor,
                   foregroundColor: Colors.white,
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 18), 
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
+                      borderRadius: BorderRadius.circular(12)), 
+                  elevation: 5, 
                 ),
-                child: const Text('Salvar'),
+                child: const Text(
+                  'Salvar Material',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
               ),
             )
           ],
@@ -340,14 +398,15 @@ class _MaterialRegistrationScreenState
     );
   }
 
-  // Widget auxiliar para responsividade
+
   Widget _buildResponsiveRow(
       {required bool isMobile, required List<Widget> children}) {
+    
     if (isMobile) {
       return Column(
         children: [
           children[0],
-          const SizedBox(height: 16),
+          const SizedBox(height: 24), 
           children[1],
         ],
       );
@@ -356,7 +415,7 @@ class _MaterialRegistrationScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(child: children[0]),
-          const SizedBox(width: 16),
+          const SizedBox(width: 24),
           Expanded(child: children[1]),
         ],
       );
@@ -368,8 +427,7 @@ class _MaterialRegistrationScreenState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('Vencimento / Calibração',
-            style:
-                TextStyle(fontWeight: FontWeight.w500, color: Colors.black54)),
+            style: TextStyle(fontWeight: FontWeight.w600, color: textColor)),
         const SizedBox(height: 8),
         TextFormField(
           controller: _dateController,
@@ -380,20 +438,29 @@ class _MaterialRegistrationScreenState
             hintText: 'DD/MM/AAAA',
             suffixIcon: IconButton(
               icon: const Icon(Icons.calendar_today_outlined,
-                  color: Colors.black54),
+                  color: primaryColor), 
               onPressed: () => _selectDate(context),
             ),
             counterText: '',
             filled: true,
-            fillColor: Colors.white,
+            fillColor: backgroundColor, 
             border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.grey[400]!)),
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none), 
             enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.grey[400]!)),
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none),
+            focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: primaryColor, width: 2)),
+            errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Colors.red, width: 1)),
+            focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Colors.red, width: 2)),
             contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16), 
           ),
           validator: (value) {
             if (_isDateRequired && (value == null || value.isEmpty))
@@ -413,30 +480,63 @@ class _MaterialRegistrationScreenState
     int maxLines = 1,
     TextInputType keyboardType = TextInputType.text,
     FormFieldValidator<String>? customValidator,
+    bool isInlineLabel = false, 
   }) {
+
+    final inputDecoration = InputDecoration(
+      filled: true,
+      fillColor: backgroundColor, 
+      hintText: isInlineLabel ? label : null,
+      border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none), 
+      enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none),
+      focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: primaryColor, width: 2)), 
+      errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.red, width: 1)),
+      focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.red, width: 2)),
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 16), 
+    );
+
+    if (isInlineLabel) {
+   
+      return TextFormField(
+        controller: controller,
+        maxLines: maxLines,
+        keyboardType: keyboardType,
+        decoration: inputDecoration,
+        validator: customValidator ??
+            (value) {
+              if (value == null || value.isEmpty)
+                return 'Obrigatório.';
+              if (keyboardType == TextInputType.number &&
+                  int.tryParse(value) == null)
+                return 'Número inválido.';
+              return null;
+            },
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label,
             style: const TextStyle(
-                fontWeight: FontWeight.w500, color: Colors.black54)),
+                fontWeight: FontWeight.w600, color: textColor)),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
           maxLines: maxLines,
           keyboardType: keyboardType,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.grey[400]!)),
-            enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.grey[400]!)),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          ),
+          decoration: inputDecoration,
           validator: customValidator ??
               (value) {
                 if (value == null || value.isEmpty)
@@ -456,42 +556,54 @@ class _MaterialRegistrationScreenState
     required String? value,
     required List<String> items,
     required ValueChanged<String?> onChanged,
-    String hint = '',
+    required String hint,
   }) {
-    if (value != null && !items.contains(value)) value = null;
-
+ 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label,
             style: const TextStyle(
-                fontWeight: FontWeight.w500, color: Colors.black54)),
+                fontWeight: FontWeight.w600, color: textColor)),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          isExpanded: true,
           value: value,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: backgroundColor,
+            border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none),
+            enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none),
+            focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: primaryColor, width: 2)),
+            errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Colors.red, width: 1)),
+            focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Colors.red, width: 2)),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          ),
+          hint: Text(hint, style: TextStyle(color: hintColor)),
+          isExpanded: true,
+          icon: const Icon(Icons.keyboard_arrow_down, color: primaryColor),
           items: items.map((String item) {
             return DropdownMenuItem<String>(
               value: item,
-              child: Text(item),
+              child: Text(item, style: const TextStyle(color: textColor)),
             );
           }).toList(),
           onChanged: onChanged,
-          decoration: InputDecoration(
-            hintText: hint,
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.grey[400]!)),
-            enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.grey[400]!)),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          ),
-          validator: (value) =>
-              (value == null || value.isEmpty) ? 'Selecione uma opção.' : null,
+          validator: (value) {
+            if (value == null || value.isEmpty)
+              return 'Este campo é obrigatório.';
+            return null;
+          },
         ),
       ],
     );

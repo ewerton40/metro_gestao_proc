@@ -127,7 +127,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         style: TextStyle(
           fontSize: isMobile ? 24 : 32, // Fonte menor no mobile
           fontWeight: FontWeight.w800,
-          color: const Color(0xFF001789),
+          color: const Color(0xFF082583),
         ),
       ),
     );
