@@ -58,6 +58,7 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
   void _limparFormularioEntrada() {
     _entradaQtdController.clear();
     _entradaObsController.clear();
+    _entradaDataController.clear();
     setState(() {
       _selectedLocal = null;
       _selectedItem = null;
@@ -162,12 +163,56 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
 
   
   Future<void> _salvarEntrada() async {
-   
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-          content: Text('Lógica de _salvarEntrada não implementada.'),
-          backgroundColor: Colors.orange),
-    );
+    setState(() => _isLoadingEntrada = true);
+
+    try {
+      final authService = context.read<AuthServices>();
+
+      if (_selectedItem == null ||
+          _entradaQtdController.text.isEmpty ||
+          _selectedLocal == null) {
+        throw Exception('Preencha todos os campos obrigatórios (Item, Qtd, Destino).');
+      }
+
+      if (!authService.estaLogado || authService.usuario == null) {
+        throw Exception('Erro: Usuário não está logado. Faça o login novamente.');
+      }
+
+      final int idMaterial = _selectedItem!.code;
+      final int quantidade = int.parse(_entradaQtdController.text);
+      final int idLocalDestino = _selectedLocal!.id;
+      final int idFuncionario = authService.usuario!.id; 
+      final String observacao = _entradaObsController.text;
+
+      final response = await _inventoryService.registerMovement(
+        idMaterial: idMaterial,
+        quantidade: quantidade,
+        idLocalDestino: idLocalDestino,
+        idFuncionario: idFuncionario,
+        observacao: observacao,
+      );
+
+      if (response['success'] == true) {
+        _limparFormularioEntrada(); 
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Entrada registrada com sucesso!'),
+              backgroundColor: Colors.green),
+        );
+      } else {
+        throw Exception(response['message']);
+      }
+    } catch (e) {
+      // Erro
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Erro ao salvar: $e'), 
+            backgroundColor: Colors.red),
+      );
+    }
+    
+    setState(() => _isLoadingEntrada = false);
   }
 
 
