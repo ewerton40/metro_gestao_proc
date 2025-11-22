@@ -8,7 +8,6 @@ import 'package:metro_projeto/screens/user_management_screen.dart';
 
 class VerticalMenu extends StatelessWidget {
   
-
   final int selectedIndex;
 
   const VerticalMenu({
@@ -19,83 +18,81 @@ class VerticalMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
    
-    const Color primaryColor = Color(0xFF0D47A1); 
-    final Color selectedTileColor = primaryColor.withOpacity(0.1);
-    const Color defaultIconColor = Color(0xFF5F6368); 
-    const Color defaultTextColor = Color(0xFF3C4043); 
+  
+    const Color primaryColor = Color(0xFF1976D2); 
+    const Color accentColor = Color(0xFF42A5F5); 
+    const Color selectedTileColor = Color(0xFFE3F2FD); 
+    const Color defaultIconColor = Color(0xFF616161);
+    const Color defaultTextColor = Color(0xFF424242); 
 
-   final safeIndex = (selectedIndex >= 0 && selectedIndex <= 5) ? selectedIndex : -1;
+    final safeIndex = (selectedIndex >= 0 && selectedIndex <= 5) ? selectedIndex : -1;
 
     return Drawer(
       backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.horizontal(right: Radius.circular(16)),
-      ),
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
           Container(
-              height: 130, 
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border(
-                  bottom: BorderSide(color: Colors.grey[200]!, width: 1.5),
-                ),
+            height: 130, 
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(
+                bottom: BorderSide(color: Colors.grey[100]!, width: 1.0), 
               ),
-              
-              child: DrawerHeader(
-                decoration: const BoxDecoration(
-                  color: Colors.transparent, 
-                ),
-                
-                padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,  
-                  children: [
-                    Container(
-                      width: 60, 
-                      height: 60,
-                      padding: const EdgeInsets.all(4), 
-                      decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.05),
-                        borderRadius: BorderRadius.circular(12), 
-                      ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,  
+                children: [
+                  Container(
+                    width: 60, 
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: accentColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12), 
+                      border: Border.all(color: accentColor.withOpacity(0.3), width: 1),
+                    ),
+                    child: Center(
                       child: Image.asset(
                         'assets/images/logo_metro_menu.png',
                         fit: BoxFit.contain,
+                        height: 40,
                       ),
                     ),
-                    const SizedBox(width: 12), 
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center, 
-                      children: [
-                        Text(
-                          'Metrô de',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w500, 
-                            fontSize: 18, 
-                            color: Colors.black54,  
-                            height: 1.1, 
-                          ),
+                  ),
+                  const SizedBox(width: 12), 
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center, 
+                    children: [
+                      Text(
+                        'Metrô de',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w400, 
+                          fontSize: 16, 
+                          color: defaultTextColor,  
+                          height: 1.1, 
                         ),
-                        Text(
-                          'São Paulo',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold, 
-                            fontSize: 20, 
-                            color: Colors.black87, 
-                            height: 1.2, 
-                          ),
+                      ),
+                      Text(
+                        'São Paulo',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700, 
+                          fontSize: 20, 
+                          color: Color(0xFF212121), 
+                          height: 1.2, 
                         ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
+          ),
+          
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
             child: Column(
               children: [
                 _buildMenuItem(
@@ -114,7 +111,7 @@ class VerticalMenu extends StatelessWidget {
                     );
                   },
                   currentSelectedIndex: safeIndex,
-                  selectedColor: primaryColor,
+                  primaryColor: primaryColor,
                   selectedTileColor: selectedTileColor,
                   defaultIconColor: defaultIconColor,
                   defaultTextColor: defaultTextColor,
@@ -135,7 +132,7 @@ class VerticalMenu extends StatelessWidget {
                     );
                   },
                   currentSelectedIndex: safeIndex,
-                  selectedColor: primaryColor,
+                  primaryColor: primaryColor,
                   selectedTileColor: selectedTileColor,
                   defaultIconColor: defaultIconColor,
                   defaultTextColor: defaultTextColor,
@@ -156,7 +153,7 @@ class VerticalMenu extends StatelessWidget {
                     );
                   },
                   currentSelectedIndex: safeIndex,
-                  selectedColor: primaryColor,
+                  primaryColor: primaryColor,
                   selectedTileColor: selectedTileColor,
                   defaultIconColor: defaultIconColor,
                   defaultTextColor: defaultTextColor,
@@ -177,7 +174,7 @@ class VerticalMenu extends StatelessWidget {
                     );
                   },
                   currentSelectedIndex: safeIndex,
-                  selectedColor: primaryColor,
+                  primaryColor: primaryColor,
                   selectedTileColor: selectedTileColor,
                   defaultIconColor: defaultIconColor,
                   defaultTextColor: defaultTextColor,
@@ -198,7 +195,7 @@ class VerticalMenu extends StatelessWidget {
                     );
                   },
                   currentSelectedIndex: safeIndex,
-                  selectedColor: primaryColor,
+                  primaryColor: primaryColor,
                   selectedTileColor: selectedTileColor,
                   defaultIconColor: defaultIconColor,
                   defaultTextColor: defaultTextColor,
@@ -219,7 +216,7 @@ class VerticalMenu extends StatelessWidget {
                     );
                   },
                   currentSelectedIndex: safeIndex,
-                  selectedColor: primaryColor,
+                  primaryColor: primaryColor,
                   selectedTileColor: selectedTileColor,
                   defaultIconColor: defaultIconColor,
                   defaultTextColor: defaultTextColor,
@@ -241,7 +238,7 @@ class VerticalMenu extends StatelessWidget {
     required int index, 
     required int currentSelectedIndex, 
     required VoidCallback onTap,
-    required Color selectedColor,
+    required Color primaryColor,
     required Color selectedTileColor,
     required Color defaultIconColor,
     required Color defaultTextColor,
@@ -249,26 +246,37 @@ class VerticalMenu extends StatelessWidget {
 
     final bool isSelected = currentSelectedIndex >= 0 && index == currentSelectedIndex;
 
-    return ListTile(
-      leading: Icon(
-        icon,
-        color: isSelected ? selectedColor : defaultIconColor,
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          color: isSelected ? selectedColor : defaultTextColor,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Material(
+        color: isSelected ? selectedTileColor : Colors.transparent,
+        borderRadius: BorderRadius.circular(10),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            child: Row(
+              children: [
+                Icon(
+                  icon,
+                  color: isSelected ? primaryColor : defaultIconColor,
+                  size: 24,
+                ),
+                const SizedBox(width: 16),
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: isSelected ? primaryColor : defaultTextColor,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    fontSize: 15,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
-      onTap: onTap, 
-      selected: isSelected,
-      selectedTileColor: selectedTileColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      horizontalTitleGap: 10,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
     );
   }
 }

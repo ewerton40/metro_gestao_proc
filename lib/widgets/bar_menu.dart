@@ -7,6 +7,9 @@ import '../services/notification_service.dart';
 import '../utils/models/notification.dart';
  
 
+const Color primaryColor = Color(0xFF1976D2); 
+const Color defaultIconColor = Color(0xFF616161); 
+
 class BarMenu extends StatefulWidget implements PreferredSizeWidget {
   const BarMenu({super.key});
 
@@ -31,13 +34,14 @@ class _BarMenuState extends State<BarMenu> {
 
   Future<void> _fetchNotifications() async {
     try {
+      
       final response = await _notificationService.fetchNotifications();
       if (mounted) {
         setState(() {
-          _notifications = response.notifications;
+           _notifications = response.notifications;
           _unreadCount = response.unreadCount;
-        });
-      }
+       });
+       }
     } catch (e) {
       print("Erro ao buscar notificações: $e");
     }
@@ -46,9 +50,11 @@ class _BarMenuState extends State<BarMenu> {
   Future<void> _onOpenNotifications() async {
     if (_unreadCount == 0) return;
 
+  
     final success = await _notificationService.markAllAsRead();
 
     if (success && mounted) {
+    if (mounted) {
       setState(() {
         _unreadCount = 0;
         _notifications = _notifications.map((n) {
@@ -62,6 +68,7 @@ class _BarMenuState extends State<BarMenu> {
       });
     }
   }
+  }
 
 
   @override
@@ -72,14 +79,11 @@ class _BarMenuState extends State<BarMenu> {
 
     return AppBar(
       backgroundColor: Colors.white,
-      elevation: 0, 
+      elevation: 4, 
+      shadowColor: Colors.black.withOpacity(0.1),
       surfaceTintColor: Colors.transparent, 
-      shape: Border(
-        bottom: BorderSide(
-          color: Colors.grey[200]!,
-          width: 1.5,
-        ),
-      ),
+      
+      
       title: InkWell(
         onTap: () {
           Navigator.push(context, 
@@ -89,10 +93,13 @@ class _BarMenuState extends State<BarMenu> {
         },
         splashColor: Colors.transparent,
         highlightColor: Colors.transparent,
-        child: Image.asset(
-          'assets/images/logo_metro_bar.png',
-          height: kToolbarHeight * 0.7, 
-          fit: BoxFit.contain,
+        child: Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Image.asset(
+            'assets/images/logo_metro_bar.png',
+            height: kToolbarHeight * 0.6, 
+            fit: BoxFit.contain,
+          ),
         ),
       ),
       actions: [
@@ -114,18 +121,29 @@ class _BarMenuState extends State<BarMenu> {
       tooltip: 'Notificações',
       offset: const Offset(0, 55), 
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0),
+        borderRadius: BorderRadius.circular(12.0), 
       ),
-      elevation: 3,
+      elevation: 6, 
+      color: Colors.white,
 
-      icon: Badge(
-        label: Text(_unreadCount.toString()),
-        isLabelVisible: _unreadCount > 0,
-        backgroundColor: Colors.redAccent, 
-        child: Icon(
-          Icons.notifications_outlined,
-          color: Colors.black.withOpacity(0.7), 
-          size: 26,
+      icon: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          shape: BoxShape.circle,
+        ),
+        child: Badge(
+          label: Text(
+            _unreadCount.toString(),
+            style: const TextStyle(color: Colors.white, fontSize: 10),
+          ),
+          isLabelVisible: _unreadCount > 0,
+          backgroundColor: Colors.redAccent, 
+          child: Icon(
+            Icons.notifications_none_outlined, 
+            color: defaultIconColor, 
+            size: 24,
+          ),
         ),
       ),
 
@@ -139,14 +157,15 @@ class _BarMenuState extends State<BarMenu> {
             child: Text(
               'Notificações',
               style: TextStyle(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w700,
                 fontSize: 16,
+                color: Color(0xFF212121),
               ),
             ),
           ),
         );
 
-        items.add(const PopupMenuDivider());
+        items.add(const PopupMenuDivider(height: 1));
 
         if (_notifications.isEmpty) {
           items.add(
@@ -155,7 +174,10 @@ class _BarMenuState extends State<BarMenu> {
               child: Center(
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 12.0),
-                  child: Text('Nenhuma notificação encontrada.'),
+                  child: Text(
+                    'Nenhuma notificação encontrada.',
+                    style: TextStyle(color: Colors.grey),
+                  ),
                 ),
               ),
             ),
@@ -164,23 +186,39 @@ class _BarMenuState extends State<BarMenu> {
           items.addAll(_notifications.map((notification) {
             return PopupMenuItem<NotificationModel>(
               value: notification,
-              child: ListTile(
-                leading: Icon(
-                  notification.lida
-                      ? Icons.mark_email_read_outlined
-                      : Icons.mark_email_unread_outlined,
-                  color: notification.lida
-                      ? Colors.grey
-                      : Theme.of(context).primaryColor, 
+              padding: EdgeInsets.zero,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: notification.lida ? Colors.white : primaryColor.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                title: Text(
-                  notification.mensagem,
-                  style: TextStyle(
-                    fontWeight:
-                        notification.lida ? FontWeight.normal : FontWeight.bold,
+                margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+                child: ListTile(
+                  leading: Icon(
+                    notification.lida
+                        ? Icons.mark_email_read_outlined
+                        : Icons.mark_email_unread_outlined,
+                    color: notification.lida
+                        ? Colors.grey
+                        : primaryColor, 
                   ),
+                  title: Text(
+                    notification.mensagem,
+                    style: TextStyle(
+                      fontWeight:
+                          notification.lida ? FontWeight.w400 : FontWeight.w600,
+                      fontSize: 14,
+                      color: notification.lida ? Colors.grey[700] : Colors.black87,
+                    ),
+                  ),
+                  subtitle: Text(
+                    notification.data,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
                 ),
-                subtitle: Text(notification.data),
               ),
             );
           }));
@@ -197,31 +235,40 @@ class _BarMenuState extends State<BarMenu> {
       tooltip: 'Menu do Usuário',
       offset: const Offset(0, 55), 
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0),
+        borderRadius: BorderRadius.circular(12.0),
       ),
-      elevation: 3,
-      child: Padding(
+      elevation: 6,
+      color: Colors.white,
+      
+     
+      child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(20),
+        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            const Icon(
               Icons.person_outline,
-              color: Colors.black.withOpacity(0.7),
+              color: primaryColor, 
+              size: 20,
             ),
             const SizedBox(width: 8),
             Text(
-              firstName.isNotEmpty ? firstName : 'User',
+              firstName.isNotEmpty ? firstName : 'Usuário',
               style: TextStyle(
                 color: Colors.black.withOpacity(0.8),
-                fontWeight: FontWeight.w500,
-                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
               ),
             ),
             const SizedBox(width: 4),
             Icon(
-              Icons.arrow_drop_down,
+              Icons.keyboard_arrow_down, 
               color: Colors.black.withOpacity(0.5),
+              size: 20,
             ),
           ],
         ),
@@ -234,15 +281,16 @@ class _BarMenuState extends State<BarMenu> {
             children: [
               Icon(
                 Icons.logout,
-                size: 18,
-                color: Colors.red[700],
+                size: 20,
+                color: Colors.red[600],
               ),
               const SizedBox(width: 10),
               Text(
                 'Sair',
                 style: TextStyle(
-                  color: Colors.red[700],
+                  color: Colors.red[600],
                   fontWeight: FontWeight.w500,
+                  fontSize: 15,
                 ),
               ),
             ],
@@ -253,6 +301,7 @@ class _BarMenuState extends State<BarMenu> {
     onSelected: (value){
       if(value == 'sair'){
         try{
+        
         Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (Route<dynamic> route) => false);
         }catch(e){
           print("Erro logout: $e");
