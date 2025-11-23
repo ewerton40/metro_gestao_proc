@@ -182,8 +182,6 @@ class _InventoryScreenState extends State<InventoryScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildHeader(theme),
-            const SizedBox(height: 24),
             _buildSearchAndFilters(theme),
             const SizedBox(height: 24),
             Expanded(
@@ -220,15 +218,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
     );
   }
 
-  Widget _buildHeader(ThemeData theme) {
-    return Text(
-      'Inventário',
-      style: theme.textTheme.headlineLarge!.copyWith(
-        fontWeight: FontWeight.bold,
-        color: const Color(0xFF082583),
-      ),
-    );
-  }
+
 
   Widget _buildSearchAndFilters(ThemeData theme) {
     return Column(

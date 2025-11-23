@@ -128,18 +128,7 @@ class _ReportScreenState extends State<ReportScreen> {
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Relatórios',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: primaryBlue, 
-              ),
-            ), //
-            const SizedBox(height: 16),
-
-         
+          children: [                  
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {

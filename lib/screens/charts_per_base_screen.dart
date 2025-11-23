@@ -237,7 +237,6 @@ class _ChartsByBaseScreenState extends State<ChartsByBaseScreen> {
       appBar: const BarMenu(),
       drawer: const VerticalMenu(selectedIndex: 10),
 
-      // LayoutBuilder para responsividade
       body: LayoutBuilder(
         builder: (context, constraints) {
           bool isMobile = constraints.maxWidth < 900;
@@ -270,7 +269,7 @@ class _ChartsByBaseScreenState extends State<ChartsByBaseScreen> {
 
   Widget _buildBaseFilters(BuildContext context, bool isMobile) {
     Widget dropdownWidget = Container(
-      // No celular, largura total. No desktop, largura do conteúdo.
+     
       width: isMobile ? double.infinity : null,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
@@ -300,7 +299,7 @@ class _ChartsByBaseScreenState extends State<ChartsByBaseScreen> {
                 value: _selectedBase,
                 icon: const Icon(Icons.arrow_drop_down, color: kPrimaryColor),
                 isDense: true,
-                isExpanded: isMobile, // Expande o texto interno no mobile
+                isExpanded: isMobile, 
                 hint: Text('Selecione',
                     style: TextStyle(color: kTextColor.withOpacity(0.7))),
                 items: _bases.map((SimpleLocation base) {
@@ -344,7 +343,7 @@ class _ChartsByBaseScreenState extends State<ChartsByBaseScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                dropdownWidget, // Dropdown embaixo
+                dropdownWidget, 
               ],
             )
           : Row(
@@ -361,7 +360,7 @@ class _ChartsByBaseScreenState extends State<ChartsByBaseScreen> {
                         color: kTextColor),
                   ),
                 ),
-                dropdownWidget, // Dropdown ao lado
+                dropdownWidget, 
               ],
             ),
     );
@@ -374,9 +373,9 @@ class _ChartsByBaseScreenState extends State<ChartsByBaseScreen> {
         Text(
           'Dashboard por Base',
           style: TextStyle(
-            fontSize: isMobile ? 28 : 36, // Fonte responsiva
+            fontSize: isMobile ? 28 : 36, 
             fontWeight: FontWeight.w900,
-            color: const Color(0xFF001789),
+            color: const Color(0xFF082583),
           ),
         ),
         const SizedBox(height: 4),

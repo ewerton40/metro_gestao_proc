@@ -206,7 +206,7 @@ class _MaterialRegistrationScreenState
                   Text(
                     'Cadastro de Materiais', 
                     style: TextStyle(
-                        fontSize: isMobile ? 28 : 36, 
+                        fontSize: isMobile ? 28 : 30, 
                         fontWeight: FontWeight.w800, 
                         color: const Color(0xFF082583)),
                   ),

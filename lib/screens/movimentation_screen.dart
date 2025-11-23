@@ -241,15 +241,6 @@ class _MovimentacaoScreenState extends State<MovimentacaoScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Movimentações',
-                style: theme.textTheme.headlineLarge!.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF082583),
-                ),
-              ),
-              const SizedBox(height: 24),
-
               Container(
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surfaceVariant,

@@ -174,15 +174,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Gestão de Usuários',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: primaryBlue,
-              ),
-            ),
-            const SizedBox(height: 24),
             if (isMobile) ...[
               TextField(
                 controller: _searchController,

@@ -98,8 +98,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch, // Estica os cards
                 children: [
-                  _buildHeader(context, isMobile),
-                  const SizedBox(height: 16),
 
                   // Passamos 'isMobile' para os widgets adaptarem o layout
                   _buildTopStatCards(context, isMobile),
@@ -119,19 +117,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildHeader(BuildContext context, bool isMobile) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Text(
-        'Dashboard Geral',
-        style: TextStyle(
-          fontSize: isMobile ? 24 : 32, // Fonte menor no mobile
-          fontWeight: FontWeight.w800,
-          color: const Color(0xFF082583),
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildTopStatCards(BuildContext context, bool isMobile) {
     final card1 = _buildStatCard(
