@@ -5,6 +5,8 @@ import 'package:metro_projeto/screens/inventory_screen.dart';
 import 'package:metro_projeto/screens/movimentation_screen.dart';
 import 'package:metro_projeto/screens/report_screen.dart';
 import 'package:metro_projeto/screens/user_management_screen.dart';
+import 'package:metro_projeto/providers/user_provider.dart';
+import 'package:provider/provider.dart';
 
 class VerticalMenu extends StatelessWidget {
   
@@ -179,48 +181,63 @@ class VerticalMenu extends StatelessWidget {
                   defaultIconColor: defaultIconColor,
                   defaultTextColor: defaultTextColor,
                 ),
-                _buildMenuItem(
-                  context: context,
-                  icon: Icons.people_outline,
-                  title: 'Gestão de Usuários',
-                  index: 4, 
-                  onTap: () {
-                    Navigator.pop(context);
-                    if (selectedIndex == 4) return;
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (Builder) => const UserManagementScreen(),
-                      ),
+                Builder(builder: (context) {
+                  final userProvider = Provider.of<UserProvider>(context);
+                  if (userProvider.isAdmin) {
+                    return Column(
+                      children: [
+                        _buildMenuItem(
+                          context: context,
+                          icon: Icons.people_outline,
+                          title: 'Gestão de Usuários',
+                          index: 4,
+                          onTap: () {
+                            Navigator.pop(context);
+                            if (selectedIndex == 4) return;
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (Builder) => const UserManagementScreen(),
+                              ),
+                            );
+                          },
+                          currentSelectedIndex: safeIndex,
+                          primaryColor: primaryColor,
+                          selectedTileColor: selectedTileColor,
+                          defaultIconColor: defaultIconColor,
+                          defaultTextColor: defaultTextColor,
+                        ),
+                        _buildMenuItem(
+                          context: context,
+                          icon: Icons.add_box_outlined,
+                          title: 'Cadastrar Material',
+                          index: 5,
+                          onTap: () {
+                            Navigator.pop(context);
+                            if (selectedIndex == 5) return;
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (Builder) => const MaterialRegistrationScreen(),
+                              ),
+                            );
+                          },
+                          currentSelectedIndex: safeIndex,
+                          primaryColor: primaryColor,
+                          selectedTileColor: selectedTileColor,
+                          defaultIconColor: defaultIconColor,
+                          defaultTextColor: defaultTextColor,
+                        ),
+                      ],
                     );
-                  },
-                  currentSelectedIndex: safeIndex,
-                  primaryColor: primaryColor,
-                  selectedTileColor: selectedTileColor,
-                  defaultIconColor: defaultIconColor,
-                  defaultTextColor: defaultTextColor,
-                ),
-                _buildMenuItem(
-                  context: context,
-                  icon: Icons.add_box_outlined,
-                  title: 'Cadastrar Material',
-                  index: 5, 
-                  onTap: () {
-                    Navigator.pop(context);
-                    if (selectedIndex == 5) return;
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (Builder) => const MaterialRegistrationScreen(),
-                      ),
+                  } else {
+                    return Column(
+                      children: [
+                        // Non-admin: do not show management/register items
+                      ],
                     );
-                  },
-                  currentSelectedIndex: safeIndex,
-                  primaryColor: primaryColor,
-                  selectedTileColor: selectedTileColor,
-                  defaultIconColor: defaultIconColor,
-                  defaultTextColor: defaultTextColor,
-                ),
+                  }
+                }),
           
               ],
             ),

@@ -79,7 +79,10 @@ class _LoginScreenState extends State<LoginScreen>
       await authService.loginRequest(email, senha);
       if (authService.estaLogado) {
         final nome = authService.usuario?.nome ?? 'Nome não encontrado';
-        Provider.of<UserProvider>(context, listen: false).setFullName(nome);
+        final cargo = authService.usuario?.cargo ?? '';
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        userProvider.setFullName(nome);
+        userProvider.setRole(cargo);
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const DashboardScreen()));
         print('Login realizado com sucesso: $nome');

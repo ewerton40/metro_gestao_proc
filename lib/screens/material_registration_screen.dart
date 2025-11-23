@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/services/inventory_service.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
+import 'package:provider/provider.dart';
+import 'package:metro_projeto/providers/user_provider.dart';
+import 'package:metro_projeto/screens/dashboard_screen.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:intl/intl.dart';
 import '../utils/models/location.dart';
@@ -186,6 +189,43 @@ class _MaterialRegistrationScreenState
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+
+    if (!userProvider.isAdmin) {
+      return Scaffold(
+        backgroundColor: backgroundColor,
+        appBar: const BarMenu(),
+        drawer: const VerticalMenu(selectedIndex: 5),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.block, size: 64, color: Colors.redAccent),
+                const SizedBox(height: 16),
+                const Text(
+                  'Acesso negado. Você não tem permissão para acessar esta área.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const DashboardScreen()),
+                    );
+                  },
+                  child: const Text('Voltar ao Painel'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: backgroundColor, 
       appBar: const BarMenu(),

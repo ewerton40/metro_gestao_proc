@@ -4,6 +4,8 @@ import 'package:metro_projeto/screens/material_registration_screen.dart';
 import '../services/inventory_service.dart';
 import 'package:metro_projeto/widgets/bar_menu.dart';
 import 'package:metro_projeto/widgets/vertical_menu.dart';
+import 'package:provider/provider.dart';
+import 'package:metro_projeto/providers/user_provider.dart';
 import '../utils/models/location.dart';
 
 
@@ -208,7 +210,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                               ),
                   ),
                   const SizedBox(height: 24),
-                  _buildFooter(theme), // RODAPÉ COM OS BOTÕES
+                  _buildFooter(theme),
                 ],
               ),
             ),
@@ -474,9 +476,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
     );
   }
 
-  // ====================================================================
-  // RODAPÉ COM A ALTERAÇÃO SOLICITADA
-  // ====================================================================
+
   Widget _buildFooter(ThemeData theme) {
     int totalItens = _items.length;
     int itensCriticos = _items.where((item) => item.quantidadeAtual <= item.qtdBaixo).length;
@@ -488,7 +488,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            // --- NOVO BOTÃO: VISUALIZAR ITENS ---
+  
             ElevatedButton.icon(
               onPressed: () {
                 
@@ -498,7 +498,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   ),
                 );
               },
-              icon: const Icon(Icons.visibility_outlined), // Ícone de olho/visualizar
+              icon: const Icon(Icons.visibility_outlined), 
               label: const Text('Visualizar Itens'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue.shade700,
@@ -512,25 +512,32 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
             const SizedBox(width: 16),
 
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const MaterialRegistrationScreen(),
+            Builder(builder: (context) {
+              final userProvider = Provider.of<UserProvider>(context);
+              if (userProvider.isAdmin) {
+                return ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const MaterialRegistrationScreen(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.add_box_outlined),
+                  label: const Text('Cadastrar Itens'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue.shade700,
+                    foregroundColor: theme.colorScheme.onPrimary,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    elevation: 4,
                   ),
                 );
-              },
-              icon: const Icon(Icons.add_box_outlined),
-              label: const Text('Cadastrar Itens'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue.shade700,
-                foregroundColor: theme.colorScheme.onPrimary,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                elevation: 4,
-              ),
-            ),
+              } else {
+                return const SizedBox.shrink();
+              }
+            }),
           ],
         ),
         const SizedBox(height: 24),

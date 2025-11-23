@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:metro_projeto/providers/user_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:metro_projeto/services/auth_services.dart';
 import 'package:metro_projeto/screens/dashboard_screen.dart';
 import 'package:metro_projeto/screens/login_screen.dart';
-import 'package:provider/provider.dart';
 import '../services/notification_service.dart';
 import '../utils/models/notification.dart';
  
@@ -301,7 +302,14 @@ class _BarMenuState extends State<BarMenu> {
     onSelected: (value){
       if(value == 'sair'){
         try{
-        
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        userProvider.clearUser();
+
+        try {
+          final auth = Provider.of<AuthServices>(context, listen: false);
+          auth.logout();
+        } catch (_) {}
+
         Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (Route<dynamic> route) => false);
         }catch(e){
           print("Erro logout: $e");
