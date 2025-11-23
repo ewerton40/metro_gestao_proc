@@ -337,36 +337,73 @@ Future<List<Map<String, dynamic>>> getCriticalItems() async {
 
 
   Future<Map<String, dynamic>?> getItemDetail(int idMaterial) async {
-  const String sqlQuery = '''
-    SELECT 
-        m.nome AS nome_material,
-        m.id_material AS codigo,
-        c.nome_categoria AS categoria,
-        m.descricao,
-        m.qtd_alerta_baixo AS estoque_minimo,
-        e.quantidade AS quantidade,
-        CASE 
-            WHEN e.quantidade <= m.qtd_alerta_baixo THEN 'Crítico'
-            ELSE 'Disponível'
-        END AS status,
-        b.nome_base AS localizacao
-    FROM materiais m
-    LEFT JOIN categoria c ON m.id_categoria = c.id_categoria
-    LEFT JOIN estoque e ON e.id_material = m.id_material
-    LEFT JOIN base b ON e.id_base = b.id_base
-    WHERE m.id_material = :idMaterial;
-  ''';
-
   try {
-    final result = await connection.execute(sqlQuery, {'idMaterial': idMaterial});
 
-     if (result.isEmpty || result.rows.isEmpty) {
-      return null;
-    }
+    const String itemQuery = '''
+      SELECT 
+          m.nome AS nome_material,
+          m.id_material AS codigo,
+          c.nome_categoria AS categoria,
+          m.descricao,
+          m.qtd_alerta_baixo AS estoque_minimo
+      FROM materiais m
+      LEFT JOIN categoria c ON m.id_categoria = c.id_categoria
+      WHERE m.id_material = :idMaterial
+      LIMIT 1;
+    ''';
 
-     final row = result.rows.firstOrNull?.typedAssoc();
+    final itemResult = await connection.execute(itemQuery, {'idMaterial': idMaterial});
+    if (itemResult.isEmpty || itemResult.rows.isEmpty) return null;
 
-    return row;
+    final itemRow = itemResult.rows.first.typedAssoc();
+
+
+    final String totalQuery = '''
+      SELECT COALESCE(SUM(e.quantidade), 0) AS quantidade_total
+      FROM estoque e
+      WHERE e.id_material = :idMaterial;
+    ''';
+
+    final totalResult = await connection.execute(totalQuery, {'idMaterial': idMaterial});
+    final totalRow = totalResult.rows.first.assoc();
+    final int totalQuantidade = int.tryParse(totalRow['quantidade_total'] ?? '0') ?? 0;
+
+ 
+    final String locQuery = '''
+      SELECT b.id_base AS id, b.nome_base AS nome, e.quantidade
+      FROM estoque e
+      JOIN base b ON e.id_base = b.id_base
+      WHERE e.id_material = :idMaterial AND e.quantidade > 0
+      ORDER BY b.nome_base;
+    ''';
+
+    final locResult = await connection.execute(locQuery, {'idMaterial': idMaterial});
+    final List<Map<String, dynamic>> locais = locResult.rows.map((r) {
+      final d = r.assoc();
+      return {
+        'id': int.tryParse(d['id'] ?? '0') ?? 0,
+        'nome': d['nome'] ?? '',
+        'quantidade': int.tryParse(d['quantidade'] ?? '0') ?? 0,
+      };
+    }).toList();
+
+    final int estoqueMinimo = int.tryParse(itemRow['estoque_minimo']?.toString() ?? '0') ?? 0;
+    final String status = (totalQuantidade <= estoqueMinimo) ? 'Crítico' : 'Disponível';
+
+    final Map<String, dynamic> detalhamento = {
+      'nome_material': itemRow['nome_material'] ?? '',
+      'codigo': int.tryParse(itemRow['codigo']?.toString() ?? '0') ?? 0,
+      'categoria': itemRow['categoria'] ?? '',
+      'descricao': itemRow['descricao'] ?? '',
+      'estoque_minimo': estoqueMinimo,
+      'quantidade': totalQuantidade,
+      'status': status,
+      // manter compatibilidade: campo 'localizacao' com a primeira localizacao (se existir)
+      'localizacao': locais.isNotEmpty ? locais.first['nome'] : null,
+      'localizacoes': locais,
+    };
+
+    return detalhamento;
   } catch (e) {
     print('Erro ao buscar detalhe do item: $e');
     throw Exception('Falha ao acessar o banco de dados.');

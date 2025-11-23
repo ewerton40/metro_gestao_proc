@@ -388,8 +388,25 @@ class _DetalheItemScreenState extends State<DetalheItemScreen> {
                                                   ),
                                                 ],
                                               ),
-                                              Text(
-                                                  "Localização: ${_itemDetalhe!['localizacao']}"),
+                                              Builder(builder: (context) {
+                                                final locs = _itemDetalhe!['localizacoes'] as List<dynamic>? ?? [];
+                                                if (locs.isEmpty) {
+                                                  return Text("Localização: ${_itemDetalhe!['localizacao'] ?? 'N/A'}");
+                                                }
+
+                                                return Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    const Text('Localizações:'),
+                                                    const SizedBox(height: 4),
+                                                    ...locs.map((l) {
+                                                      final nome = l['nome'] ?? '';
+                                                      final qtd = l['quantidade'] != null ? ' - Qtd: ${l['quantidade']}' : '';
+                                                      return Text('$nome$qtd');
+                                                    }).toList(),
+                                                  ],
+                                                );
+                                              }),
                                             ],
                                           ),
                                         ),
