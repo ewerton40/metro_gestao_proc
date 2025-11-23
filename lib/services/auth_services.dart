@@ -143,4 +143,16 @@ Future<Map<String, dynamic>> updateUser({
       throw Exception('Erro de conexão ao atualizar: $e');
     }
   }
+
+  Future<bool> deleteUser(int id) async {
+  final url = Uri.parse('$_baseUrl/users/delete/$id');
+
+  final response = await http.delete(url);
+
+  if (response.statusCode == 200) {
+    return true;
+  } else {
+    throw Exception('Erro ao excluir usuário: ${response.body}');
+  }
+}
 }

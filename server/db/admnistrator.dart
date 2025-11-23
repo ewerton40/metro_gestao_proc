@@ -139,4 +139,22 @@ class AdmnistratorDAO {
       rethrow;
     }
   }
+
+
+  Future<bool> deleteUser(int id) async {
+  final conn = await connection;
+
+  try {
+    final result = await conn.execute(
+      'DELETE FROM funcionario WHERE id_funcionario = :id',
+      {'id': id},
+    );
+
+    return result.affectedRows.toDouble() > 0;
+  } catch (e) {
+    throw Exception('Erro ao deletar usuário: $e');
+  } finally {
+    await conn.close();
+  }
+}
 }

@@ -65,44 +65,96 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
   void _showDeleteConfirmationDialog(Funcionario user) {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirmar desativação',
-              style: TextStyle(color: primaryBlue)),
-          content:
-              Text('Tem certeza se quer desativar o usuário ${user.nome}?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.grey[300],
-                foregroundColor: Colors.black,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        bool isDeleting = false;
+        bool isSuccess = false;
+        String? errorText;
+
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: Text(
+                isSuccess ? 'SUCESSO' : 'CONFIRMAR DESATIVAÇÃO',
+                style: const TextStyle(color: primaryBlue),
               ),
-              child: const Text('Cancelar'),
-            ),
-            TextButton(
-              onPressed: () {
-                // TODO: Chamar o backend para deletar
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text(
-                          'TODO: Lógica de deletar ainda não implementada.')),
-                );
-              },
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              ),
-              child: const Text('Excluir'),
-            ),
-          ],
+              content: isDeleting
+                  ? const SizedBox(
+                      height: 100,
+                      child: Center(
+                        child: CircularProgressIndicator(color: primaryBlue),
+                      ),
+                    )
+                  : isSuccess
+                      ? const Text('Usuário excluído com sucesso!')
+                      : Text(errorText ??
+                          'Tem certeza se quer desativar o usuário ${user.nome}?'),
+              actions: [
+                if (!isDeleting && !isSuccess)
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.grey[300],
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
+                    ),
+                    child: const Text('Cancelar'),
+                  ),
+                if (!isDeleting && !isSuccess)
+                  TextButton(
+                    onPressed: () async {
+                      setStateDialog(() {
+                        isDeleting = true;
+                        errorText = null;
+                      });
+
+                      try {
+                        final success = await _authService.deleteUser(user.id);
+
+                        if (success) {
+                          setState(() {
+                            _users.removeWhere((u) => u.id == user.id);
+                            _filteredUsers.removeWhere((u) => u.id == user.id);
+                          });
+                          setStateDialog(() {
+                            isDeleting = false;
+                            isSuccess = true;
+                          });
+                        }
+                      } catch (e) {
+                        setStateDialog(() {
+                          isDeleting = false;
+                          errorText = 'Erro ao excluir: $e';
+                        });
+                      }
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
+                    ),
+                    child: const Text('Excluir'),
+                  ),
+                if (isSuccess)
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: primaryBlue,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
+                    ),
+                    child: const Text('OK'),
+                  ),
+              ],
+            );
+          },
         );
       },
     );
@@ -164,11 +216,9 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     );
   }
 
-  /// Constrói o cabeçalho (Título, Busca, Botão) adaptável
   Widget _buildResponsiveHeader() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Se a tela for menor que 700px, empilha os elementos
         bool isMobile = constraints.maxWidth < 700;
 
         return Column(
@@ -204,7 +254,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     );
   }
 
-  /// Estilo do campo de busca
   InputDecoration _searchDecoration() {
     return InputDecoration(
       hintText: 'Buscar por nome ou e-mail...',
@@ -226,7 +275,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     );
   }
 
-  /// Botão "Adicionar Usuário"
   Widget _buildAddButton() {
     return ElevatedButton(
       onPressed: () {
@@ -254,7 +302,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     );
   }
 
-  /// Layout Mobile: Lista de Cards
   Widget _buildMobileList() {
     return ListView.builder(
       itemCount: _filteredUsers.length,
@@ -282,7 +329,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                         ),
                       ),
                     ),
-                    // Badge de Cargo
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
@@ -317,7 +363,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                // Botões de Ação
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -348,7 +393,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     );
   }
 
-  /// Layout Desktop: Tabela
   Widget _buildDesktopTable() {
     return Container(
       decoration: BoxDecoration(
