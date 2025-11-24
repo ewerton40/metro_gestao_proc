@@ -392,7 +392,7 @@ class _MaterialRegistrationScreenState
                         const SizedBox(width: 16),
                         Expanded(
                             child: _buildTextField(
-                          label: 'Estoque atual',
+                          label: 'Estoque alto',
                           controller: _maxStockController,
                           keyboardType: TextInputType.number,
                           isInlineLabel: true,

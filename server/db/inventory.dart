@@ -117,13 +117,18 @@ class InventoryDAO {
         m.id_medida AS medidaId,       
         u.nome_medida AS medida,
         m.requer_calibracao AS requerCalibracao,
-        m.qtd_alto AS qtdAlto,           -- CORRIGIDO (era qtd_atual)
+        m.qtd_alto AS qtdAlto,
         m.qtd_alerta_baixo AS qtdBaixo,
         m.descricao AS descricao,
-        0 AS quantidadeAtual -- Adicionado para o construtor não quebrar
+        COALESCE(e.quantidade, 0) AS quantidadeAtual 
       FROM materiais m
       LEFT JOIN categoria c ON m.id_categoria = c.id_categoria
       LEFT JOIN unidade_medida u ON m.id_medida = u.id_medida
+      LEFT JOIN (
+        SELECT id_material, SUM(quantidade) AS quantidade
+        FROM estoque
+        GROUP BY id_material
+      ) e ON m.id_material = e.id_material
     ''';
 
     List<String> whereClauses = [];
@@ -143,13 +148,13 @@ class InventoryDAO {
     if (statusEstoque != null) {
       switch (statusEstoque) {
         case 'Em estoque':
-          whereClauses.add('m.qtd_alto > m.qtd_alerta_baixo');
+          whereClauses.add('COALESCE(e.quantidade,0) > m.qtd_alerta_baixo');
           break;
         case 'Baixo estoque':
-          whereClauses.add('m.qtd_alto > 0 AND m.qtd_alto <= m.qtd_alerta_baixo');
+          whereClauses.add('COALESCE(e.quantidade,0) > 0 AND COALESCE(e.quantidade,0) <= m.qtd_alerta_baixo');
           break;
         case 'Esgotado':
-          whereClauses.add('m.qtd_alto <= 0');
+          whereClauses.add('COALESCE(e.quantidade,0) <= 0');
           break;
       }
     }
